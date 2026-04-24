@@ -19,7 +19,7 @@ function ResetPasswordFormContent() {
   const { resetPassword } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const token = searchParams.get("token");
+  const token = searchParams?.get("token") ?? null;
 
   // 3. FUNÇÕES
   const handleSubmit = async (e: FormEvent) => {

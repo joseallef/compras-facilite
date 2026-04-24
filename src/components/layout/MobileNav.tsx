@@ -7,7 +7,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 export function MobileNav() {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "";
   const { isAuthenticated } = useAuth();
 
   if (!isAuthenticated) return null;

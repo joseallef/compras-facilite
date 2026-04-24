@@ -1,11 +1,12 @@
 "use client";
 
 import { FinishShoppingModal } from "@/components/ui/FinishShoppingModal";
+import { ShoppingListEditPageSkeleton } from "@/components/ui/Skeleton";
 import { useListDetail } from "@/hooks/useListDetail";
 import { Category } from "@/types";
 import { cn } from "@/utils/cn";
 import { motion } from "framer-motion";
-import { ArrowLeft, CheckCircle2, DollarSign, Loader2, Lock, ShoppingCart } from "lucide-react";
+import { ArrowLeft, CheckCircle2, DollarSign, Lock, ShoppingCart } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -17,7 +18,7 @@ export default function EdicaoPage() {
   const router = useRouter();
   const params = useParams();
   
-  const rawId = params.id;
+  const rawId = params?.id;
   const listId = typeof rawId === "string" && rawId.length > 0 ? rawId : null;
 
   const { 
@@ -100,11 +101,7 @@ export default function EdicaoPage() {
   };
 
   if (!isLoaded) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
-      </div>
-    );
+    return <ShoppingListEditPageSkeleton />;
   }
 
   if (!listId || !list) {
@@ -160,7 +157,7 @@ export default function EdicaoPage() {
           </div>
           
           <div className="flex items-center gap-2">
-            {isClosed && list.totalValue !== null && (
+            {isClosed && list.totalValue != null && (
               <div className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/50 text-amber-700 dark:text-amber-400 font-bold shadow-sm">
                 <DollarSign size={18} />
                 <span>
@@ -277,5 +274,3 @@ export default function EdicaoPage() {
     </main>
   );
 }
-
-

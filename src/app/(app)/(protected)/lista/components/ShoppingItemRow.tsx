@@ -6,14 +6,6 @@ import { motion } from "framer-motion";
 import { CheckCircle2, Circle, MinusCircle, PlusCircle, Trash2 } from "lucide-react";
 import { ShoppingItemRowProps } from "../types";
 
-interface ShoppingItemRowProps {
-  item: ShoppingItem;
-  isAtMarket: boolean;
-  onToggle: () => void;
-  onQuantityChange: (quantity: number) => void;
-  onRemove: () => void;
-}
-
 export function ShoppingItemRow({
   item,
   isAtMarket,

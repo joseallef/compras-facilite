@@ -1,7 +1,8 @@
 "use client";
 
+import { Skeleton } from "@/components/ui/Skeleton";
 import { CATEGORIES, Category } from "@/types";
-import { Loader2, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { AddItemFormProps } from "../types";
 
@@ -56,7 +57,10 @@ export function AddItemForm({ onAdd, isLoading }: AddItemFormProps) {
           className="bg-foreground text-background px-6 py-3 rounded-xl font-bold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           {isLoading ? (
-            <Loader2 className="h-5 w-5 animate-spin" />
+            <>
+              <Skeleton className="h-5 w-5 rounded-full bg-background/30" />
+              <Skeleton className="h-4 w-20 rounded bg-background/30" />
+            </>
           ) : (
             <>
               <Plus className="h-5 w-5" />

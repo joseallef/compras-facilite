@@ -35,6 +35,8 @@ describe("useShoppingLists Hook", () => {
       login: jest.fn(),
       register: jest.fn(),
       logout: jest.fn(),
+      forgotPassword: jest.fn(),
+      resetPassword: jest.fn(),
     });
   });
 

@@ -1,14 +1,18 @@
 "use client";
 
 import { cn } from "@/utils/cn";
-import { type CSSProperties } from "react";
+import { type CSSProperties, type HTMLAttributes } from "react";
 
 export function Skeleton({
   className,
-}: {
-  className?: string;
-}) {
-  return <div className={cn("animate-pulse rounded-md bg-muted/30", className)} />;
+  ...props
+}: HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div
+      {...props}
+      className={cn("animate-pulse rounded-md bg-muted/30", className)}
+    />
+  );
 }
 
 export function PageHeaderSkeleton({
@@ -180,5 +184,135 @@ export function TableCardSkeleton({
         </table>
       </div>
     </div>
+  );
+}
+
+export function ShoppingListFormPageSkeleton() {
+  return (
+    <main className="max-w-4xl mx-auto w-full p-4 md:p-8">
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Skeleton className="h-11 w-11 rounded-2xl bg-muted/40" />
+          <Skeleton className="h-10 w-40 rounded-xl bg-muted/40" />
+          <div className="ml-auto">
+            <Skeleton className="h-11 w-32 rounded-2xl bg-muted/40" />
+          </div>
+        </div>
+
+        <div className="bg-card p-6 rounded-[2.5rem] border border-border shadow-sm space-y-4">
+          <div className="space-y-2">
+            <Skeleton className="h-3 w-28 rounded bg-muted/40 ml-1" />
+            <Skeleton className="h-12 w-full rounded-2xl bg-muted/40" />
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 px-2">
+            <Skeleton className="h-5 w-5 rounded-lg bg-muted/40" />
+            <Skeleton className="h-5 w-28 rounded bg-muted/40" />
+            <Skeleton className="h-5 w-10 rounded-full bg-muted/40" />
+          </div>
+
+          <div className="bg-card p-6 rounded-3xl border border-border shadow-sm space-y-4">
+            <div className="flex flex-col md:flex-row gap-3">
+              <Skeleton className="h-12 flex-1 rounded-xl bg-muted/40" />
+              <Skeleton className="h-12 w-full md:w-48 rounded-xl bg-muted/40" />
+              <Skeleton className="h-12 w-full md:w-40 rounded-xl bg-muted/40" />
+            </div>
+          </div>
+
+          <div className="bg-card rounded-[2.5rem] border border-border shadow-sm overflow-hidden">
+            <div className="p-8 border-b border-border space-y-3">
+              <Skeleton className="h-5 w-48 rounded bg-muted/40" />
+              <Skeleton className="h-4 w-72 rounded" />
+            </div>
+            <div className="divide-y divide-border">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div key={index} className="px-8 py-5 flex items-center gap-4">
+                  <Skeleton className="h-5 w-44 rounded bg-muted/40" />
+                  <div className="ml-auto flex items-center gap-3">
+                    <Skeleton className="h-9 w-20 rounded-xl bg-muted/40" />
+                    <Skeleton className="h-9 w-9 rounded-xl bg-muted/40" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+export function ShoppingListEditPageSkeleton() {
+  return (
+    <main className="max-w-4xl mx-auto w-full p-4 md:p-8">
+      <div className="space-y-6 pb-24">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
+          <div className="flex items-center gap-4 flex-1">
+            <Skeleton className="h-11 w-11 rounded-2xl bg-muted/40" />
+            <div className="flex-1 space-y-2">
+              <Skeleton className="h-9 w-56 rounded-xl bg-muted/40" />
+              <Skeleton className="h-4 w-32 rounded bg-muted/40" />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-11 w-40 rounded-2xl bg-muted/40" />
+          </div>
+        </div>
+
+        <div className="bg-card p-4 rounded-3xl border border-border shadow-sm flex items-center gap-4">
+          <div className="flex-1 h-3 bg-muted/20 rounded-full overflow-hidden border border-muted/10">
+            <Skeleton className="h-full w-1/2 rounded-full bg-muted/40" />
+          </div>
+          <Skeleton className="h-5 w-20 rounded bg-muted/40" />
+        </div>
+
+        <div className="bg-card p-6 rounded-3xl border border-border shadow-sm space-y-4">
+          <div className="flex flex-col md:flex-row gap-3">
+            <Skeleton className="h-12 flex-1 rounded-xl bg-muted/40" />
+            <Skeleton className="h-12 w-full md:w-48 rounded-xl bg-muted/40" />
+            <Skeleton className="h-12 w-full md:w-40 rounded-xl bg-muted/40" />
+          </div>
+        </div>
+
+        <div className="bg-card rounded-[2.5rem] border border-border shadow-sm overflow-hidden">
+          <div className="p-8 border-b border-border flex items-center justify-between">
+            <Skeleton className="h-6 w-44 rounded bg-muted/40" />
+            <Skeleton className="h-6 w-24 rounded-full bg-muted/40" />
+          </div>
+
+          <div className="divide-y divide-border">
+            {Array.from({ length: 7 }).map((_, index) => (
+              <div key={index} className="px-8 py-5 flex items-center gap-4">
+                <Skeleton className="h-5 w-44 rounded bg-muted/40" />
+                <Skeleton className="h-4 w-20 rounded" />
+                <div className="ml-auto flex items-center gap-3">
+                  <Skeleton className="h-9 w-20 rounded-xl bg-muted/40" />
+                  <Skeleton className="h-9 w-9 rounded-xl bg-muted/40" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-card/80 backdrop-blur-md border-t border-border flex justify-center z-10">
+          <div className="max-w-4xl w-full flex justify-between items-center px-4">
+            <div className="flex gap-4">
+              <div className="text-center space-y-2">
+                <Skeleton className="h-3 w-10 rounded bg-muted/40" />
+                <Skeleton className="h-7 w-10 rounded bg-muted/40" />
+              </div>
+              <div className="text-center space-y-2">
+                <Skeleton className="h-3 w-10 rounded bg-muted/40" />
+                <Skeleton className="h-7 w-10 rounded bg-muted/40" />
+              </div>
+            </div>
+            <Skeleton className="h-12 w-44 rounded-2xl bg-muted/40" />
+          </div>
+        </div>
+      </div>
+    </main>
   );
 }

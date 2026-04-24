@@ -1,8 +1,9 @@
 "use client";
 
 import { useAuth } from "@/hooks/useAuth";
-import { Loader2 } from "lucide-react";
 import { ReactNode } from "react";
+import { usePathname } from "next/navigation";
+import { ShoppingListEditPageSkeleton, ShoppingListFormPageSkeleton } from "@/components/ui/Skeleton";
 
 /**
  * Layout para rotas protegidas.
@@ -12,14 +13,23 @@ import { ReactNode } from "react";
  */
 export default function ProtectedLayout({ children }: { children: ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
+  const pathname = usePathname() ?? "";
 
   // O middleware já redireciona se não estiver autenticado.
   // Aqui apenas mostramos o spinner enquanto a sessão inicial é hidratada no cliente,
   // embora passar a sessão via RootLayout já deva resolver isso.
   if (isLoading) {
+    if (pathname.startsWith("/cadastro")) {
+      return <ShoppingListFormPageSkeleton />;
+    }
+
+    if (pathname.startsWith("/edicao")) {
+      return <ShoppingListEditPageSkeleton />;
+    }
+
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
+        <div className="h-8 w-8 rounded-full bg-muted/30 animate-pulse" />
       </div>
     );
   }
