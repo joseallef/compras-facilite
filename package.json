@@ -7,6 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "postinstall": "prisma generate",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate:deploy": "prisma migrate deploy",
+    "vercel-build": "prisma migrate deploy && next build",
     "test": "jest",
     "test:watch": "jest --watch"
   },
