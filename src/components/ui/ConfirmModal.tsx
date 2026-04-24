@@ -40,15 +40,10 @@ export function ConfirmModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={onClose} title={title} description={description}>
       <div className="flex flex-col items-center text-center gap-6">
         <div className={cn("p-4 rounded-3xl", iconStyles[variant])}>
           <AlertCircle size={40} />
-        </div>
-
-        <div className="space-y-2">
-          <h3 className="text-2xl font-bold tracking-tight">{title}</h3>
-          <p className="text-muted leading-relaxed">{description}</p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 w-full mt-2">

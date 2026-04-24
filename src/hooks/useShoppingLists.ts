@@ -83,15 +83,14 @@ export function useShoppingLists() {
   };
 
   const updateList = async (id: string, updates: Partial<ShoppingList>) => {
-    if (updates.name) {
-      try {
-        await updateShoppingList(id, updates.name);
-        setLists(prev => prev.map(l => 
-          l.id === id ? { ...l, ...updates, updatedAt: new Date() } : l
-        ));
-      } catch (error) {
-        console.error("Failed to update list", error);
-      }
+    try {
+      const { name, status, totalValue } = updates;
+      await updateShoppingList(id, { name, status, totalValue });
+      setLists(prev => prev.map(l => 
+        l.id === id ? { ...l, ...updates, updatedAt: new Date() } : l
+      ));
+    } catch (error) {
+      console.error("Failed to update list", error);
     }
   };
 

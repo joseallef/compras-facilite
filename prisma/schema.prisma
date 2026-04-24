@@ -7,14 +7,14 @@ datasource db {
 }
 
 model User {
-  id                 String               @id @default(uuid())
-  email              String               @unique
-  name               String?
-  password           String
-  lists              ShoppingList[]
+  id                  String               @id @default(uuid())
+  email               String               @unique
+  name                String?
+  password            String
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
   passwordResetTokens PasswordResetToken[]
-  createdAt          DateTime             @default(now())
-  updatedAt          DateTime             @updatedAt
+  lists               ShoppingList[]
 }
 
 model PasswordResetToken {
@@ -22,20 +22,22 @@ model PasswordResetToken {
   token     String   @unique
   expiresAt DateTime
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
 
 model ShoppingList {
-  id        String         @id @default(uuid())
-  name      String
-  userId    String
-  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  items     ShoppingItem[]
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
+  id         String         @id @default(uuid())
+  name       String
+  userId     String
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  status     ListStatus     @default(ABERTA)
+  totalValue Float?
+  items      ShoppingItem[]
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
@@ -48,11 +50,16 @@ model ShoppingItem {
   isPicked       Boolean      @default(false)
   category       Category     @default(Outros)
   shoppingListId String
-  shoppingList   ShoppingList @relation(fields: [shoppingListId], references: [id], onDelete: Cascade)
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
+  shoppingList   ShoppingList @relation(fields: [shoppingListId], references: [id], onDelete: Cascade)
 
   @@index([shoppingListId])
+}
+
+enum ListStatus {
+  ABERTA
+  CONCLUIDA
 }
 
 enum Category {

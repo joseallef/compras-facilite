@@ -151,11 +151,23 @@ export default function Page() {
 
 ---
 
-## 🧠 Boas Práticas (Clean Code)
+## 🧠 Boas Práticas e Padrões de Código
 
-* **Nomeação**: Nomes claros, descritivos e em inglês (ou português, conforme padrão do time, mas consistente).
-* **Responsabilidade Única**: Funções e componentes devem fazer apenas uma coisa.
-* **Tipagem**: TypeScript obrigatório em 100% do código de lógica e serviços.
+### 🐞 Bugs e Lógica
+* **Debounce em Inputs**: Para atualizações automáticas em inputs de texto (ex: nome da lista), utilize `use-debounce` para evitar múltiplas chamadas de API desnecessárias.
+* **Tratamento de Erros**: Sempre adicione `console.error("[NomeDaFuncao]", error)` dentro dos blocos `catch` para facilitar o rastreamento de bugs em produção, além do feedback visual ao usuário via `toast`.
+
+### ✨ Desenvolvimento e Organização
+* **Tipagem Forte**: O uso de `any` é proibido. Utilize sempre as interfaces e tipos definidos em `src/types`.
+* **Hooks Customizados**: Extraia a lógica complexa de UI e cálculos de progresso para hooks específicos (ex: `useListDetail`). Isso mantém o componente de página limpo e focado em renderização.
+* **Código Limpo**: Remova estados (`useState`) e variáveis declaradas que não estão sendo utilizadas para evitar confusão na manutenção.
+
+### ⚡ Performance
+* **Memoização**: Utilize `useMemo` para cálculos que dependem de arrays de objetos (ex: progresso da lista, contagem de itens marcados). Isso evita re-renderizações pesadas.
+
+### 🛡️ Segurança e UX
+* **Validação de Parâmetros**: Valide sempre o tipo e a existência de parâmetros de URL (`params.id`) antes de utilizá-los na lógica do componente.
+* **Feedback de Operação**: Desabilite botões de envio (`disabled={isSubmitting}`) e mostre estados de carregamento durante operações assíncronas para evitar submissões duplicadas.
 
 ---
 

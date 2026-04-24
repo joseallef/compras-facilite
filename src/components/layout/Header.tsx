@@ -26,27 +26,35 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-8">
-            <Link href="/" className="flex items-center gap-2 font-bold text-xl">
-              <div className="bg-emerald-100 dark:bg-emerald-900/30 p-2 rounded-xl">
-                <ShoppingCart className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+            <Link href="/" className="flex items-center gap-2 font-bold text-xl transition-transform active:scale-95">
+              <div className="bg-emerald-600 p-2 rounded-xl shadow-lg shadow-emerald-600/20">
+                <ShoppingCart className="h-5 w-5 text-white" />
               </div>
-              <span>ComprasFácil</span>
+              <span className="hidden xs:block tracking-tight">ComprasFácil</span>
             </Link>
             
-            <nav className="hidden md:flex items-center gap-6">
+            <nav className="hidden md:flex items-center gap-1 bg-muted/5 p-1 rounded-xl border border-border/50">
               <Link
                 href="/"
-                className="text-sm font-medium text-muted hover:text-foreground transition-colors"
+                className="text-sm font-bold px-4 py-2 rounded-lg text-muted hover:text-foreground hover:bg-muted/10 transition-all"
               >
                 Início
               </Link>
               {isAuthenticated && (
-                <Link
-                  href="/lista"
-                  className="text-sm font-medium text-muted hover:text-foreground transition-colors"
-                >
-                  Minhas Listas
-                </Link>
+                <>
+                  <Link
+                    href="/dashboard"
+                    className="text-sm font-bold px-4 py-2 rounded-lg text-muted hover:text-foreground hover:bg-muted/10 transition-all"
+                  >
+                    Dashboard
+                  </Link>
+                  <Link
+                    href="/lista"
+                    className="text-sm font-bold px-4 py-2 rounded-lg text-muted hover:text-foreground hover:bg-muted/10 transition-all"
+                  >
+                    Minhas Listas
+                  </Link>
+                </>
               )}
             </nav>
           </div>
@@ -56,38 +64,40 @@ export function Header() {
               <div className="relative" ref={menuRef}>
                 <button
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
-                  className="flex items-center gap-2 p-2 rounded-xl hover:bg-muted/10 transition-colors"
+                  className="flex items-center gap-2 p-1.5 rounded-2xl hover:bg-muted/10 transition-all active:scale-95 border border-transparent hover:border-border"
                 >
-                  <div className="bg-emerald-100 dark:bg-emerald-900/30 p-2 rounded-lg">
+                  <div className="bg-emerald-100 dark:bg-emerald-900/30 p-2 rounded-xl">
                     <User className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                   </div>
-                  <span className="hidden sm:block text-sm font-medium">
-                    {user?.name}
+                  <span className="hidden sm:block text-sm font-bold pr-2">
+                    {user?.name?.split(" ")[0]}
                   </span>
                 </button>
 
                 <AnimatePresence>
                   {isMenuOpen && (
                     <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className="absolute right-0 mt-2 w-48 bg-card border border-border rounded-xl shadow-lg overflow-hidden"
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      className="absolute right-0 mt-2 w-56 bg-card border border-border rounded-[1.5rem] shadow-2xl overflow-hidden z-50"
                     >
-                      <div className="px-4 py-3 border-b border-border">
-                        <p className="text-sm font-medium">{user?.name}</p>
-                        <p className="text-xs text-muted">{user?.email}</p>
+                      <div className="px-5 py-4 border-b border-border bg-muted/5">
+                        <p className="text-sm font-bold truncate">{user?.name}</p>
+                        <p className="text-xs text-muted truncate">{user?.email}</p>
                       </div>
-                      <button
-                        onClick={() => {
-                          logout();
-                          setIsMenuOpen(false);
-                        }}
-                        className="w-full flex items-center gap-2 px-4 py-3 text-sm text-muted hover:bg-muted/10 transition-colors"
-                      >
-                        <LogOut className="h-4 w-4" />
-                        Sair
-                      </button>
+                      <div className="p-2">
+                        <button
+                          onClick={() => {
+                            logout();
+                            setIsMenuOpen(false);
+                          }}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all group"
+                        >
+                          <LogOut className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+                          Sair da conta
+                        </button>
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>

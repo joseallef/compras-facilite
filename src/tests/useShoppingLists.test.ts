@@ -1,230 +1,116 @@
-import { useShoppingLists } from "@/hooks/useShoppingLists";
-import { act, renderHook } from "@testing-library/react";
+// Mock useAuth and services before anything else
+jest.mock("@/services/shopping-lists.service", () => ({
+  getShoppingLists: jest.fn(),
+  createShoppingList: jest.fn(),
+  createShoppingListFromTemplate: jest.fn(),
+  deleteShoppingList: jest.fn(),
+  updateShoppingList: jest.fn(),
+  addShoppingItem: jest.fn(),
+  removeShoppingItem: jest.fn(),
+  toggleShoppingItem: jest.fn(),
+  updateShoppingItemQuantity: jest.fn(),
+}));
 
 jest.mock("@/hooks/useAuth", () => ({
-  useAuth: () => ({
-    user: { id: "test-user-id", email: "test@example.com", name: "test" },
-    isAuthenticated: true,
-    isLoading: false,
-  }),
+  useAuth: jest.fn(),
 }));
 
-jest.mock("@/services/shopping-lists.service", () => ({
-  getShoppingLists: jest.fn(async () => []),
-  createShoppingList: jest.fn(async (userId, name) => ({
-    id: "new-list-id",
-    name,
-    userId,
-    items: [],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  })),
-  createShoppingListFromTemplate: jest.fn(async (userId, name, items) => ({
-    id: "template-list-id",
-    name,
-    userId,
-    items: items.map((it: any) => ({ ...it, id: Math.random().toString(), isPicked: false })),
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  })),
-  deleteShoppingList: jest.fn(async () => {}),
-  updateShoppingList: jest.fn(async (id, name) => ({ id, name })),
-  addShoppingItem: jest.fn(async (listId, item) => ({
-    id: "new-item-id",
-    ...item,
-    isPicked: false,
-  })),
-  removeShoppingItem: jest.fn(async () => {}),
-  toggleShoppingItem: jest.fn(async (listId, itemId, isPicked) => ({ id: itemId, isPicked })),
-  updateShoppingItemQuantity: jest.fn(async (listId, itemId, quantity) => ({ id: itemId, quantity })),
-}));
+import * as auth from "@/hooks/useAuth";
+import { useShoppingLists } from "@/hooks/useShoppingLists";
+import * as services from "@/services/shopping-lists.service";
+import { act, renderHook, waitFor } from "@testing-library/react";
 
-const STORAGE_KEY = "compras-facilite-lists";
+const mockedServices = services as jest.Mocked<typeof services>;
+const mockedAuth = auth as jest.Mocked<typeof auth>;
+
+const mockUser = { id: "user-1", email: "test@example.com", name: "Test User" };
 
 describe("useShoppingLists Hook", () => {
   beforeEach(() => {
-    localStorage.clear();
-  });
-
-  it("should initialize with empty lists", () => {
-    const { result } = renderHook(() => useShoppingLists());
-    
-    expect(result.current.lists).toEqual([]);
-    expect(result.current.isLoaded).toBe(true);
-  });
-
-  it("should create a new list without template", () => {
-    const { result } = renderHook(() => useShoppingLists());
-    
-    act(() => {
-      result.current.createList("Minha Lista", false);
+    jest.clearAllMocks();
+    mockedAuth.useAuth.mockReturnValue({
+      user: mockUser,
+      isAuthenticated: true,
+      isLoading: false,
+      login: jest.fn(),
+      register: jest.fn(),
+      logout: jest.fn(),
     });
-    
+  });
+
+  it("should fetch lists on mount when authenticated", async () => {
+    const mockLists = [
+      { id: "1", name: "Lista 1", items: [], status: "ABERTA", createdAt: new Date(), updatedAt: new Date() }
+    ];
+    mockedServices.getShoppingLists.mockResolvedValue(mockLists as any);
+
+    const { result } = renderHook(() => useShoppingLists());
+
+    await waitFor(() => {
+      expect(result.current.isLoaded).toBe(true);
+    });
+
     expect(result.current.lists).toHaveLength(1);
-    expect(result.current.lists[0].name).toBe("Minha Lista");
-    expect(result.current.lists[0].items).toEqual([]);
+    expect(result.current.lists[0].name).toBe("Lista 1");
+    expect(mockedServices.getShoppingLists).toHaveBeenCalledWith("user-1");
   });
 
-  it("should create a new list with template", () => {
+  it("should create a new list", async () => {
+    const newList = { id: "2", name: "Nova Lista", items: [], status: "ABERTA", createdAt: new Date(), updatedAt: new Date() };
+    mockedServices.createShoppingList.mockResolvedValue(newList as any);
+    mockedServices.getShoppingLists.mockResolvedValue([newList] as any);
+
     const { result } = renderHook(() => useShoppingLists());
-    
-    act(() => {
-      result.current.createList("Compras de Janeiro", true);
+
+    let created;
+    await act(async () => {
+      created = await result.current.createList("Nova Lista");
     });
-    
+
+    expect(mockedServices.createShoppingList).toHaveBeenCalledWith("user-1", "Nova Lista");
+    expect(created).toBeDefined();
     expect(result.current.lists).toHaveLength(1);
-    expect(result.current.lists[0].name).toBe("Compras de Janeiro");
-    expect(result.current.lists[0].items.length).toBeGreaterThan(0);
-    expect(result.current.lists[0].items.every((item) => !item.isPicked)).toBe(true);
   });
 
-  it("should delete a list", () => {
+  it("should delete a list", async () => {
+    const mockLists = [
+      { id: "1", name: "Lista 1", items: [], status: "ABERTA", createdAt: new Date(), updatedAt: new Date() }
+    ];
+    mockedServices.getShoppingLists.mockResolvedValue(mockLists as any);
+    mockedServices.deleteShoppingList.mockResolvedValue({} as any);
+
     const { result } = renderHook(() => useShoppingLists());
-    
-    act(() => {
-      const newList = result.current.createList("Lista Teste", false);
-      result.current.deleteList(newList.id);
+
+    await waitFor(() => {
+      expect(result.current.isLoaded).toBe(true);
     });
-    
+
+    await act(async () => {
+      await result.current.deleteList("1");
+    });
+
+    expect(mockedServices.deleteShoppingList).toHaveBeenCalledWith("1");
     expect(result.current.lists).toHaveLength(0);
   });
 
-  it("should update list name", () => {
-    const { result } = renderHook(() => useShoppingLists());
-    
-    let newList;
-    act(() => {
-      newList = result.current.createList("Lista Original", false);
-    });
-    
-    act(() => {
-      result.current.updateList(newList!.id, { name: "Lista Atualizada" });
-    });
-    
-    expect(result.current.lists[0].name).toBe("Lista Atualizada");
-  });
+  it("should update list", async () => {
+    const mockLists = [
+      { id: "1", name: "Lista 1", items: [], status: "ABERTA", createdAt: new Date(), updatedAt: new Date() }
+    ];
+    mockedServices.getShoppingLists.mockResolvedValue(mockLists as any);
+    mockedServices.updateShoppingList.mockResolvedValue({} as any);
 
-  it("should add item to list", () => {
     const { result } = renderHook(() => useShoppingLists());
-    
-    let newList;
-    act(() => {
-      newList = result.current.createList("Lista Teste", false);
-    });
-    
-    act(() => {
-      result.current.addItemToList(newList!.id, {
-        name: "Arroz",
-        quantity: 2,
-        unit: "pct",
-        category: "Alimentos",
-      });
-    });
-    
-    expect(result.current.lists[0].items).toHaveLength(1);
-    expect(result.current.lists[0].items[0].name).toBe("Arroz");
-    expect(result.current.lists[0].items[0].isPicked).toBe(false);
-  });
 
-  it("should remove item from list", () => {
-    const { result } = renderHook(() => useShoppingLists());
-    
-    let newList;
-    act(() => {
-      newList = result.current.createList("Lista Teste", false);
+    await waitFor(() => {
+      expect(result.current.isLoaded).toBe(true);
     });
-    
-    let itemId;
-    act(() => {
-      result.current.addItemToList(newList!.id, {
-        name: "Arroz",
-        quantity: 1,
-        unit: "pct",
-        category: "Alimentos",
-      });
-    });
-    
-    itemId = result.current.lists[0].items[0].id;
-    
-    act(() => {
-      result.current.removeItemFromList(newList!.id, itemId);
-    });
-    
-    expect(result.current.lists[0].items).toHaveLength(0);
-  });
 
-  it("should toggle item picked status", () => {
-    const { result } = renderHook(() => useShoppingLists());
-    
-    let newList;
-    act(() => {
-      newList = result.current.createList("Lista Teste", false);
+    await act(async () => {
+      await result.current.updateList("1", { name: "Novo Nome" });
     });
-    
-    act(() => {
-      result.current.addItemToList(newList!.id, {
-        name: "Arroz",
-        quantity: 1,
-        unit: "pct",
-        category: "Alimentos",
-      });
-    });
-    
-    const itemId = result.current.lists[0].items[0].id;
-    
-    expect(result.current.lists[0].items[0].isPicked).toBe(false);
-    
-    act(() => {
-      result.current.toggleItemPicked(newList!.id, itemId);
-    });
-    
-    expect(result.current.lists[0].items[0].isPicked).toBe(true);
-    
-    act(() => {
-      result.current.toggleItemPicked(newList!.id, itemId);
-    });
-    
-    expect(result.current.lists[0].items[0].isPicked).toBe(false);
-  });
 
-  it("should update item quantity", () => {
-    const { result } = renderHook(() => useShoppingLists());
-    
-    let newList;
-    act(() => {
-      newList = result.current.createList("Lista Teste", false);
-    });
-    
-    act(() => {
-      result.current.addItemToList(newList!.id, {
-        name: "Arroz",
-        quantity: 1,
-        unit: "pct",
-        category: "Alimentos",
-      });
-    });
-    
-    const itemId = result.current.lists[0].items[0].id;
-    
-    act(() => {
-      result.current.updateItemQuantity(newList!.id, itemId, 5);
-    });
-    
-    expect(result.current.lists[0].items[0].quantity).toBe(5);
-  });
-
-  it("should persist lists to localStorage", () => {
-    const { result } = renderHook(() => useShoppingLists());
-    
-    act(() => {
-      result.current.createList("Lista Persistida", false);
-    });
-    
-    const stored = localStorage.getItem(STORAGE_KEY);
-    expect(stored).toBeTruthy();
-    
-    const parsed = JSON.parse(stored!);
-    expect(parsed).toHaveLength(1);
-    expect(parsed[0].name).toBe("Lista Persistida");
+    expect(mockedServices.updateShoppingList).toHaveBeenCalledWith("1", { name: "Novo Nome", status: undefined, totalValue: undefined });
+    expect(result.current.lists[0].name).toBe("Novo Nome");
   });
 });

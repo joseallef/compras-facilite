@@ -3,7 +3,7 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { motion } from "framer-motion";
-import { Calendar, ChevronRight, ShoppingCart, Trash2, Edit2 } from "lucide-react";
+import { Calendar, ChevronRight, ShoppingCart, Trash2, CheckCircle2, DollarSign } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { cn } from "@/utils/cn";
@@ -14,7 +14,7 @@ export function ShoppingListCard({ list, onClick, onDelete }: ShoppingListCardPr
   const pickedCount = list.items.filter((i) => i.isPicked).length;
   const totalCount = list.items.length;
   const progress = totalCount > 0 ? (pickedCount / totalCount) * 100 : 0;
-  const isCompleted = totalCount > 0 && pickedCount === totalCount;
+  const isCompleted = list.status === "CONCLUIDA";
 
   return (
     <motion.div
@@ -23,9 +23,17 @@ export function ShoppingListCard({ list, onClick, onDelete }: ShoppingListCardPr
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
       whileHover={{ y: -4 }}
-      onClick={onClick}
-      className="group bg-card p-6 rounded-[2rem] border border-border shadow-sm hover:shadow-xl hover:border-emerald-500/20 dark:hover:border-emerald-500/20 transition-all cursor-pointer relative"
+      onClick={() => router.push(`/edicao/${list.id}`)}
+      className="group bg-card p-6 rounded-[2rem] border border-border shadow-sm hover:shadow-xl hover:border-emerald-500/20 dark:hover:border-emerald-500/20 transition-all cursor-pointer relative overflow-hidden"
     >
+      {isCompleted && (
+        <div className="absolute top-0 right-0">
+          <div className="bg-emerald-500 text-white text-[10px] font-bold py-1 px-4 rotate-45 translate-x-3 translate-y-2 shadow-sm uppercase tracking-widest">
+            Concluída
+          </div>
+        </div>
+      )}
+
       <div className="flex justify-between items-start mb-6">
         <div className={cn(
           "p-3 rounded-2xl transition-all duration-300",
@@ -37,16 +45,17 @@ export function ShoppingListCard({ list, onClick, onDelete }: ShoppingListCardPr
         </div>
         
         <div className="flex gap-2">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              router.push(`/edicao/${list.id}`);
-            }}
-            className="p-2.5 rounded-xl text-muted/40 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all active:scale-90"
-            title="Editar lista"
-          >
-            <Edit2 size={20} />
-          </button>
+          {list.totalValue !== null && list.totalValue !== undefined && (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/50 text-amber-700 dark:text-amber-400 rounded-xl text-xs font-bold">
+              <DollarSign size={14} />
+              <span>
+                {new Intl.NumberFormat("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                }).format(list.totalValue)}
+              </span>
+            </div>
+          )}
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -100,7 +109,7 @@ export function ShoppingListCard({ list, onClick, onDelete }: ShoppingListCardPr
 
       {/* Navigation Indicator - Discretely integrated */}
       <div className="mt-6 pt-4 border-t border-border/50 flex items-center justify-between text-xs font-bold text-muted/40 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-        <span>VER DETALHES</span>
+        <span>ABRIR LISTA</span>
         <ChevronRight size={14} className="translate-x-0 group-hover:translate-x-1 transition-transform" />
       </div>
     </motion.div>

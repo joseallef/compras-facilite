@@ -1,4 +1,4 @@
-import { ShoppingItemRow } from "@/app/(protected)/lista/[id]/components/ShoppingItemRow";
+import { ShoppingItemRow } from "@/app/(app)/(protected)/lista/components/ShoppingItemRow";
 import { fireEvent, render, screen } from "@testing-library/react";
 
 const defaultItem = {

@@ -1,7 +1,5 @@
 "use client";
 
-import { Footer } from "@/components/layout/Footer";
-import { Header } from "@/components/layout/Header";
 import { useShoppingLists } from "@/hooks/useShoppingLists";
 import { ShoppingItem } from "@/types";
 import { useRouter } from "next/navigation";
@@ -27,6 +25,7 @@ export default function CadastroPage() {
       toast.success("Lista criada com sucesso!");
       router.push("/lista");
     } catch (error) {
+      console.error("[handleSubmit]", error);
       toast.error("Erro ao criar lista");
     } finally {
       setIsSubmitting(false);
@@ -34,16 +33,13 @@ export default function CadastroPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <Header />
-      <main className="flex-1 max-w-4xl mx-auto w-full p-4 md:p-8">
-        <ShoppingListForm
-          title="Nova Lista"
-          onSubmit={handleSubmit}
-          isSubmitting={isSubmitting}
-        />
-      </main>
-      <Footer />
-    </div>
+    <main className="max-w-4xl mx-auto w-full p-4 md:p-8">
+      <ShoppingListForm
+        title="Nova Lista"
+        onSubmit={handleSubmit}
+        isSubmitting={isSubmitting}
+      />
+    </main>
   );
 }
+

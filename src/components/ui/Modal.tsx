@@ -35,7 +35,10 @@ export function Modal({
                 className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm"
               />
             </Dialog.Overlay>
-            <Dialog.Content asChild>
+            <Dialog.Content 
+              asChild
+              aria-describedby={description ? undefined : undefined}
+            >
               <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -46,18 +49,23 @@ export function Modal({
                     className
                   )}
                 >
-                  <div className="flex flex-col gap-2 mb-6">
-                    {title && (
-                      <Dialog.Title className="text-2xl font-bold tracking-tight">
-                        {title}
-                      </Dialog.Title>
-                    )}
-                    {description && (
-                      <Dialog.Description className="text-muted text-sm leading-relaxed">
-                        {description}
-                      </Dialog.Description>
-                    )}
-                  </div>
+                  {(title || description) && (
+                    <div className="flex flex-col gap-2 mb-6">
+                      {title && (
+                        <Dialog.Title className="text-2xl font-bold tracking-tight">
+                          {title}
+                        </Dialog.Title>
+                      )}
+                      {description && (
+                        <Dialog.Description className="text-muted text-sm leading-relaxed">
+                          {description}
+                        </Dialog.Description>
+                      )}
+                    </div>
+                  )}
+
+                  {!title && <Dialog.Title className="sr-only">Modal</Dialog.Title>}
+                  {!description && <Dialog.Description className="sr-only">Modal content</Dialog.Description>}
 
                   {children}
 

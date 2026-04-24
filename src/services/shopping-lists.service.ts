@@ -45,13 +45,18 @@ export async function deleteShoppingList(listId: string) {
   }
 }
 
-export async function updateShoppingList(listId: string, name: string) {
+export async function updateShoppingList(listId: string, data: { 
+  name?: string; 
+  status?: "ABERTA" | "CONCLUIDA"; 
+  totalValue?: number | null 
+}) {
   try {
     const list = await prisma.shoppingList.update({
       where: { id: listId },
-      data: { name },
+      data,
     });
     revalidatePath("/lista");
+    revalidatePath(`/edicao/${listId}`);
     return list;
   } catch (error) {
     console.error("Error updating shopping list:", error);
@@ -105,7 +110,7 @@ export async function addShoppingItem(listId: string, data: {
         shoppingListId: listId,
       },
     });
-    revalidatePath(`/lista/${listId}`);
+    revalidatePath(`/edicao/${listId}`);
     return item;
   } catch (error) {
     console.error("Error adding shopping item:", error);
@@ -118,7 +123,7 @@ export async function removeShoppingItem(listId: string, itemId: string) {
     await prisma.shoppingItem.delete({
       where: { id: itemId },
     });
-    revalidatePath(`/lista/${listId}`);
+    revalidatePath(`/edicao/${listId}`);
   } catch (error) {
     console.error("Error removing shopping item:", error);
     throw new Error("Failed to remove item");
@@ -131,7 +136,7 @@ export async function toggleShoppingItem(listId: string, itemId: string, isPicke
       where: { id: itemId },
       data: { isPicked },
     });
-    revalidatePath(`/lista/${listId}`);
+    revalidatePath(`/edicao/${listId}`);
     return item;
   } catch (error) {
     console.error("Error toggling shopping item:", error);
@@ -145,7 +150,7 @@ export async function updateShoppingItemQuantity(listId: string, itemId: string,
       where: { id: itemId },
       data: { quantity },
     });
-    revalidatePath(`/lista/${listId}`);
+    revalidatePath(`/edicao/${listId}`);
     return item;
   } catch (error) {
     console.error("Error updating shopping item quantity:", error);

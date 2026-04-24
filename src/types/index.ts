@@ -17,11 +17,15 @@ export interface ShoppingItem {
   category: Category;
 }
 
+export type ListStatus = "ABERTA" | "CONCLUIDA";
+
 export interface ShoppingList {
   id: string;
   name: string;
   userId: string;
   items: ShoppingItem[];
+  status: ListStatus;
+  totalValue?: number | null;
   createdAt: Date;
   updatedAt: Date;
 }
