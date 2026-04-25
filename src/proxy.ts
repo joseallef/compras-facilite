@@ -10,7 +10,7 @@ const { auth } = NextAuth(authConfig);
  */
 export const proxy = auth((req) => {
   const { nextUrl } = req;
-  const isAuthenticated = !!req.auth;
+  const isAuthenticated = Boolean(req.auth?.user?.id);
 
   const isProtectedRoute = 
     nextUrl.pathname.startsWith("/lista") || 
