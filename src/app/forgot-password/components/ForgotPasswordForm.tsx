@@ -37,8 +37,11 @@ export function ForgotPasswordForm() {
       await forgotPassword(email);
       setSuccess(true);
       toast.success("E-mail de recuperação enviado!");
-    } catch (err: any) {
-      const errorMessage = err.message || "Erro ao solicitar recuperação. Tente novamente.";
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Erro ao solicitar recuperação. Tente novamente.";
       setError(errorMessage);
       toast.error(errorMessage);
     } finally {

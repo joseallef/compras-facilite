@@ -1,6 +1,5 @@
 "use client";
 
-import { ShoppingItem } from "@/types";
 import { cn } from "@/utils/cn";
 import { motion } from "framer-motion";
 import { CheckCircle2, Circle, MinusCircle, PlusCircle, Trash2 } from "lucide-react";

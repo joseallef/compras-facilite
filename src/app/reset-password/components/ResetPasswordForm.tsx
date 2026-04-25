@@ -57,8 +57,11 @@ function ResetPasswordFormContent() {
       setTimeout(() => {
         router.push("/login");
       }, 3000);
-    } catch (err: any) {
-      const errorMessage = err.message || "Erro ao redefinir senha. O link pode ter expirado.";
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Erro ao redefinir senha. O link pode ter expirado.";
       setError(errorMessage);
       toast.error(errorMessage);
     } finally {

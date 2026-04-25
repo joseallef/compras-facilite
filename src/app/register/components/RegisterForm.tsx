@@ -54,8 +54,11 @@ export function RegisterForm() {
       // Auto-login after registration
       await login(email, password);
       router.push("/lista");
-    } catch (err: any) {
-      const errorMessage = err.message || "Erro ao criar conta. Tente novamente.";
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Erro ao criar conta. Tente novamente.";
       setError(errorMessage);
       toast.error(errorMessage);
     } finally {

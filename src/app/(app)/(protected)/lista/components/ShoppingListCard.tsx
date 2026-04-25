@@ -3,14 +3,12 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { motion } from "framer-motion";
-import { Calendar, ChevronRight, ShoppingCart, Trash2, CheckCircle2, DollarSign } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Calendar, ChevronRight, DollarSign, ShoppingCart, Trash2 } from "lucide-react";
 
 import { cn } from "@/utils/cn";
 import { ShoppingListCardProps } from "../types";
 
 export function ShoppingListCard({ list, onClick, onDelete }: ShoppingListCardProps) {
-  const router = useRouter();
   const pickedCount = list.items.filter((i) => i.isPicked).length;
   const totalCount = list.items.length;
   const progress = totalCount > 0 ? (pickedCount / totalCount) * 100 : 0;
@@ -23,7 +21,7 @@ export function ShoppingListCard({ list, onClick, onDelete }: ShoppingListCardPr
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
       whileHover={{ y: -4 }}
-      onClick={() => router.push(`/edicao/${list.id}`)}
+      onClick={onClick}
       className="group bg-card p-6 rounded-[2rem] border border-border shadow-sm hover:shadow-xl hover:border-emerald-500/20 dark:hover:border-emerald-500/20 transition-all cursor-pointer relative overflow-hidden"
     >
       {isCompleted && (

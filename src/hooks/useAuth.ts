@@ -15,7 +15,7 @@ export function useAuth() {
       }
     : null;
 
-  const isAuthenticated = status === "authenticated";
+  const isAuthenticated = status === "authenticated" && Boolean(session?.user);
   const isLoading = status === "loading";
 
   const login = async (email: string, password: string) => {

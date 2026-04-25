@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from "react";
 
 export function Header() {
   const { user, isAuthenticated, logout } = useAuth();
+  const showUserMenu = isAuthenticated && Boolean(user);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -40,7 +41,7 @@ export function Header() {
               >
                 Início
               </Link>
-              {isAuthenticated && (
+              {showUserMenu && (
                 <>
                   <Link
                     href="/dashboard"
@@ -60,7 +61,7 @@ export function Header() {
           </div>
 
           <div className="flex items-center gap-4">
-            {isAuthenticated ? (
+            {showUserMenu ? (
               <div className="relative" ref={menuRef}>
                 <button
                   onClick={() => setIsMenuOpen(!isMenuOpen)}

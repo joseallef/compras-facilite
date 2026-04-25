@@ -42,9 +42,20 @@ describe("useShoppingLists Hook", () => {
 
   it("should fetch lists on mount when authenticated", async () => {
     const mockLists = [
-      { id: "1", name: "Lista 1", items: [], status: "ABERTA", createdAt: new Date(), updatedAt: new Date() }
+      {
+        id: "1",
+        name: "Lista 1",
+        userId: "user-1",
+        items: [],
+        status: "ABERTA",
+        totalValue: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }
     ];
-    mockedServices.getShoppingLists.mockResolvedValue(mockLists as any);
+    mockedServices.getShoppingLists.mockResolvedValue(
+      mockLists as unknown as Awaited<ReturnType<typeof services.getShoppingLists>>
+    );
 
     const { result } = renderHook(() => useShoppingLists());
 
@@ -58,9 +69,26 @@ describe("useShoppingLists Hook", () => {
   });
 
   it("should create a new list", async () => {
-    const newList = { id: "2", name: "Nova Lista", items: [], status: "ABERTA", createdAt: new Date(), updatedAt: new Date() };
-    mockedServices.createShoppingList.mockResolvedValue(newList as any);
-    mockedServices.getShoppingLists.mockResolvedValue([newList] as any);
+    const newList = {
+      id: "2",
+      name: "Nova Lista",
+      userId: "user-1",
+      status: "ABERTA",
+      totalValue: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    mockedServices.createShoppingList.mockResolvedValue(
+      newList as unknown as Awaited<ReturnType<typeof services.createShoppingList>>
+    );
+    mockedServices.getShoppingLists.mockResolvedValue(
+      [
+        {
+          ...newList,
+          items: [],
+        },
+      ] as unknown as Awaited<ReturnType<typeof services.getShoppingLists>>
+    );
 
     const { result } = renderHook(() => useShoppingLists());
 
@@ -76,10 +104,23 @@ describe("useShoppingLists Hook", () => {
 
   it("should delete a list", async () => {
     const mockLists = [
-      { id: "1", name: "Lista 1", items: [], status: "ABERTA", createdAt: new Date(), updatedAt: new Date() }
+      {
+        id: "1",
+        name: "Lista 1",
+        userId: "user-1",
+        items: [],
+        status: "ABERTA",
+        totalValue: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }
     ];
-    mockedServices.getShoppingLists.mockResolvedValue(mockLists as any);
-    mockedServices.deleteShoppingList.mockResolvedValue({} as any);
+    mockedServices.getShoppingLists.mockResolvedValue(
+      mockLists as unknown as Awaited<ReturnType<typeof services.getShoppingLists>>
+    );
+    mockedServices.deleteShoppingList.mockResolvedValue(
+      undefined as unknown as Awaited<ReturnType<typeof services.deleteShoppingList>>
+    );
 
     const { result } = renderHook(() => useShoppingLists());
 
@@ -97,10 +138,23 @@ describe("useShoppingLists Hook", () => {
 
   it("should update list", async () => {
     const mockLists = [
-      { id: "1", name: "Lista 1", items: [], status: "ABERTA", createdAt: new Date(), updatedAt: new Date() }
+      {
+        id: "1",
+        name: "Lista 1",
+        userId: "user-1",
+        items: [],
+        status: "ABERTA",
+        totalValue: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }
     ];
-    mockedServices.getShoppingLists.mockResolvedValue(mockLists as any);
-    mockedServices.updateShoppingList.mockResolvedValue({} as any);
+    mockedServices.getShoppingLists.mockResolvedValue(
+      mockLists as unknown as Awaited<ReturnType<typeof services.getShoppingLists>>
+    );
+    mockedServices.updateShoppingList.mockResolvedValue(
+      undefined as unknown as Awaited<ReturnType<typeof services.updateShoppingList>>
+    );
 
     const { result } = renderHook(() => useShoppingLists());
 

@@ -2,7 +2,7 @@ import "@testing-library/jest-dom";
 import { TextDecoder, TextEncoder } from "util";
 
 global.TextEncoder = TextEncoder;
-global.TextDecoder = TextDecoder as any;
+global.TextDecoder = TextDecoder as unknown as typeof global.TextDecoder;
 
 // Mock next/cache
 jest.mock("next/cache", () => ({

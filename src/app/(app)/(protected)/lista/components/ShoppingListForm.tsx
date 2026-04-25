@@ -1,9 +1,7 @@
 "use client";
 
 import { Category, ShoppingItem } from "@/types";
-import { cn } from "@/utils/cn";
-import { motion } from "framer-motion";
-import { ArrowLeft, Save, Trash2, Plus, ShoppingBag } from "lucide-react";
+import { ArrowLeft, Save, ShoppingBag } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AddItemForm } from "./AddItemForm";

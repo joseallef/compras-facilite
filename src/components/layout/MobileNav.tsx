@@ -8,9 +8,9 @@ import { usePathname } from "next/navigation";
 
 export function MobileNav() {
   const pathname = usePathname() ?? "";
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
-  if (!isAuthenticated) return null;
+  if (!isAuthenticated || !user) return null;
 
   const navItems = [
     {
