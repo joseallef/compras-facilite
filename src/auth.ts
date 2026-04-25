@@ -12,6 +12,15 @@ function getPasswordPepper() {
   return pepper;
 }
 
+function getBcryptRounds() {
+  const raw = process.env.BCRYPT_ROUNDS;
+  const parsed = raw ? Number.parseInt(raw, 10) : NaN;
+  if (Number.isFinite(parsed) && parsed >= 10 && parsed <= 20) {
+    return parsed;
+  }
+  return process.env.NODE_ENV === "production" ? 14 : 10;
+}
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
   providers: [
@@ -34,13 +43,27 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null;
         }
 
-        const isPasswordValid = await bcrypt.compare(
-          `${credentials.password as string}${getPasswordPepper()}`,
-          user.password
-        );
+        const passwordValue = credentials.password as string;
+        const pepper = getPasswordPepper();
+        const withPepper = await bcrypt.compare(`${passwordValue}${pepper}`, user.password);
 
-        if (!isPasswordValid) {
-          return null;
+        if (!withPepper) {
+          const legacyValid = await bcrypt.compare(passwordValue, user.password);
+          if (!legacyValid) {
+            return null;
+          }
+
+          const upgradedHash = await bcrypt.hash(`${passwordValue}${pepper}`, getBcryptRounds());
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { password: upgradedHash },
+          });
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+          };
         }
 
         return {
