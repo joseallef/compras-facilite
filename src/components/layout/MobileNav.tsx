@@ -42,7 +42,7 @@ export function MobileNav() {
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card/80 backdrop-blur-lg border-t border-border px-6 py-3 pb-safe-area-inset-bottom">
-      <div className="flex items-center justify-between max-w-lg mx-auto">
+      <div className="grid grid-cols-4 items-end max-w-lg mx-auto">
         {navItems.map((item) => {
           const Icon = item.icon;
           return (
@@ -50,15 +50,19 @@ export function MobileNav() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex flex-col items-center gap-1 transition-all relative",
-                item.active ? "text-emerald-600" : "text-muted hover:text-foreground",
-                item.primary && " -translate-y-6"
+                "flex flex-col items-center gap-1 transition-all relative w-full",
+                item.active ? "text-emerald-600" : "text-muted hover:text-foreground"
               )}
             >
               {item.primary ? (
-                <div className="bg-emerald-600 text-white p-4 rounded-2xl shadow-lg shadow-emerald-600/40 active:scale-90 transition-transform">
-                  <Plus size={24} strokeWidth={3} />
-                </div>
+                <>
+                  <div className="-translate-y-6 bg-emerald-600 text-white p-4 rounded-2xl shadow-lg shadow-emerald-600/40 active:scale-90 transition-transform">
+                    <Plus size={24} strokeWidth={3} />
+                  </div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider -mt-5">
+                    {item.label}
+                  </span>
+                </>
               ) : (
                 <>
                   <Icon size={22} strokeWidth={item.active ? 2.5 : 2} />

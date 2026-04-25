@@ -112,7 +112,7 @@ export function Header() {
                   Entrar
                 </Link>
                 <Link
-                  href="/login"
+                  href="/register"
                   className="bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-emerald-700 transition-colors"
                 >
                   Cadastrar
