@@ -4,6 +4,14 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { authConfig } from "./auth.config";
 
+function getPasswordPepper() {
+  const pepper = process.env.PASSWORD_PEPPER ?? "";
+  if (process.env.NODE_ENV === "production" && pepper.length === 0) {
+    throw new Error("PASSWORD_PEPPER não definido.");
+  }
+  return pepper;
+}
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
   providers: [
@@ -27,7 +35,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
 
         const isPasswordValid = await bcrypt.compare(
-          credentials.password as string,
+          `${credentials.password as string}${getPasswordPepper()}`,
           user.password
         );
 

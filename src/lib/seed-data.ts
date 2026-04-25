@@ -1,5 +1,6 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Category, PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
 import { subDays, subMonths } from "date-fns";
 import * as dotenv from "dotenv";
 import pg from "pg";
@@ -11,17 +12,34 @@ const pool = new pg.Pool({ connectionString });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
+function getPasswordPepper() {
+  return process.env.PASSWORD_PEPPER ?? "";
+}
+
+function getBcryptRounds() {
+  const raw = process.env.BCRYPT_ROUNDS;
+  const parsed = raw ? Number.parseInt(raw, 10) : NaN;
+  if (Number.isFinite(parsed) && parsed >= 10 && parsed <= 20) {
+    return parsed;
+  }
+  return 10;
+}
+
 async function main() {
   console.log("🌱 Iniciando seed de dados...");
 
   // 1. Criar ou encontrar um usuário de teste
+  const hashedPassword = await bcrypt.hash(
+    `password123${getPasswordPepper()}`,
+    getBcryptRounds()
+  );
   const user = await prisma.user.upsert({
     where: { email: "demo@example.com" },
     update: {},
     create: {
       email: "demo@example.com",
       name: "Usuário Demo",
-      password: "password123", // Em produção use hash!
+      password: hashedPassword,
     },
   });
 

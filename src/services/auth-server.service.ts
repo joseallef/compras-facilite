@@ -9,6 +9,23 @@ type ActionResult<T> =
   | { ok: true; data: T }
   | { ok: false; error: string };
 
+function getPasswordPepper() {
+  const pepper = process.env.PASSWORD_PEPPER ?? "";
+  if (process.env.NODE_ENV === "production" && pepper.length === 0) {
+    throw new Error("PASSWORD_PEPPER não definido.");
+  }
+  return pepper;
+}
+
+function getBcryptRounds() {
+  const raw = process.env.BCRYPT_ROUNDS;
+  const parsed = raw ? Number.parseInt(raw, 10) : NaN;
+  if (Number.isFinite(parsed) && parsed >= 10 && parsed <= 20) {
+    return parsed;
+  }
+  return process.env.NODE_ENV === "production" ? 14 : 10;
+}
+
 export async function registerAction(data: {
   email: string;
   name: string;
@@ -25,7 +42,10 @@ export async function registerAction(data: {
       return { ok: false, error: "Usuário já cadastrado com este e-mail." };
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(
+      `${password}${getPasswordPepper()}`,
+      getBcryptRounds()
+    );
 
     const user = await prisma.user.create({
       data: {
@@ -94,7 +114,10 @@ export async function resetPasswordAction(data: {
       return { ok: false, error: "Token de recuperação inválido ou expirado." };
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(
+      `${password}${getPasswordPepper()}`,
+      getBcryptRounds()
+    );
 
     await prisma.user.update({
       where: { id: resetToken.userId },
