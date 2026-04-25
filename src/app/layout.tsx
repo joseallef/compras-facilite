@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import type { CSSProperties } from "react";
 import { Toaster } from "sonner";
 import "./globals.css";
 
@@ -26,6 +27,11 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await auth();
+  const toasterStyle: CSSProperties & Record<`--${string}`, string> = {
+    "--toast-close-button-start": "unset",
+    "--toast-close-button-end": "0",
+    "--toast-close-button-transform": "translate(35%, -35%)",
+  };
 
   return (
     <html
@@ -35,7 +41,7 @@ export default async function RootLayout({
       <body className="min-h-full flex flex-col">
         <AuthProvider session={session}>
           {children}
-          <Toaster position="top-right" richColors closeButton />
+          <Toaster position="top-right" richColors closeButton style={toasterStyle} />
         </AuthProvider>
       </body>
     </html>

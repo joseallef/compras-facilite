@@ -12,6 +12,20 @@ function getPasswordPepper() {
   return pepper;
 }
 
+function getPasswordPepperCandidates() {
+  const current = getPasswordPepper();
+  const previousRaw = process.env.PASSWORD_PEPPER_PREVIOUS ?? "";
+  const previous = previousRaw
+    .split(",")
+    .map((value) => value.trim())
+    .filter((value) => value.length > 0);
+
+  return {
+    current,
+    all: [current, ...previous],
+  };
+}
+
 function getBcryptRounds() {
   const raw = process.env.BCRYPT_ROUNDS;
   const parsed = raw ? Number.parseInt(raw, 10) : NaN;
@@ -44,16 +58,46 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
 
         const passwordValue = credentials.password as string;
-        const pepper = getPasswordPepper();
-        const withPepper = await bcrypt.compare(`${passwordValue}${pepper}`, user.password);
+        const peppers = getPasswordPepperCandidates();
+        let matchedPepper: string | null = null;
 
-        if (!withPepper) {
+        for (const pepper of peppers.all) {
+          const matches = await bcrypt.compare(`${passwordValue}${pepper}`, user.password);
+          if (matches) {
+            matchedPepper = pepper;
+            break;
+          }
+        }
+
+        if (matchedPepper) {
+          if (matchedPepper !== peppers.current) {
+            const upgradedHash = await bcrypt.hash(
+              `${passwordValue}${peppers.current}`,
+              getBcryptRounds()
+            );
+            await prisma.user.update({
+              where: { id: user.id },
+              data: { password: upgradedHash },
+            });
+          }
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+          };
+        }
+
+        {
           const legacyValid = await bcrypt.compare(passwordValue, user.password);
           if (!legacyValid) {
             return null;
           }
 
-          const upgradedHash = await bcrypt.hash(`${passwordValue}${pepper}`, getBcryptRounds());
+          const upgradedHash = await bcrypt.hash(
+            `${passwordValue}${peppers.current}`,
+            getBcryptRounds()
+          );
           await prisma.user.update({
             where: { id: user.id },
             data: { password: upgradedHash },
@@ -65,12 +109,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             name: user.name,
           };
         }
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-        };
       },
     }),
   ],
