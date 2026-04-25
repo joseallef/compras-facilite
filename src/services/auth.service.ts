@@ -1,10 +1,12 @@
+"use client";
+
+import emailjs from "@emailjs/browser";
 import { signIn, signOut } from "next-auth/react";
 import {
-  registerAction,
   createPasswordResetTokenAction,
+  registerAction,
   resetPasswordAction,
 } from "./auth-server.service";
-import emailjs from "@emailjs/browser";
 
 export const authService = {
   async login(email: string, password: string) {
@@ -26,17 +28,31 @@ export const authService = {
   },
 
   async register(data: Parameters<typeof registerAction>[0]) {
-    return await registerAction(data);
+    const result = await registerAction(data);
+    if (!result.ok) {
+      throw new Error(result.error);
+    }
+    return result.data;
   },
 
   async forgotPassword(email: string) {
-    const { token, name } = await createPasswordResetTokenAction(email);
+    const result = await createPasswordResetTokenAction(email);
+    if (!result.ok) {
+      throw new Error(result.error);
+    }
 
-    // EmailJS integration (client-side)
-    // IMPORTANT: Make sure to set these environment variables in your project
-    const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!;
-    const templateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!;
-    const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!;
+    const { token, name } = result.data;
+    if (!token) {
+      return { success: true };
+    }
+
+    const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID;
+    const templateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID;
+    const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY;
+
+    if (!serviceId || !templateId || !publicKey) {
+      throw new Error("Configuração de e-mail não definida.");
+    }
 
     const resetLink = `${window.location.origin}/reset-password?token=${token}`;
 
@@ -56,6 +72,10 @@ export const authService = {
   },
 
   async resetPassword(data: Parameters<typeof resetPasswordAction>[0]) {
-    return await resetPasswordAction(data);
+    const result = await resetPasswordAction(data);
+    if (!result.ok) {
+      throw new Error(result.error);
+    }
+    return result.data;
   },
 };

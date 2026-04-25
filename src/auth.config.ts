@@ -2,6 +2,7 @@ import type { NextAuthConfig } from "next-auth";
 
 export const authConfig = {
   providers: [], // Empty providers list, implemented in auth.ts
+  trustHost: true,
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
@@ -22,5 +23,5 @@ export const authConfig = {
   session: {
     strategy: "jwt",
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
 } satisfies NextAuthConfig;
