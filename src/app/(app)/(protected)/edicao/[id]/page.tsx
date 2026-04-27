@@ -231,7 +231,7 @@ export default function EdicaoPage() {
       </motion.div>
 
       {(isAtMarket || (pickedCount === totalCount && totalCount > 0 && !isClosed)) && (
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-card/80 backdrop-blur-md border-t border-border flex justify-center z-10">
+        <div className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] md:bottom-0 left-0 right-0 p-4 bg-card/80 backdrop-blur-md border-t border-border flex justify-center z-10">
           <div className="max-w-4xl w-full flex justify-between items-center px-4">
             <div className="flex gap-4">
               <div className="text-center">
