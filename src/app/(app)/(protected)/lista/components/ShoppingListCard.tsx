@@ -5,6 +5,7 @@ import { ptBR } from "date-fns/locale";
 import { motion } from "framer-motion";
 import { Calendar, ChevronRight, DollarSign, ShoppingCart, Trash2 } from "lucide-react";
 
+import { Button } from "@/components/ui/Button";
 import { cn } from "@/utils/cn";
 import { ShoppingListCardProps } from "../types";
 
@@ -54,7 +55,7 @@ export function ShoppingListCard({ list, onClick, onDelete }: ShoppingListCardPr
               </span>
             </div>
           )}
-          <button
+          <Button
             onClick={(e) => {
               e.stopPropagation();
               onDelete();
@@ -63,7 +64,7 @@ export function ShoppingListCard({ list, onClick, onDelete }: ShoppingListCardPr
             title="Excluir lista"
           >
             <Trash2 size={20} />
-          </button>
+          </Button>
         </div>
       </div>
 

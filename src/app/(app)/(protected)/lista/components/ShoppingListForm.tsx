@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import { Category, ShoppingItem } from "@/types";
 import { ArrowLeft, Save, ShoppingBag } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -72,53 +74,39 @@ export function ShoppingListForm({
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <button
+        <Button
           onClick={() => router.back()}
           className="bg-card p-2.5 rounded-2xl border border-border text-muted hover:text-emerald-600 hover:border-emerald-200 dark:hover:border-emerald-800 transition-all active:scale-90"
         >
           <ArrowLeft size={20} />
-        </button>
+        </Button>
         <h1 className="text-3xl font-bold tracking-tight flex-1">{title}</h1>
-        <button
+        <Button
           onClick={handleSubmit}
           disabled={isSubmitting || !name.trim()}
           className="flex items-center gap-2 bg-emerald-600 text-white px-6 py-2.5 rounded-2xl font-bold transition-all shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 active:scale-95 disabled:opacity-50"
         >
           <Save size={20} />
           Salvar
-        </button>
+        </Button>
       </div>
 
       <div className="bg-card p-6 rounded-[2.5rem] border border-border shadow-sm space-y-4">
-        <label className="block space-y-2">
-          <span className="text-sm font-bold text-muted/60 uppercase tracking-wider ml-1">
-            Nome da Lista
-          </span>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => {
-              setName(e.target.value);
-              if (nameError) setNameError("");
-            }}
-            className={`w-full text-xl font-bold bg-background border rounded-2xl px-4 py-3 focus:ring-2 outline-none transition-all ${
-              nameError
-                ? "border-red-500 focus:ring-red-500"
-                : "border-border focus:ring-emerald-500"
-            }`}
-            placeholder="Ex: Compras da Semana"
-            aria-invalid={Boolean(nameError)}
-            aria-describedby={nameError ? "shopping-list-name-error" : undefined}
-          />
-          {nameError && (
-            <span
-              id="shopping-list-name-error"
-              className="text-sm text-red-600 dark:text-red-400 ml-1"
-            >
-              {nameError}
-            </span>
-          )}
-        </label>
+        <Input
+          id="shopping-list-name"
+          type="text"
+          label="Nome da Lista"
+          labelClassName="text-sm font-bold text-muted/60 uppercase tracking-wider ml-1"
+          value={name}
+          onChange={(e) => {
+            setName(e.target.value);
+            if (nameError) setNameError("");
+          }}
+          placeholder="Ex: Compras da Semana"
+          error={nameError}
+          containerClassName="space-y-2"
+          inputClassName="text-xl font-bold rounded-2xl px-4"
+        />
       </div>
 
       <div className="space-y-4">

@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import { useAuth } from "@/hooks/useAuth";
 import { ArrowRight, Eye, EyeOff, Loader2, Lock, Mail, ShoppingCart, User } from "lucide-react";
 import Link from "next/link";
@@ -114,111 +116,70 @@ export function RegisterForm() {
               </div>
             )}
 
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium mb-1">
-                Nome completo
-              </label>
-              <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted" />
-                <input
-                  id="name"
-                  type="text"
-                  value={name}
-                  onChange={(e) => {
-                    setName(e.target.value);
-                    if (fieldErrors.name) {
-                      setFieldErrors((prev) => ({ ...prev, name: undefined }));
-                    }
-                    if (formError) setFormError("");
-                  }}
-                  placeholder="Seu nome"
-                  className={`w-full pl-12 pr-4 py-2.5 bg-background border rounded-xl focus:ring-2 outline-none transition-all ${
-                    fieldErrors.name
-                      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                      : "border-border focus:ring-emerald-500 focus:border-emerald-500"
-                  }`}
-                  disabled={isLoading}
-                  aria-invalid={Boolean(fieldErrors.name)}
-                  aria-describedby={fieldErrors.name ? "register-name-error" : undefined}
-                />
-              </div>
-              {fieldErrors.name && (
-                <p id="register-name-error" className="mt-2 text-sm text-red-600 dark:text-red-400">
-                  {fieldErrors.name}
-                </p>
-              )}
-            </div>
+            <Input
+              id="name"
+              type="text"
+              label="Nome completo"
+              value={name}
+              onChange={(e) => {
+                setName(e.target.value);
+                if (fieldErrors.name) {
+                  setFieldErrors((prev) => ({ ...prev, name: undefined }));
+                }
+                if (formError) setFormError("");
+              }}
+              placeholder="Seu nome"
+              disabled={isLoading}
+              leftIcon={<User className="h-5 w-5" />}
+              error={fieldErrors.name}
+              containerClassName="space-y-1"
+              inputClassName="py-2.5"
+            />
 
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium mb-1">
-                Email
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted" />
-                <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    if (fieldErrors.email) {
-                      setFieldErrors((prev) => ({ ...prev, email: undefined }));
-                    }
-                    if (formError) setFormError("");
-                  }}
-                  placeholder="seu@email.com"
-                  className={`w-full pl-12 pr-4 py-2.5 bg-background border rounded-xl focus:ring-2 outline-none transition-all ${
-                    fieldErrors.email
-                      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                      : "border-border focus:ring-emerald-500 focus:border-emerald-500"
-                  }`}
-                  disabled={isLoading}
-                  aria-invalid={Boolean(fieldErrors.email)}
-                  aria-describedby={fieldErrors.email ? "register-email-error" : undefined}
-                />
-              </div>
-              {fieldErrors.email && (
-                <p id="register-email-error" className="mt-2 text-sm text-red-600 dark:text-red-400">
-                  {fieldErrors.email}
-                </p>
-              )}
-            </div>
+            <Input
+              id="email"
+              type="email"
+              label="Email"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (fieldErrors.email) {
+                  setFieldErrors((prev) => ({ ...prev, email: undefined }));
+                }
+                if (formError) setFormError("");
+              }}
+              placeholder="seu@email.com"
+              disabled={isLoading}
+              leftIcon={<Mail className="h-5 w-5" />}
+              error={fieldErrors.email}
+              containerClassName="space-y-1"
+              inputClassName="py-2.5"
+            />
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium mb-1">
-                Senha
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted" />
-                <input
-                  id="password"
-                  type={isPasswordVisible ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    if (fieldErrors.password || fieldErrors.confirmPassword) {
-                      setFieldErrors((prev) => ({
-                        ...prev,
-                        password: undefined,
-                        confirmPassword: undefined,
-                      }));
-                    }
-                    if (formError) setFormError("");
-                  }}
-                  placeholder="••••••••"
-                  className={`w-full pl-12 pr-12 py-2.5 bg-background border rounded-xl focus:ring-2 outline-none transition-all ${
-                    fieldErrors.password
-                      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                      : "border-border focus:ring-emerald-500 focus:border-emerald-500"
-                  }`}
-                  disabled={isLoading}
-                  aria-invalid={Boolean(fieldErrors.password)}
-                  aria-describedby={fieldErrors.password ? "register-password-error" : undefined}
-                />
-                <button
+            <Input
+              id="password"
+              type={isPasswordVisible ? "text" : "password"}
+              label="Senha"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (fieldErrors.password || fieldErrors.confirmPassword) {
+                  setFieldErrors((prev) => ({
+                    ...prev,
+                    password: undefined,
+                    confirmPassword: undefined,
+                  }));
+                }
+                if (formError) setFormError("");
+              }}
+              placeholder="••••••••"
+              disabled={isLoading}
+              leftIcon={<Lock className="h-5 w-5" />}
+              rightSlot={
+                <Button
                   type="button"
                   onClick={() => setIsPasswordVisible((prev) => !prev)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg text-muted hover:text-foreground hover:bg-muted/10 transition-all"
+                  className="p-2 rounded-lg text-muted hover:text-foreground hover:bg-muted/10 transition-all"
                   aria-label={isPasswordVisible ? "Ocultar senha" : "Mostrar senha"}
                   disabled={isLoading}
                 >
@@ -227,46 +188,33 @@ export function RegisterForm() {
                   ) : (
                     <Eye className="h-5 w-5" />
                   )}
-                </button>
-              </div>
-              {fieldErrors.password && (
-                <p id="register-password-error" className="mt-2 text-sm text-red-600 dark:text-red-400">
-                  {fieldErrors.password}
-                </p>
-              )}
-            </div>
+                </Button>
+              }
+              error={fieldErrors.password}
+              containerClassName="space-y-1"
+              inputClassName="py-2.5"
+            />
 
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium mb-1">
-                Confirmar senha
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted" />
-                <input
-                  id="confirmPassword"
-                  type={isConfirmPasswordVisible ? "text" : "password"}
-                  value={confirmPassword}
-                  onChange={(e) => {
-                    setConfirmPassword(e.target.value);
-                    if (fieldErrors.confirmPassword) {
-                      setFieldErrors((prev) => ({ ...prev, confirmPassword: undefined }));
-                    }
-                    if (formError) setFormError("");
-                  }}
-                  placeholder="••••••••"
-                  className={`w-full pl-12 pr-12 py-2.5 bg-background border rounded-xl focus:ring-2 outline-none transition-all ${
-                    fieldErrors.confirmPassword
-                      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                      : "border-border focus:ring-emerald-500 focus:border-emerald-500"
-                  }`}
-                  disabled={isLoading}
-                  aria-invalid={Boolean(fieldErrors.confirmPassword)}
-                  aria-describedby={fieldErrors.confirmPassword ? "register-confirm-password-error" : undefined}
-                />
-                <button
+            <Input
+              id="confirmPassword"
+              type={isConfirmPasswordVisible ? "text" : "password"}
+              label="Confirmar senha"
+              value={confirmPassword}
+              onChange={(e) => {
+                setConfirmPassword(e.target.value);
+                if (fieldErrors.confirmPassword) {
+                  setFieldErrors((prev) => ({ ...prev, confirmPassword: undefined }));
+                }
+                if (formError) setFormError("");
+              }}
+              placeholder="••••••••"
+              disabled={isLoading}
+              leftIcon={<Lock className="h-5 w-5" />}
+              rightSlot={
+                <Button
                   type="button"
                   onClick={() => setIsConfirmPasswordVisible((prev) => !prev)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg text-muted hover:text-foreground hover:bg-muted/10 transition-all"
+                  className="p-2 rounded-lg text-muted hover:text-foreground hover:bg-muted/10 transition-all"
                   aria-label={isConfirmPasswordVisible ? "Ocultar senha" : "Mostrar senha"}
                   disabled={isLoading}
                 >
@@ -275,19 +223,14 @@ export function RegisterForm() {
                   ) : (
                     <Eye className="h-5 w-5" />
                   )}
-                </button>
-              </div>
-              {fieldErrors.confirmPassword && (
-                <p
-                  id="register-confirm-password-error"
-                  className="mt-2 text-sm text-red-600 dark:text-red-400"
-                >
-                  {fieldErrors.confirmPassword}
-                </p>
-              )}
-            </div>
+                </Button>
+              }
+              error={fieldErrors.confirmPassword}
+              containerClassName="space-y-1"
+              inputClassName="py-2.5"
+            />
 
-            <button
+            <Button
               type="submit"
               disabled={isLoading}
               className="w-full mt-6 flex items-center justify-center gap-2 bg-emerald-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-emerald-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
@@ -303,7 +246,7 @@ export function RegisterForm() {
                   <ArrowRight className="h-5 w-5" />
                 </>
               )}
-            </button>
+            </Button>
           </form>
         </div>
       </div>

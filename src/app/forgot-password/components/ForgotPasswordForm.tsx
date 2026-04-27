@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import { useAuth } from "@/hooks/useAuth";
 import { ArrowLeft, ArrowRight, Loader2, Mail, ShoppingCart } from "lucide-react";
 import Link from "next/link";
@@ -97,42 +99,25 @@ export function ForgotPasswordForm() {
                 </div>
               )}
 
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium mb-2">
-                  Email
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted" />
-                  <input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => {
-                      setEmail(e.target.value);
-                      if (fieldErrors.email) {
-                        setFieldErrors((prev) => ({ ...prev, email: undefined }));
-                      }
-                      if (formError) setFormError("");
-                    }}
-                    placeholder="seu@email.com"
-                    className={`w-full pl-12 pr-4 py-3 bg-background border rounded-xl focus:ring-2 outline-none transition-all ${
-                      fieldErrors.email
-                        ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                        : "border-border focus:ring-emerald-500 focus:border-emerald-500"
-                    }`}
-                    disabled={isLoading}
-                    aria-invalid={Boolean(fieldErrors.email)}
-                    aria-describedby={fieldErrors.email ? "forgot-email-error" : undefined}
-                  />
-                </div>
-                {fieldErrors.email && (
-                  <p id="forgot-email-error" className="mt-2 text-sm text-red-600 dark:text-red-400">
-                    {fieldErrors.email}
-                  </p>
-                )}
-              </div>
+              <Input
+                id="email"
+                type="email"
+                label="Email"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (fieldErrors.email) {
+                    setFieldErrors((prev) => ({ ...prev, email: undefined }));
+                  }
+                  if (formError) setFormError("");
+                }}
+                placeholder="seu@email.com"
+                disabled={isLoading}
+                leftIcon={<Mail className="h-5 w-5" />}
+                error={fieldErrors.email}
+              />
 
-              <button
+              <Button
                 type="submit"
                 disabled={isLoading}
                 className="w-full flex items-center justify-center gap-2 bg-emerald-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-emerald-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
@@ -148,7 +133,7 @@ export function ForgotPasswordForm() {
                     <ArrowRight className="h-5 w-5" />
                   </>
                 )}
-              </button>
+              </Button>
 
               <div className="text-center">
                 <Link

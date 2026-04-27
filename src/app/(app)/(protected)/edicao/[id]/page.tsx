@@ -1,6 +1,8 @@
 "use client";
 
+import { Button } from "@/components/ui/Button";
 import { FinishShoppingModal } from "@/components/ui/FinishShoppingModal";
+import { Input } from "@/components/ui/Input";
 import { ShoppingListEditPageSkeleton } from "@/components/ui/Skeleton";
 import { useListDetail } from "@/hooks/useListDetail";
 import { Category } from "@/types";
@@ -109,12 +111,12 @@ export default function EdicaoPage() {
       <div className="flex items-center justify-center py-20">
         <div className="text-center">
           <h2 className="text-2xl font-bold">Lista não encontrada</h2>
-          <button
+          <Button
             onClick={() => router.push("/lista")}
             className="mt-4 text-emerald-600 hover:text-emerald-700 font-medium"
           >
             Voltar para minhas listas
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -133,19 +135,20 @@ export default function EdicaoPage() {
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
           <div className="flex items-center gap-4 flex-1">
-            <button
+            <Button
               onClick={() => router.push("/lista")}
               className="bg-card p-2.5 rounded-2xl border border-border text-muted hover:text-emerald-600 hover:border-emerald-200 dark:hover:border-emerald-800 transition-all active:scale-90"
             >
               <ArrowLeft size={20} />
-            </button>
+            </Button>
             <div className="flex-1 relative group">
-              <input
+              <Input
                 type="text"
                 defaultValue={list.name}
                 onChange={(e) => handleUpdateListName(e.target.value)}
-                className="text-2xl md:text-3xl font-bold bg-transparent border-none p-0 focus:ring-0 text-foreground w-full outline-none"
                 placeholder="Nome da Lista"
+                containerClassName="space-y-0"
+                inputClassName="text-2xl md:text-3xl font-bold bg-transparent border-none p-0 focus:ring-0 text-foreground outline-none rounded-none"
               />
               {isClosed && (
                 <div className="absolute -top-6 left-0 flex items-center gap-1.5 px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-emerald-200 dark:border-emerald-800">
@@ -169,7 +172,7 @@ export default function EdicaoPage() {
               </div>
             )}
             
-            <button
+            <Button
               onClick={() => setIsAtMarket(!isAtMarket)}
               className={cn(
                 "flex items-center gap-2 px-6 py-2.5 rounded-2xl font-bold transition-all shadow-lg active:scale-95",
@@ -180,7 +183,7 @@ export default function EdicaoPage() {
             >
               <ShoppingCart size={20} />
               {isAtMarket ? "Editar Lista" : "No Mercado"}
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -209,12 +212,12 @@ export default function EdicaoPage() {
                 Você pode revisar os itens abaixo ou reabrir a lista para fazer alterações.
               </p>
             </div>
-            <button
+            <Button
               onClick={handleReopenShopping}
               className="px-6 py-2 bg-white dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 rounded-xl font-bold hover:bg-amber-100 transition-all active:scale-95"
             >
               Reabrir Lista
-            </button>
+            </Button>
           </div>
         )}
 
@@ -244,21 +247,21 @@ export default function EdicaoPage() {
             </div>
 
             {pickedCount === totalCount && totalCount > 0 && !isClosed ? (
-              <button
+              <Button
                 onClick={() => setIsFinishModalOpen(true)}
                 className="bg-emerald-600 text-white px-8 py-3 rounded-2xl font-bold flex items-center gap-2 shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-all active:scale-95"
               >
                 <CheckCircle2 size={20} />
                 Finalizar Compra
-              </button>
+              </Button>
             ) : isAtMarket ? (
               <div className="flex items-center gap-3">
-                 <button
+                 <Button
                   onClick={() => setIsFinishModalOpen(true)}
                   className="bg-muted/10 hover:bg-muted/20 text-foreground px-6 py-3 rounded-2xl font-bold flex items-center gap-2 transition-all active:scale-95 border border-border"
                 >
                   Fechar
-                </button>
+                </Button>
               </div>
             ) : null}
           </div>

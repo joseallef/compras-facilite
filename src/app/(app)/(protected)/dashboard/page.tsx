@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import {
   ChartCardSkeleton,
   PageHeaderSkeleton,
@@ -44,20 +46,21 @@ function DashboardHeader({
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <div className="relative group">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted group-focus-within:text-emerald-500 transition-colors" />
-          <input
-            type="text"
-            placeholder="Buscar lista..."
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-10 pr-4 py-2 bg-card border border-border rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all w-full md:w-64"
-          />
-        </div>
+        <Input
+          type="text"
+          placeholder="Buscar lista..."
+          value={searchQuery}
+          onChange={(e) => onSearchChange(e.target.value)}
+          className="group"
+          containerClassName="space-y-0"
+          leftIcon={<Search className="h-4 w-4" />}
+          leftIconClassName="left-3 group-focus-within:text-emerald-500 transition-colors"
+          inputClassName="pl-10 py-2 bg-card w-full md:w-64"
+        />
 
         <div className="flex bg-card border border-border rounded-xl p-1">
           {[1, 3, 6, 12].map((m) => (
-            <button
+            <Button
               key={m}
               onClick={() => onFilterChange(m)}
               className={cn(
@@ -68,7 +71,7 @@ function DashboardHeader({
               )}
             >
               {m === 1 ? "Mês" : `${m}M`}
-            </button>
+            </Button>
           ))}
         </div>
       </div>

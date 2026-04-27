@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import { useAuth } from "@/hooks/useAuth";
 import { ArrowRight, Eye, EyeOff, Loader2, Lock, ShoppingCart } from "lucide-react";
 import Link from "next/link";
@@ -108,37 +110,26 @@ function ResetPasswordFormContent() {
             </div>
           )}
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium mb-2">
-              Nova senha
-            </label>
-            <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted" />
-              <input
-                id="password"
-                type={isPasswordVisible ? "text" : "password"}
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  if (fieldErrors.password) {
-                    setFieldErrors((prev) => ({ ...prev, password: undefined }));
-                  }
-                  if (formError) setFormError("");
-                }}
-                placeholder="••••••••"
-                className={`w-full pl-12 pr-12 py-3 bg-background border rounded-xl focus:ring-2 outline-none transition-all ${
-                  fieldErrors.password
-                    ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                    : "border-border focus:ring-emerald-500 focus:border-emerald-500"
-                }`}
-                disabled={isLoading}
-                aria-invalid={Boolean(fieldErrors.password)}
-                aria-describedby={fieldErrors.password ? "reset-password-error" : undefined}
-              />
-              <button
+          <Input
+            id="password"
+            type={isPasswordVisible ? "text" : "password"}
+            label="Nova senha"
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (fieldErrors.password) {
+                setFieldErrors((prev) => ({ ...prev, password: undefined }));
+              }
+              if (formError) setFormError("");
+            }}
+            placeholder="••••••••"
+            disabled={isLoading}
+            leftIcon={<Lock className="h-5 w-5" />}
+            rightSlot={
+              <Button
                 type="button"
                 onClick={() => setIsPasswordVisible((prev) => !prev)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg text-muted hover:text-foreground hover:bg-muted/10 transition-all"
+                className="p-2 rounded-lg text-muted hover:text-foreground hover:bg-muted/10 transition-all"
                 aria-label={isPasswordVisible ? "Ocultar senha" : "Mostrar senha"}
                 disabled={isLoading}
               >
@@ -147,46 +138,31 @@ function ResetPasswordFormContent() {
                 ) : (
                   <Eye className="h-5 w-5" />
                 )}
-              </button>
-            </div>
-            {fieldErrors.password && (
-              <p id="reset-password-error" className="mt-2 text-sm text-red-600 dark:text-red-400">
-                {fieldErrors.password}
-              </p>
-            )}
-          </div>
+              </Button>
+            }
+            error={fieldErrors.password}
+          />
 
-          <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium mb-2">
-              Confirmar nova senha
-            </label>
-            <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted" />
-              <input
-                id="confirmPassword"
-                type={isConfirmPasswordVisible ? "text" : "password"}
-                value={confirmPassword}
-                onChange={(e) => {
-                  setConfirmPassword(e.target.value);
-                  if (fieldErrors.confirmPassword) {
-                    setFieldErrors((prev) => ({ ...prev, confirmPassword: undefined }));
-                  }
-                  if (formError) setFormError("");
-                }}
-                placeholder="••••••••"
-                className={`w-full pl-12 pr-12 py-3 bg-background border rounded-xl focus:ring-2 outline-none transition-all ${
-                  fieldErrors.confirmPassword
-                    ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                    : "border-border focus:ring-emerald-500 focus:border-emerald-500"
-                }`}
-                disabled={isLoading}
-                aria-invalid={Boolean(fieldErrors.confirmPassword)}
-                aria-describedby={fieldErrors.confirmPassword ? "reset-confirm-password-error" : undefined}
-              />
-              <button
+          <Input
+            id="confirmPassword"
+            type={isConfirmPasswordVisible ? "text" : "password"}
+            label="Confirmar nova senha"
+            value={confirmPassword}
+            onChange={(e) => {
+              setConfirmPassword(e.target.value);
+              if (fieldErrors.confirmPassword) {
+                setFieldErrors((prev) => ({ ...prev, confirmPassword: undefined }));
+              }
+              if (formError) setFormError("");
+            }}
+            placeholder="••••••••"
+            disabled={isLoading}
+            leftIcon={<Lock className="h-5 w-5" />}
+            rightSlot={
+              <Button
                 type="button"
                 onClick={() => setIsConfirmPasswordVisible((prev) => !prev)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg text-muted hover:text-foreground hover:bg-muted/10 transition-all"
+                className="p-2 rounded-lg text-muted hover:text-foreground hover:bg-muted/10 transition-all"
                 aria-label={isConfirmPasswordVisible ? "Ocultar senha" : "Mostrar senha"}
                 disabled={isLoading}
               >
@@ -195,19 +171,12 @@ function ResetPasswordFormContent() {
                 ) : (
                   <Eye className="h-5 w-5" />
                 )}
-              </button>
-            </div>
-            {fieldErrors.confirmPassword && (
-              <p
-                id="reset-confirm-password-error"
-                className="mt-2 text-sm text-red-600 dark:text-red-400"
-              >
-                {fieldErrors.confirmPassword}
-              </p>
-            )}
-          </div>
+              </Button>
+            }
+            error={fieldErrors.confirmPassword}
+          />
 
-          <button
+          <Button
             type="submit"
             disabled={isLoading}
             className="w-full flex items-center justify-center gap-2 bg-emerald-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-emerald-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
@@ -223,7 +192,7 @@ function ResetPasswordFormContent() {
                 <ArrowRight className="h-5 w-5" />
               </>
             )}
-          </button>
+          </Button>
         </form>
       )}
     </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/Button";
 import { cn } from "@/utils/cn";
 import * as Dialog from "@radix-ui/react-dialog";
 import { AnimatePresence, motion } from "framer-motion";
@@ -70,13 +71,13 @@ export function Modal({
                   {children}
 
                   <Dialog.Close asChild>
-                    <button
+                    <Button
                       className="absolute top-6 right-6 p-2 text-muted/40 hover:text-foreground hover:bg-muted/10 rounded-full transition-all active:scale-90 cursor-pointer"
                       aria-label="Close"
                       onClick={onClose}
                     >
                       <X size={20} />
-                    </button>
+                    </Button>
                   </Dialog.Close>
                 </motion.div>
               </div>

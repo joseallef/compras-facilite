@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/Button";
 import { cn } from "@/utils/cn";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { Modal } from "./Modal";
@@ -47,14 +48,14 @@ export function ConfirmModal({
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 w-full mt-2">
-          <button
+          <Button
             onClick={onClose}
             disabled={isLoading}
             className="flex-1 px-6 py-3.5 rounded-2xl font-bold border border-border hover:bg-muted/10 transition-all active:scale-95 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
           >
             {cancelText}
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={onConfirm}
             disabled={isLoading}
             className={cn(
@@ -70,7 +71,7 @@ export function ConfirmModal({
             ) : (
               confirmText
             )}
-          </button>
+          </Button>
         </div>
       </div>
     </Modal>

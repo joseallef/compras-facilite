@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
 import { CheckCircle2, DollarSign } from "lucide-react";
 import { useState } from "react";
@@ -63,42 +65,40 @@ export function FinishShoppingModal({
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="totalValue" className="text-sm font-bold text-muted/60 uppercase tracking-wider ml-1">
-            Valor Total Gasto (R$)
-          </label>
-          <div className="relative">
-            <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted" />
-            <input
-              id="totalValue"
-              type="text"
-              inputMode="decimal"
-              value={value}
-              onChange={handleValueChange}
-              placeholder="0,00"
-              className="w-full pl-12 pr-4 py-3 bg-background border border-border rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all text-xl font-bold"
-              disabled={isLoading}
-            />
-          </div>
+          <Input
+            id="totalValue"
+            type="text"
+            inputMode="decimal"
+            label="Valor Total Gasto (R$)"
+            labelClassName="text-sm font-bold text-muted/60 uppercase tracking-wider ml-1"
+            value={value}
+            onChange={handleValueChange}
+            placeholder="0,00"
+            disabled={isLoading}
+            leftIcon={<DollarSign className="h-5 w-5" />}
+            containerClassName="space-y-2"
+            inputClassName="rounded-2xl text-xl font-bold border-border"
+          />
           <p className="text-[10px] text-muted ml-1 italic">
             * Opcional. Você pode deixar em branco se preferir.
           </p>
         </div>
 
         <div className="flex gap-3 pt-2">
-          <button
+          <Button
             onClick={onClose}
             className="flex-1 px-6 py-3 rounded-2xl font-bold border border-border hover:bg-muted/10 transition-all active:scale-95"
             disabled={isLoading}
           >
             Cancelar
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={handleConfirm}
             disabled={isLoading}
             className="flex-1 px-6 py-3 rounded-2xl font-bold bg-emerald-600 text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {isLoading ? "Salvando..." : "Confirmar"}
-          </button>
+          </Button>
         </div>
       </div>
     </Modal>

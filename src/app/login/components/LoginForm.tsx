@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import { useAuth } from "@/hooks/useAuth";
 import { ArrowRight, Eye, EyeOff, Loader2, Lock, Mail, ShoppingCart } from "lucide-react";
 import Link from "next/link";
@@ -90,72 +92,44 @@ export function LoginForm() {
               </div>
             )}
 
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium mb-2">
-                Email
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted" />
-                <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    if (fieldErrors.email) {
-                      setFieldErrors((prev) => ({ ...prev, email: undefined }));
-                    }
-                    if (formError) setFormError("");
-                  }}
-                  placeholder="seu@email.com"
-                  className={`w-full pl-12 pr-4 py-3 bg-background border rounded-xl focus:ring-2 outline-none transition-all ${
-                    fieldErrors.email
-                      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                      : "border-border focus:ring-emerald-500 focus:border-emerald-500"
-                  }`}
-                  disabled={isLoading}
-                  aria-invalid={Boolean(fieldErrors.email)}
-                  aria-describedby={fieldErrors.email ? "login-email-error" : undefined}
-                />
-              </div>
-              {fieldErrors.email && (
-                <p id="login-email-error" className="mt-2 text-sm text-red-600 dark:text-red-400">
-                  {fieldErrors.email}
-                </p>
-              )}
-            </div>
+            <Input
+              id="email"
+              type="email"
+              label="Email"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (fieldErrors.email) {
+                  setFieldErrors((prev) => ({ ...prev, email: undefined }));
+                }
+                if (formError) setFormError("");
+              }}
+              placeholder="seu@email.com"
+              disabled={isLoading}
+              leftIcon={<Mail className="h-5 w-5" />}
+              error={fieldErrors.email}
+            />
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium mb-2">
-                Senha
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted" />
-                <input
-                  id="password"
-                  type={isPasswordVisible ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    if (fieldErrors.password) {
-                      setFieldErrors((prev) => ({ ...prev, password: undefined }));
-                    }
-                    if (formError) setFormError("");
-                  }}
-                  placeholder="••••••••"
-                  className={`w-full pl-12 pr-12 py-3 bg-background border rounded-xl focus:ring-2 outline-none transition-all ${
-                    fieldErrors.password
-                      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                      : "border-border focus:ring-emerald-500 focus:border-emerald-500"
-                  }`}
-                  disabled={isLoading}
-                  aria-invalid={Boolean(fieldErrors.password)}
-                  aria-describedby={fieldErrors.password ? "login-password-error" : undefined}
-                />
-                <button
+            <Input
+              id="password"
+              type={isPasswordVisible ? "text" : "password"}
+              label="Senha"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (fieldErrors.password) {
+                  setFieldErrors((prev) => ({ ...prev, password: undefined }));
+                }
+                if (formError) setFormError("");
+              }}
+              placeholder="••••••••"
+              disabled={isLoading}
+              leftIcon={<Lock className="h-5 w-5" />}
+              rightSlot={
+                <Button
                   type="button"
                   onClick={() => setIsPasswordVisible((prev) => !prev)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg text-muted hover:text-foreground hover:bg-muted/10 transition-all"
+                  className="p-2 rounded-lg text-muted hover:text-foreground hover:bg-muted/10 transition-all"
                   aria-label={isPasswordVisible ? "Ocultar senha" : "Mostrar senha"}
                   disabled={isLoading}
                 >
@@ -164,16 +138,12 @@ export function LoginForm() {
                   ) : (
                     <Eye className="h-5 w-5" />
                   )}
-                </button>
-              </div>
-              {fieldErrors.password && (
-                <p id="login-password-error" className="mt-2 text-sm text-red-600 dark:text-red-400">
-                  {fieldErrors.password}
-                </p>
-              )}
-            </div>
+                </Button>
+              }
+              error={fieldErrors.password}
+            />
 
-            <button
+            <Button
               type="submit"
               disabled={isLoading}
               className="w-full flex items-center justify-center gap-2 bg-emerald-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-emerald-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
@@ -189,7 +159,7 @@ export function LoginForm() {
                   <ArrowRight className="h-5 w-5" />
                 </>
               )}
-            </button>
+            </Button>
           </form>
 
           <div className="mt-6 text-center text-sm text-muted">

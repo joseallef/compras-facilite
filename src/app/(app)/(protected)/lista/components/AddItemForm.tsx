@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { CATEGORIES, Category } from "@/types";
 import { Plus } from "lucide-react";
@@ -38,7 +40,8 @@ export function AddItemForm({ onAdd, isLoading }: AddItemFormProps) {
     >
       <div className="flex flex-col md:flex-row gap-3">
         <div className="flex-1">
-          <input
+          <Input
+            id="add-item-name"
             type="text"
             value={name}
             onChange={(e) => {
@@ -46,20 +49,11 @@ export function AddItemForm({ onAdd, isLoading }: AddItemFormProps) {
               if (nameError) setNameError("");
             }}
             placeholder="O que você precisa comprar?"
-            className={`w-full bg-background border rounded-xl px-4 py-3 focus:ring-2 transition-all outline-none text-foreground ${
-              nameError
-                ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                : "border-border focus:ring-emerald-500 focus:border-emerald-500"
-            }`}
             disabled={isLoading}
-            aria-invalid={Boolean(nameError)}
-            aria-describedby={nameError ? "add-item-name-error" : undefined}
+            error={nameError}
+            containerClassName="space-y-2"
+            inputClassName="text-foreground"
           />
-          {nameError && (
-            <p id="add-item-name-error" className="mt-2 text-sm text-red-600 dark:text-red-400">
-              {nameError}
-            </p>
-          )}
         </div>
         <select
           value={category}
@@ -73,7 +67,7 @@ export function AddItemForm({ onAdd, isLoading }: AddItemFormProps) {
             </option>
           ))}
         </select>
-        <button
+        <Button
           type="submit"
           disabled={isLoading || !name.trim()}
           className="bg-foreground text-background px-6 py-3 rounded-xl font-bold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
@@ -89,7 +83,7 @@ export function AddItemForm({ onAdd, isLoading }: AddItemFormProps) {
               Adicionar
             </>
           )}
-        </button>
+        </Button>
       </div>
     </form>
   );

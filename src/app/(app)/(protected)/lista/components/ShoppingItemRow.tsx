@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/Button";
 import { cn } from "@/utils/cn";
 import { motion } from "framer-motion";
 import { CheckCircle2, Circle, MinusCircle, PlusCircle, Trash2 } from "lucide-react";
@@ -34,7 +35,7 @@ export function ShoppingItemRow({
           : "bg-card border-border shadow-sm hover:border-emerald-200 dark:hover:border-emerald-800"
       )}
     >
-      <button
+      <Button
         onClick={onToggle}
         className={cn(
           "transition-colors flex-shrink-0",
@@ -49,7 +50,7 @@ export function ShoppingItemRow({
         ) : (
           <Circle size={28} />
         )}
-      </button>
+      </Button>
 
       <div className="flex-1 min-w-0">
         <p
@@ -68,29 +69,29 @@ export function ShoppingItemRow({
       {!isAtMarket && (
         <div className="flex items-center gap-3 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
           <div className="flex items-center bg-background border border-border rounded-xl p-1">
-            <button
+            <Button
               onClick={() => onQuantityChange(Math.max(1, item.quantity - 1))}
               className="p-1 hover:text-emerald-600 transition-colors"
               aria-label="Diminuir quantidade"
             >
               <MinusCircle size={20} />
-            </button>
+            </Button>
             <span className="w-8 text-center font-bold">{item.quantity}</span>
-            <button
+            <Button
               onClick={() => onQuantityChange(item.quantity + 1)}
               className="p-1 hover:text-emerald-600 transition-colors"
               aria-label="Aumentar quantidade"
             >
               <PlusCircle size={20} />
-            </button>
+            </Button>
           </div>
-          <button
+          <Button
             onClick={onRemove}
             className="text-muted/50 hover:text-red-500 p-2 transition-colors"
             aria-label="Remover item"
           >
             <Trash2 size={20} />
-          </button>
+          </Button>
         </div>
       )}
 

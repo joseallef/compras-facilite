@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/hooks/useAuth";
 import { AnimatePresence, motion } from "framer-motion";
 import { LogOut, ShoppingCart, User } from "lucide-react";
@@ -63,7 +64,7 @@ export function Header() {
           <div className="flex items-center gap-4">
             {showUserMenu ? (
               <div className="relative" ref={menuRef}>
-                <button
+                <Button
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
                   className="flex items-center gap-2 p-1.5 rounded-2xl hover:bg-muted/10 transition-all active:scale-95 border border-transparent hover:border-border"
                 >
@@ -73,7 +74,7 @@ export function Header() {
                   <span className="hidden sm:block text-sm font-bold pr-2">
                     {user?.name?.split(" ")[0]}
                   </span>
-                </button>
+                </Button>
 
                 <AnimatePresence>
                   {isMenuOpen && (
@@ -88,7 +89,7 @@ export function Header() {
                         <p className="text-xs text-muted truncate">{user?.email}</p>
                       </div>
                       <div className="p-2">
-                        <button
+                        <Button
                           onClick={() => {
                             logout();
                             setIsMenuOpen(false);
@@ -97,7 +98,7 @@ export function Header() {
                         >
                           <LogOut className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
                           Sair da conta
-                        </button>
+                        </Button>
                       </div>
                     </motion.div>
                   )}
