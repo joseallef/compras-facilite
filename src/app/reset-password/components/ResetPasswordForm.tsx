@@ -14,7 +14,8 @@ function ResetPasswordFormContent() {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [formError, setFormError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<{ password?: string; confirmPassword?: string }>({});
   const [success, setSuccess] = useState(false);
 
   // 2. VARIÁVEIS
@@ -26,32 +27,35 @@ function ResetPasswordFormContent() {
   // 3. FUNÇÕES
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError("");
+    setFormError("");
+    setFieldErrors({});
     setSuccess(false);
     setIsLoading(true);
 
     try {
       if (!token) {
-        setError("Token de recuperação ausente.");
+        setFormError("Token de recuperação ausente.");
         return;
       }
 
-      if (!password || !confirmPassword) {
-        setError("Preencha todos os campos");
+      const nextErrors: typeof fieldErrors = {};
+      const passwordValue = password;
+      const confirmPasswordValue = confirmPassword;
+
+      if (!passwordValue) nextErrors.password = "Crie uma nova senha.";
+      else if (passwordValue.length < 6) nextErrors.password = "A senha deve ter pelo menos 6 caracteres.";
+
+      if (!confirmPasswordValue) nextErrors.confirmPassword = "Confirme sua nova senha.";
+      else if (passwordValue && passwordValue !== confirmPasswordValue) {
+        nextErrors.confirmPassword = "As senhas não coincidem.";
+      }
+
+      if (Object.keys(nextErrors).length > 0) {
+        setFieldErrors(nextErrors);
         return;
       }
 
-      if (password !== confirmPassword) {
-        setError("As senhas não coincidem");
-        return;
-      }
-
-      if (password.length < 6) {
-        setError("A senha deve ter pelo menos 6 caracteres");
-        return;
-      }
-
-      await resetPassword({ token, password });
+      await resetPassword({ token, password: passwordValue });
       setSuccess(true);
       toast.success("Senha redefinida com sucesso!");
       
@@ -64,7 +68,7 @@ function ResetPasswordFormContent() {
         err instanceof Error
           ? err.message
           : "Erro ao redefinir senha. O link pode ter expirado.";
-      setError(errorMessage);
+      setFormError(errorMessage);
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -98,9 +102,9 @@ function ResetPasswordFormContent() {
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-6">
-          {error && (
+          {formError && (
             <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-xl text-sm">
-              {error}
+              {formError}
             </div>
           )}
 
@@ -114,10 +118,22 @@ function ResetPasswordFormContent() {
                 id="password"
                 type={isPasswordVisible ? "text" : "password"}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (fieldErrors.password) {
+                    setFieldErrors((prev) => ({ ...prev, password: undefined }));
+                  }
+                  if (formError) setFormError("");
+                }}
                 placeholder="••••••••"
-                className="w-full pl-12 pr-12 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                className={`w-full pl-12 pr-12 py-3 bg-background border rounded-xl focus:ring-2 outline-none transition-all ${
+                  fieldErrors.password
+                    ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                    : "border-border focus:ring-emerald-500 focus:border-emerald-500"
+                }`}
                 disabled={isLoading}
+                aria-invalid={Boolean(fieldErrors.password)}
+                aria-describedby={fieldErrors.password ? "reset-password-error" : undefined}
               />
               <button
                 type="button"
@@ -133,6 +149,11 @@ function ResetPasswordFormContent() {
                 )}
               </button>
             </div>
+            {fieldErrors.password && (
+              <p id="reset-password-error" className="mt-2 text-sm text-red-600 dark:text-red-400">
+                {fieldErrors.password}
+              </p>
+            )}
           </div>
 
           <div>
@@ -145,10 +166,22 @@ function ResetPasswordFormContent() {
                 id="confirmPassword"
                 type={isConfirmPasswordVisible ? "text" : "password"}
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value);
+                  if (fieldErrors.confirmPassword) {
+                    setFieldErrors((prev) => ({ ...prev, confirmPassword: undefined }));
+                  }
+                  if (formError) setFormError("");
+                }}
                 placeholder="••••••••"
-                className="w-full pl-12 pr-12 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                className={`w-full pl-12 pr-12 py-3 bg-background border rounded-xl focus:ring-2 outline-none transition-all ${
+                  fieldErrors.confirmPassword
+                    ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                    : "border-border focus:ring-emerald-500 focus:border-emerald-500"
+                }`}
                 disabled={isLoading}
+                aria-invalid={Boolean(fieldErrors.confirmPassword)}
+                aria-describedby={fieldErrors.confirmPassword ? "reset-confirm-password-error" : undefined}
               />
               <button
                 type="button"
@@ -164,6 +197,14 @@ function ResetPasswordFormContent() {
                 )}
               </button>
             </div>
+            {fieldErrors.confirmPassword && (
+              <p
+                id="reset-confirm-password-error"
+                className="mt-2 text-sm text-red-600 dark:text-red-400"
+              >
+                {fieldErrors.confirmPassword}
+              </p>
+            )}
           </div>
 
           <button

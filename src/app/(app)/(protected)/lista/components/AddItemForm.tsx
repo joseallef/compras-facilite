@@ -10,15 +10,21 @@ export function AddItemForm({ onAdd, isLoading }: AddItemFormProps) {
   // 1. STATES
   const [name, setName] = useState("");
   const [category, setCategory] = useState<Category>("Alimentos");
+  const [nameError, setNameError] = useState("");
 
   // 2. VARIÁVEIS
 
   // 3. FUNÇÕES
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return;
+    const nameValue = name.trim();
+    if (!nameValue) {
+      setNameError("Digite o nome do item.");
+      return;
+    }
+    setNameError("");
 
-    onAdd(name.trim(), category);
+    onAdd(nameValue, category);
     setName("");
   };
 
@@ -31,14 +37,30 @@ export function AddItemForm({ onAdd, isLoading }: AddItemFormProps) {
       className="bg-card p-6 rounded-3xl border border-border shadow-sm space-y-4"
     >
       <div className="flex flex-col md:flex-row gap-3">
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="O que você precisa comprar?"
-          className="flex-1 bg-background border border-border rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all outline-none text-foreground"
-          disabled={isLoading}
-        />
+        <div className="flex-1">
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => {
+              setName(e.target.value);
+              if (nameError) setNameError("");
+            }}
+            placeholder="O que você precisa comprar?"
+            className={`w-full bg-background border rounded-xl px-4 py-3 focus:ring-2 transition-all outline-none text-foreground ${
+              nameError
+                ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                : "border-border focus:ring-emerald-500 focus:border-emerald-500"
+            }`}
+            disabled={isLoading}
+            aria-invalid={Boolean(nameError)}
+            aria-describedby={nameError ? "add-item-name-error" : undefined}
+          />
+          {nameError && (
+            <p id="add-item-name-error" className="mt-2 text-sm text-red-600 dark:text-red-400">
+              {nameError}
+            </p>
+          )}
+        </div>
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value as Category)}

@@ -7,13 +7,18 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { toast } from "sonner";
 
+function isValidEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+}
+
 export function LoginForm() {
   // 1. STATES
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [formError, setFormError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
 
   // 2. VARIÁVEIS
   const { login } = useAuth();
@@ -22,26 +27,31 @@ export function LoginForm() {
   // 3. FUNÇÕES
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError("");
+    setFormError("");
+    setFieldErrors({});
     setIsLoading(true);
 
     try {
-      if (!email || !password) {
-        setError("Preencha todos os campos");
+      const nextErrors: typeof fieldErrors = {};
+      const emailValue = email.trim();
+      const passwordValue = password;
+
+      if (!emailValue) nextErrors.email = "Informe seu e-mail.";
+      else if (!isValidEmail(emailValue)) nextErrors.email = "Digite um e-mail válido.";
+
+      if (!passwordValue) nextErrors.password = "Informe sua senha.";
+
+      if (Object.keys(nextErrors).length > 0) {
+        setFieldErrors(nextErrors);
         return;
       }
 
-      if (!email.includes("@")) {
-        setError("Digite um email válido");
-        return;
-      }
-
-      await login(email, password);
+      await login(emailValue, passwordValue);
       toast.success("Login realizado com sucesso!");
       router.push("/lista");
     } catch {
       const errorMessage = "Erro ao fazer login. Verifique suas credenciais.";
-      setError(errorMessage);
+      setFormError(errorMessage);
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -74,9 +84,9 @@ export function LoginForm() {
 
         <div className="bg-card border border-border rounded-3xl p-8 shadow-xl">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
+            {formError && (
               <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-xl text-sm">
-                {error}
+                {formError}
               </div>
             )}
 
@@ -90,12 +100,29 @@ export function LoginForm() {
                   id="email"
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (fieldErrors.email) {
+                      setFieldErrors((prev) => ({ ...prev, email: undefined }));
+                    }
+                    if (formError) setFormError("");
+                  }}
                   placeholder="seu@email.com"
-                  className="w-full pl-12 pr-4 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                  className={`w-full pl-12 pr-4 py-3 bg-background border rounded-xl focus:ring-2 outline-none transition-all ${
+                    fieldErrors.email
+                      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                      : "border-border focus:ring-emerald-500 focus:border-emerald-500"
+                  }`}
                   disabled={isLoading}
+                  aria-invalid={Boolean(fieldErrors.email)}
+                  aria-describedby={fieldErrors.email ? "login-email-error" : undefined}
                 />
               </div>
+              {fieldErrors.email && (
+                <p id="login-email-error" className="mt-2 text-sm text-red-600 dark:text-red-400">
+                  {fieldErrors.email}
+                </p>
+              )}
             </div>
 
             <div>
@@ -108,10 +135,22 @@ export function LoginForm() {
                   id="password"
                   type={isPasswordVisible ? "text" : "password"}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (fieldErrors.password) {
+                      setFieldErrors((prev) => ({ ...prev, password: undefined }));
+                    }
+                    if (formError) setFormError("");
+                  }}
                   placeholder="••••••••"
-                  className="w-full pl-12 pr-12 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                  className={`w-full pl-12 pr-12 py-3 bg-background border rounded-xl focus:ring-2 outline-none transition-all ${
+                    fieldErrors.password
+                      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                      : "border-border focus:ring-emerald-500 focus:border-emerald-500"
+                  }`}
                   disabled={isLoading}
+                  aria-invalid={Boolean(fieldErrors.password)}
+                  aria-describedby={fieldErrors.password ? "login-password-error" : undefined}
                 />
                 <button
                   type="button"
@@ -127,6 +166,11 @@ export function LoginForm() {
                   )}
                 </button>
               </div>
+              {fieldErrors.password && (
+                <p id="login-password-error" className="mt-2 text-sm text-red-600 dark:text-red-400">
+                  {fieldErrors.password}
+                </p>
+              )}
             </div>
 
             <button

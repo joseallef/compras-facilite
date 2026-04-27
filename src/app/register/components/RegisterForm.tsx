@@ -7,6 +7,10 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { toast } from "sonner";
 
+function isValidEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+}
+
 export function RegisterForm() {
   // 1. STATES
   const [name, setName] = useState("");
@@ -16,7 +20,13 @@ export function RegisterForm() {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [formError, setFormError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<{
+    name?: string;
+    email?: string;
+    password?: string;
+    confirmPassword?: string;
+  }>({});
 
   // 2. VARIÁVEIS
   const { register, login } = useAuth();
@@ -25,43 +35,49 @@ export function RegisterForm() {
   // 3. FUNÇÕES
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError("");
+    setFormError("");
+    setFieldErrors({});
     setIsLoading(true);
 
     try {
-      if (!name || !email || !password || !confirmPassword) {
-        setError("Preencha todos os campos");
+      const nextErrors: typeof fieldErrors = {};
+      const nameValue = name.trim();
+      const emailValue = email.trim();
+      const passwordValue = password;
+      const confirmPasswordValue = confirmPassword;
+
+      if (!nameValue) nextErrors.name = "Informe seu nome.";
+      else if (nameValue.length < 2) nextErrors.name = "O nome deve ter pelo menos 2 caracteres.";
+
+      if (!emailValue) nextErrors.email = "Informe seu e-mail.";
+      else if (!isValidEmail(emailValue)) nextErrors.email = "Digite um e-mail válido.";
+
+      if (!passwordValue) nextErrors.password = "Crie uma senha.";
+      else if (passwordValue.length < 6) nextErrors.password = "A senha deve ter pelo menos 6 caracteres.";
+
+      if (!confirmPasswordValue) nextErrors.confirmPassword = "Confirme sua senha.";
+      else if (passwordValue && passwordValue !== confirmPasswordValue) {
+        nextErrors.confirmPassword = "As senhas não coincidem.";
+      }
+
+      if (Object.keys(nextErrors).length > 0) {
+        setFieldErrors(nextErrors);
         return;
       }
 
-      if (!email.includes("@")) {
-        setError("Digite um email válido");
-        return;
-      }
-
-      if (password !== confirmPassword) {
-        setError("As senhas não coincidem");
-        return;
-      }
-
-      if (password.length < 6) {
-        setError("A senha deve ter pelo menos 6 caracteres");
-        return;
-      }
-
-      await register({ name, email, password });
+      await register({ name: nameValue, email: emailValue, password: passwordValue });
       
       toast.success("Conta criada com sucesso! Fazendo login...");
 
       // Auto-login after registration
-      await login(email, password);
+      await login(emailValue, passwordValue);
       router.push("/lista");
     } catch (err) {
       const errorMessage =
         err instanceof Error
           ? err.message
           : "Erro ao criar conta. Tente novamente.";
-      setError(errorMessage);
+      setFormError(errorMessage);
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -92,9 +108,9 @@ export function RegisterForm() {
 
         <div className="bg-card border border-border rounded-3xl p-8 shadow-xl">
           <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
+            {formError && (
               <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-xl text-sm">
-                {error}
+                {formError}
               </div>
             )}
 
@@ -108,12 +124,29 @@ export function RegisterForm() {
                   id="name"
                   type="text"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={(e) => {
+                    setName(e.target.value);
+                    if (fieldErrors.name) {
+                      setFieldErrors((prev) => ({ ...prev, name: undefined }));
+                    }
+                    if (formError) setFormError("");
+                  }}
                   placeholder="Seu nome"
-                  className="w-full pl-12 pr-4 py-2.5 bg-background border border-border rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                  className={`w-full pl-12 pr-4 py-2.5 bg-background border rounded-xl focus:ring-2 outline-none transition-all ${
+                    fieldErrors.name
+                      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                      : "border-border focus:ring-emerald-500 focus:border-emerald-500"
+                  }`}
                   disabled={isLoading}
+                  aria-invalid={Boolean(fieldErrors.name)}
+                  aria-describedby={fieldErrors.name ? "register-name-error" : undefined}
                 />
               </div>
+              {fieldErrors.name && (
+                <p id="register-name-error" className="mt-2 text-sm text-red-600 dark:text-red-400">
+                  {fieldErrors.name}
+                </p>
+              )}
             </div>
 
             <div>
@@ -126,12 +159,29 @@ export function RegisterForm() {
                   id="email"
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (fieldErrors.email) {
+                      setFieldErrors((prev) => ({ ...prev, email: undefined }));
+                    }
+                    if (formError) setFormError("");
+                  }}
                   placeholder="seu@email.com"
-                  className="w-full pl-12 pr-4 py-2.5 bg-background border border-border rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                  className={`w-full pl-12 pr-4 py-2.5 bg-background border rounded-xl focus:ring-2 outline-none transition-all ${
+                    fieldErrors.email
+                      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                      : "border-border focus:ring-emerald-500 focus:border-emerald-500"
+                  }`}
                   disabled={isLoading}
+                  aria-invalid={Boolean(fieldErrors.email)}
+                  aria-describedby={fieldErrors.email ? "register-email-error" : undefined}
                 />
               </div>
+              {fieldErrors.email && (
+                <p id="register-email-error" className="mt-2 text-sm text-red-600 dark:text-red-400">
+                  {fieldErrors.email}
+                </p>
+              )}
             </div>
 
             <div>
@@ -144,10 +194,26 @@ export function RegisterForm() {
                   id="password"
                   type={isPasswordVisible ? "text" : "password"}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (fieldErrors.password || fieldErrors.confirmPassword) {
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        password: undefined,
+                        confirmPassword: undefined,
+                      }));
+                    }
+                    if (formError) setFormError("");
+                  }}
                   placeholder="••••••••"
-                  className="w-full pl-12 pr-12 py-2.5 bg-background border border-border rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                  className={`w-full pl-12 pr-12 py-2.5 bg-background border rounded-xl focus:ring-2 outline-none transition-all ${
+                    fieldErrors.password
+                      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                      : "border-border focus:ring-emerald-500 focus:border-emerald-500"
+                  }`}
                   disabled={isLoading}
+                  aria-invalid={Boolean(fieldErrors.password)}
+                  aria-describedby={fieldErrors.password ? "register-password-error" : undefined}
                 />
                 <button
                   type="button"
@@ -163,6 +229,11 @@ export function RegisterForm() {
                   )}
                 </button>
               </div>
+              {fieldErrors.password && (
+                <p id="register-password-error" className="mt-2 text-sm text-red-600 dark:text-red-400">
+                  {fieldErrors.password}
+                </p>
+              )}
             </div>
 
             <div>
@@ -175,10 +246,22 @@ export function RegisterForm() {
                   id="confirmPassword"
                   type={isConfirmPasswordVisible ? "text" : "password"}
                   value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                    if (fieldErrors.confirmPassword) {
+                      setFieldErrors((prev) => ({ ...prev, confirmPassword: undefined }));
+                    }
+                    if (formError) setFormError("");
+                  }}
                   placeholder="••••••••"
-                  className="w-full pl-12 pr-12 py-2.5 bg-background border border-border rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                  className={`w-full pl-12 pr-12 py-2.5 bg-background border rounded-xl focus:ring-2 outline-none transition-all ${
+                    fieldErrors.confirmPassword
+                      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                      : "border-border focus:ring-emerald-500 focus:border-emerald-500"
+                  }`}
                   disabled={isLoading}
+                  aria-invalid={Boolean(fieldErrors.confirmPassword)}
+                  aria-describedby={fieldErrors.confirmPassword ? "register-confirm-password-error" : undefined}
                 />
                 <button
                   type="button"
@@ -194,6 +277,14 @@ export function RegisterForm() {
                   )}
                 </button>
               </div>
+              {fieldErrors.confirmPassword && (
+                <p
+                  id="register-confirm-password-error"
+                  className="mt-2 text-sm text-red-600 dark:text-red-400"
+                >
+                  {fieldErrors.confirmPassword}
+                </p>
+              )}
             </div>
 
             <button

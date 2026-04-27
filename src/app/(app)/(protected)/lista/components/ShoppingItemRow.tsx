@@ -66,7 +66,7 @@ export function ShoppingItemRow({
       </div>
 
       {!isAtMarket && (
-        <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-3 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
           <div className="flex items-center bg-background border border-border rounded-xl p-1">
             <button
               onClick={() => onQuantityChange(Math.max(1, item.quantity - 1))}

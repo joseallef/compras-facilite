@@ -27,6 +27,7 @@ export function ShoppingListForm({
   const router = useRouter();
   const [name, setName] = useState(initialData?.name || "");
   const [items, setItems] = useState<ShoppingItem[]>(initialData?.items || []);
+  const [nameError, setNameError] = useState("");
 
   const handleAddItem = (itemName: string, category: Category) => {
     const newItem: ShoppingItem = {
@@ -51,9 +52,14 @@ export function ShoppingListForm({
   };
 
   const handleSubmit = async () => {
-    if (!name.trim()) return;
+    const nameValue = name.trim();
+    if (!nameValue) {
+      setNameError("Informe o nome da lista.");
+      return;
+    }
+    setNameError("");
     await onSubmit(
-      name,
+      nameValue,
       items.map(({ name, quantity, unit, category }) => ({
         name,
         quantity,
@@ -91,10 +97,27 @@ export function ShoppingListForm({
           <input
             type="text"
             value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full text-xl font-bold bg-background border border-border rounded-2xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+            onChange={(e) => {
+              setName(e.target.value);
+              if (nameError) setNameError("");
+            }}
+            className={`w-full text-xl font-bold bg-background border rounded-2xl px-4 py-3 focus:ring-2 outline-none transition-all ${
+              nameError
+                ? "border-red-500 focus:ring-red-500"
+                : "border-border focus:ring-emerald-500"
+            }`}
             placeholder="Ex: Compras da Semana"
+            aria-invalid={Boolean(nameError)}
+            aria-describedby={nameError ? "shopping-list-name-error" : undefined}
           />
+          {nameError && (
+            <span
+              id="shopping-list-name-error"
+              className="text-sm text-red-600 dark:text-red-400 ml-1"
+            >
+              {nameError}
+            </span>
+          )}
         </label>
       </div>
 

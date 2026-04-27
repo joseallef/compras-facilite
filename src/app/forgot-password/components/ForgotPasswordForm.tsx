@@ -6,11 +6,16 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { toast } from "sonner";
 
+function isValidEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+}
+
 export function ForgotPasswordForm() {
   // 1. STATES
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [formError, setFormError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<{ email?: string }>({});
   const [success, setSuccess] = useState(false);
 
   // 2. VARIÁVEIS
@@ -19,22 +24,24 @@ export function ForgotPasswordForm() {
   // 3. FUNÇÕES
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError("");
+    setFormError("");
+    setFieldErrors({});
     setSuccess(false);
     setIsLoading(true);
 
     try {
-      if (!email) {
-        setError("Preencha o campo de email");
+      const nextErrors: typeof fieldErrors = {};
+      const emailValue = email.trim();
+
+      if (!emailValue) nextErrors.email = "Informe seu e-mail.";
+      else if (!isValidEmail(emailValue)) nextErrors.email = "Digite um e-mail válido.";
+
+      if (Object.keys(nextErrors).length > 0) {
+        setFieldErrors(nextErrors);
         return;
       }
 
-      if (!email.includes("@")) {
-        setError("Digite um email válido");
-        return;
-      }
-
-      await forgotPassword(email);
+      await forgotPassword(emailValue);
       setSuccess(true);
       toast.success("E-mail de recuperação enviado!");
     } catch (err) {
@@ -42,7 +49,7 @@ export function ForgotPasswordForm() {
         err instanceof Error
           ? err.message
           : "Erro ao solicitar recuperação. Tente novamente.";
-      setError(errorMessage);
+      setFormError(errorMessage);
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -84,9 +91,9 @@ export function ForgotPasswordForm() {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
-              {error && (
+              {formError && (
                 <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-xl text-sm">
-                  {error}
+                  {formError}
                 </div>
               )}
 
@@ -100,12 +107,29 @@ export function ForgotPasswordForm() {
                     id="email"
                     type="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      if (fieldErrors.email) {
+                        setFieldErrors((prev) => ({ ...prev, email: undefined }));
+                      }
+                      if (formError) setFormError("");
+                    }}
                     placeholder="seu@email.com"
-                    className="w-full pl-12 pr-4 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                    className={`w-full pl-12 pr-4 py-3 bg-background border rounded-xl focus:ring-2 outline-none transition-all ${
+                      fieldErrors.email
+                        ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                        : "border-border focus:ring-emerald-500 focus:border-emerald-500"
+                    }`}
                     disabled={isLoading}
+                    aria-invalid={Boolean(fieldErrors.email)}
+                    aria-describedby={fieldErrors.email ? "forgot-email-error" : undefined}
                   />
                 </div>
+                {fieldErrors.email && (
+                  <p id="forgot-email-error" className="mt-2 text-sm text-red-600 dark:text-red-400">
+                    {fieldErrors.email}
+                  </p>
+                )}
               </div>
 
               <button
