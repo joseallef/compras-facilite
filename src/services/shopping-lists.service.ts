@@ -1,10 +1,21 @@
 "use server";
 
+import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { Category } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
-export async function getShoppingLists(userId: string) {
+async function requireUserId() {
+  const session = await auth();
+  const userId = session?.user?.id;
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+  return userId;
+}
+
+export async function getShoppingLists() {
+  const userId = await requireUserId();
   try {
     return await prisma.shoppingList.findMany({
       where: { userId },
@@ -17,7 +28,8 @@ export async function getShoppingLists(userId: string) {
   }
 }
 
-export async function createShoppingList(userId: string, name: string) {
+export async function createShoppingList(name: string) {
+  const userId = await requireUserId();
   try {
     const list = await prisma.shoppingList.create({
       data: {
@@ -34,10 +46,12 @@ export async function createShoppingList(userId: string, name: string) {
 }
 
 export async function deleteShoppingList(listId: string) {
+  const userId = await requireUserId();
   try {
-    await prisma.shoppingList.delete({
-      where: { id: listId },
-    });
+    const result = await prisma.shoppingList.deleteMany({ where: { id: listId, userId } });
+    if (result.count === 0) {
+      throw new Error("Not found");
+    }
     revalidatePath("/lista");
   } catch (error) {
     console.error("Error deleting shopping list:", error);
@@ -50,26 +64,28 @@ export async function updateShoppingList(listId: string, data: {
   status?: "ABERTA" | "CONCLUIDA"; 
   totalValue?: number | null 
 }) {
+  const userId = await requireUserId();
   try {
-    const list = await prisma.shoppingList.update({
-      where: { id: listId },
-      data,
-    });
+    const result = await prisma.shoppingList.updateMany({ where: { id: listId, userId }, data });
+    if (result.count === 0) {
+      throw new Error("Not found");
+    }
     revalidatePath("/lista");
     revalidatePath(`/edicao/${listId}`);
-    return list;
+    return await prisma.shoppingList.findUnique({ where: { id: listId } });
   } catch (error) {
     console.error("Error updating shopping list:", error);
     throw new Error("Failed to update list");
   }
 }
 
-export async function createShoppingListFromTemplate(userId: string, name: string, items: {
+export async function createShoppingListFromTemplate(name: string, items: {
   name: string;
   quantity: number;
   unit: string;
   category: string;
 }[]) {
+  const userId = await requireUserId();
   try {
     const list = await prisma.shoppingList.create({
       data: {
@@ -100,7 +116,15 @@ export async function addShoppingItem(listId: string, data: {
   unit: string;
   category: string;
 }) {
+  const userId = await requireUserId();
   try {
+    const list = await prisma.shoppingList.findFirst({
+      where: { id: listId, userId },
+      select: { id: true },
+    });
+    if (!list) {
+      throw new Error("Not found");
+    }
     const item = await prisma.shoppingItem.create({
       data: {
         name: data.name,
@@ -119,10 +143,18 @@ export async function addShoppingItem(listId: string, data: {
 }
 
 export async function removeShoppingItem(listId: string, itemId: string) {
+  const userId = await requireUserId();
   try {
-    await prisma.shoppingItem.delete({
-      where: { id: itemId },
+    const result = await prisma.shoppingItem.deleteMany({
+      where: {
+        id: itemId,
+        shoppingListId: listId,
+        shoppingList: { userId },
+      },
     });
+    if (result.count === 0) {
+      throw new Error("Not found");
+    }
     revalidatePath(`/edicao/${listId}`);
   } catch (error) {
     console.error("Error removing shopping item:", error);
@@ -131,12 +163,24 @@ export async function removeShoppingItem(listId: string, itemId: string) {
 }
 
 export async function toggleShoppingItem(listId: string, itemId: string, isPicked: boolean) {
+  const userId = await requireUserId();
   try {
-    const item = await prisma.shoppingItem.update({
-      where: { id: itemId },
+    const result = await prisma.shoppingItem.updateMany({
+      where: {
+        id: itemId,
+        shoppingListId: listId,
+        shoppingList: { userId },
+      },
       data: { isPicked },
     });
+    if (result.count === 0) {
+      throw new Error("Not found");
+    }
     revalidatePath(`/edicao/${listId}`);
+    const item = await prisma.shoppingItem.findUnique({ where: { id: itemId } });
+    if (!item) {
+      throw new Error("Not found");
+    }
     return item;
   } catch (error) {
     console.error("Error toggling shopping item:", error);
@@ -145,12 +189,24 @@ export async function toggleShoppingItem(listId: string, itemId: string, isPicke
 }
 
 export async function updateShoppingItemQuantity(listId: string, itemId: string, quantity: number) {
+  const userId = await requireUserId();
   try {
-    const item = await prisma.shoppingItem.update({
-      where: { id: itemId },
+    const result = await prisma.shoppingItem.updateMany({
+      where: {
+        id: itemId,
+        shoppingListId: listId,
+        shoppingList: { userId },
+      },
       data: { quantity },
     });
+    if (result.count === 0) {
+      throw new Error("Not found");
+    }
     revalidatePath(`/edicao/${listId}`);
+    const item = await prisma.shoppingItem.findUnique({ where: { id: itemId } });
+    if (!item) {
+      throw new Error("Not found");
+    }
     return item;
   } catch (error) {
     console.error("Error updating shopping item quantity:", error);

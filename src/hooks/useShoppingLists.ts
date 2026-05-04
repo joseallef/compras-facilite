@@ -2,15 +2,15 @@
 
 import { useAuth } from "@/hooks/useAuth";
 import {
-  addShoppingItem,
-  createShoppingList,
-  createShoppingListFromTemplate,
-  deleteShoppingList,
-  getShoppingLists,
-  removeShoppingItem,
-  toggleShoppingItem,
-  updateShoppingItemQuantity,
-  updateShoppingList
+    addShoppingItem,
+    createShoppingList,
+    createShoppingListFromTemplate,
+    deleteShoppingList,
+    getShoppingLists,
+    removeShoppingItem,
+    toggleShoppingItem,
+    updateShoppingItemQuantity,
+    updateShoppingList
 } from "@/services/shopping-lists.service";
 import { useCallback, useEffect, useState } from "react";
 import { MONTHLY_SHOPPING_TEMPLATE } from "../data/templates";
@@ -28,7 +28,7 @@ export function useShoppingLists() {
     
     setIsLoading(true);
     try {
-      const data = await getShoppingLists(user.id);
+      const data = await getShoppingLists();
       // Prisma returns Date objects, which is fine for date-fns
       setLists(data as unknown as ShoppingList[]);
     } catch (error) {
@@ -54,9 +54,9 @@ export function useShoppingLists() {
     try {
       let newList;
       if (useTemplate) {
-        newList = await createShoppingListFromTemplate(user.id, name, MONTHLY_SHOPPING_TEMPLATE);
+        newList = await createShoppingListFromTemplate(name, MONTHLY_SHOPPING_TEMPLATE);
       } else {
-        newList = await createShoppingList(user.id, name);
+        newList = await createShoppingList(name);
       }
       
       // Update local state or just refetch

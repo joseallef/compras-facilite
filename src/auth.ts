@@ -35,6 +35,14 @@ function getBcryptRounds() {
   return process.env.NODE_ENV === "production" ? 14 : 10;
 }
 
+function normalizeEmail(value: string) {
+  return value.trim().toLowerCase();
+}
+
+async function sleep(ms: number) {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
   providers: [
@@ -46,14 +54,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
+          await sleep(250);
           return null;
         }
 
+        const email = normalizeEmail(credentials.email as string);
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email as string },
+          where: { email },
         });
 
         if (!user || !user.password) {
+          await sleep(250);
           return null;
         }
 
@@ -91,6 +102,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         {
           const legacyValid = await bcrypt.compare(passwordValue, user.password);
           if (!legacyValid) {
+            await sleep(250);
             return null;
           }
 

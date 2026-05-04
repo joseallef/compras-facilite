@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import { v4 as uuidv4 } from "uuid";
 
 type ActionResult<T> =
@@ -26,14 +27,92 @@ function getBcryptRounds() {
   return process.env.NODE_ENV === "production" ? 14 : 10;
 }
 
+function normalizeEmail(value: string) {
+  return value.trim().toLowerCase();
+}
+
+function isValidEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+}
+
+function hashResetToken(token: string) {
+  return crypto.createHash("sha256").update(token).digest("hex");
+}
+
+function getAppUrl() {
+  const direct =
+    process.env.APP_URL ??
+    process.env.NEXTAUTH_URL ??
+    process.env.NEXT_PUBLIC_APP_URL ??
+    "";
+
+  if (direct) return direct.replace(/\/$/, "");
+
+  const vercel = process.env.VERCEL_URL;
+  if (vercel) return `https://${vercel}`.replace(/\/$/, "");
+
+  return "http://localhost:3000";
+}
+
+function getEmailJsConfig() {
+  const serviceId =
+    process.env.EMAILJS_SERVICE_ID ?? process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID ?? "";
+  const templateId =
+    process.env.EMAILJS_TEMPLATE_ID ?? process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID ?? "";
+  const publicKey =
+    process.env.EMAILJS_PUBLIC_KEY ?? process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY ?? "";
+
+  if (!serviceId || !templateId || !publicKey) {
+    throw new Error("Configuração de e-mail não definida.");
+  }
+
+  return { serviceId, templateId, publicKey };
+}
+
+async function sendPasswordResetEmail(params: { toEmail: string; toName: string; token: string }) {
+  const { serviceId, templateId, publicKey } = getEmailJsConfig();
+  const resetLink = `${getAppUrl()}/reset-password?token=${params.token}`;
+
+  const res = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      service_id: serviceId,
+      template_id: templateId,
+      user_id: publicKey,
+      template_params: {
+        to_name: params.toName,
+        to_email: params.toEmail,
+        reset_link: resetLink,
+      },
+    }),
+  });
+
+  if (!res.ok) {
+    throw new Error("Falha ao enviar e-mail de recuperação.");
+  }
+}
+
 export async function registerAction(data: {
   email: string;
   name: string;
   password: string;
 }): Promise<ActionResult<{ id: string; email: string; name: string | null }>> {
-  const { email, name, password } = data;
+  const email = normalizeEmail(data.email);
+  const name = data.name.trim();
+  const password = data.password;
 
   try {
+    if (!name) return { ok: false, error: "Informe seu nome." };
+    if (name.length < 2) return { ok: false, error: "O nome deve ter pelo menos 2 caracteres." };
+    if (!email) return { ok: false, error: "Informe seu e-mail." };
+    if (!isValidEmail(email)) return { ok: false, error: "Digite um e-mail válido." };
+    if (!password) return { ok: false, error: "Crie uma senha." };
+    if (password.length < 6) return { ok: false, error: "A senha deve ter pelo menos 6 caracteres." };
+    if (password.length > 200) return { ok: false, error: "A senha é muito longa." };
+
     const existingUser = await prisma.user.findUnique({
       where: { email },
     });
@@ -67,17 +146,33 @@ export async function registerAction(data: {
 
 export async function createPasswordResetTokenAction(
   email: string
-): Promise<ActionResult<{ token: string | null; name: string | null }>> {
+): Promise<ActionResult<{ success: true }>> {
   try {
+    const normalizedEmail = normalizeEmail(email);
+    if (!normalizedEmail || !isValidEmail(normalizedEmail)) {
+      return { ok: true, data: { success: true } };
+    }
+
     const user = await prisma.user.findUnique({
-      where: { email },
+      where: { email: normalizedEmail },
     });
 
     if (!user) {
-      return { ok: true, data: { token: null, name: null } };
+      return { ok: true, data: { success: true } };
     }
 
-    const token = uuidv4();
+    const lastToken = await prisma.passwordResetToken.findFirst({
+      where: { userId: user.id },
+      orderBy: { createdAt: "desc" },
+      select: { createdAt: true },
+    });
+
+    if (lastToken && Date.now() - lastToken.createdAt.getTime() < 2 * 60 * 1000) {
+      return { ok: true, data: { success: true } };
+    }
+
+    const rawToken = uuidv4();
+    const tokenHash = hashResetToken(rawToken);
     const expiresAt = new Date(Date.now() + 1000 * 60 * 60);
 
     await prisma.passwordResetToken.deleteMany({
@@ -86,13 +181,26 @@ export async function createPasswordResetTokenAction(
 
     await prisma.passwordResetToken.create({
       data: {
-        token,
+        token: tokenHash,
         expiresAt,
         userId: user.id,
       },
     });
 
-    return { ok: true, data: { token, name: user.name } };
+    try {
+      await sendPasswordResetEmail({
+        toEmail: user.email,
+        toName: user.name || user.email.split("@")[0],
+        token: rawToken,
+      });
+    } catch (error) {
+      await prisma.passwordResetToken.deleteMany({
+        where: { userId: user.id, token: tokenHash },
+      });
+      throw error;
+    }
+
+    return { ok: true, data: { success: true } };
   } catch {
     return { ok: false, error: "Erro ao solicitar recuperação. Tente novamente." };
   }
@@ -105,8 +213,13 @@ export async function resetPasswordAction(data: {
   const { token, password } = data;
 
   try {
+    if (!token) return { ok: false, error: "Token de recuperação inválido ou expirado." };
+    if (!password) return { ok: false, error: "Crie uma nova senha." };
+    if (password.length < 6) return { ok: false, error: "A senha deve ter pelo menos 6 caracteres." };
+    if (password.length > 200) return { ok: false, error: "A senha é muito longa." };
+
     const resetToken = await prisma.passwordResetToken.findUnique({
-      where: { token },
+      where: { token: hashResetToken(token) },
       include: { user: true },
     });
 
