@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { consumeRateLimit, getClientIp } from "@/lib/rate-limit";
 import { Prisma } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
@@ -104,6 +105,17 @@ export async function registerAction(data: {
   const name = data.name.trim();
   const password = data.password;
 
+  const ip = await getClientIp();
+  const limitResult = await consumeRateLimit({
+    key: `register:${ip}`,
+    limit: 5,
+    windowMs: 60 * 60 * 1000, // 1 hour
+  });
+
+  if (!limitResult.allowed) {
+    return { ok: false, error: "Muitas tentativas de cadastro. Tente novamente mais tarde." };
+  }
+
   try {
     if (!name) return { ok: false, error: "Informe seu nome." };
     if (name.length < 2) return { ok: false, error: "O nome deve ter pelo menos 2 caracteres." };
@@ -147,6 +159,17 @@ export async function registerAction(data: {
 export async function createPasswordResetTokenAction(
   email: string
 ): Promise<ActionResult<{ success: true }>> {
+  const ip = await getClientIp();
+  const limitResult = await consumeRateLimit({
+    key: `forgot-password:${ip}`,
+    limit: 3,
+    windowMs: 60 * 60 * 1000, // 1 hour
+  });
+
+  if (!limitResult.allowed) {
+    return { ok: false, error: "Muitas solicitações de recuperação. Tente novamente mais tarde." };
+  }
+
   try {
     const normalizedEmail = normalizeEmail(email);
     if (!normalizedEmail || !isValidEmail(normalizedEmail)) {
@@ -211,6 +234,17 @@ export async function resetPasswordAction(data: {
   password: string;
 }): Promise<ActionResult<{ success: true }>> {
   const { token, password } = data;
+
+  const ip = await getClientIp();
+  const limitResult = await consumeRateLimit({
+    key: `reset-password:${ip}`,
+    limit: 10,
+    windowMs: 60 * 60 * 1000, // 1 hour
+  });
+
+  if (!limitResult.allowed) {
+    return { ok: false, error: "Muitas tentativas de redefinição. Tente novamente mais tarde." };
+  }
 
   try {
     if (!token) return { ok: false, error: "Token de recuperação inválido ou expirado." };

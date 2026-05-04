@@ -28,6 +28,16 @@ model PasswordResetToken {
   @@index([userId])
 }
 
+model RateLimit {
+  key       String   @id
+  count     Int
+  resetAt   DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([resetAt])
+}
+
 model ShoppingList {
   id         String         @id @default(uuid())
   name       String

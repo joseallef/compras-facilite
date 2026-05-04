@@ -2,6 +2,7 @@
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { consumeRateLimit, getClientIp } from "@/lib/rate-limit";
 import { Category } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
@@ -30,6 +31,18 @@ export async function getShoppingLists() {
 
 export async function createShoppingList(name: string) {
   const userId = await requireUserId();
+  const ip = await getClientIp();
+
+  const limitResult = await consumeRateLimit({
+    key: `create-list:${userId}:${ip}`,
+    limit: 10,
+    windowMs: 60 * 60 * 1000, // 1 hour
+  });
+
+  if (!limitResult.allowed) {
+    throw new Error("Muitas listas criadas. Tente novamente mais tarde.");
+  }
+
   try {
     const list = await prisma.shoppingList.create({
       data: {
@@ -86,6 +99,18 @@ export async function createShoppingListFromTemplate(name: string, items: {
   category: string;
 }[]) {
   const userId = await requireUserId();
+  const ip = await getClientIp();
+
+  const limitResult = await consumeRateLimit({
+    key: `create-list:${userId}:${ip}`,
+    limit: 10,
+    windowMs: 60 * 60 * 1000, // 1 hour
+  });
+
+  if (!limitResult.allowed) {
+    throw new Error("Muitas listas criadas. Tente novamente mais tarde.");
+  }
+
   try {
     const list = await prisma.shoppingList.create({
       data: {
