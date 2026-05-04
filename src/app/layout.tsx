@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { AuthProvider } from "@/components/providers/AuthProvider";
+import { ScrollToTop } from "@/components/ui/ScrollToTop";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import type { CSSProperties } from "react";
@@ -41,6 +42,7 @@ export default async function RootLayout({
       <body className="min-h-full flex flex-col">
         <AuthProvider session={session}>
           {children}
+          <ScrollToTop />
           <Toaster position="top-right" richColors closeButton style={toasterStyle} />
         </AuthProvider>
       </body>
