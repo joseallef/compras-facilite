@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { EditItemModal } from "@/components/ui/EditItemModal";
 import { FinishShoppingModal } from "@/components/ui/FinishShoppingModal";
 import { Input } from "@/components/ui/Input";
@@ -45,7 +46,9 @@ function EdicaoPageContent() {
   const isAtMarket = searchParams.get("mode") === "market";
   const [isFinishModalOpen, setIsFinishModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<ShoppingItem | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
@@ -91,6 +94,27 @@ function EdicaoPageContent() {
   const handleEditItem = (item: ShoppingItem) => {
     setEditingItem(item);
     setIsEditModalOpen(true);
+  };
+
+  const handleRemoveItemRequest = (itemId: string) => {
+    setItemToDelete(itemId);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!listId || !itemToDelete) return;
+    setIsSubmitting(true);
+    try {
+      await removeItemFromList(listId, itemToDelete);
+      toast.success("Item removido com sucesso!");
+    } catch (error) {
+      console.error("[handleConfirmDelete]", error);
+      toast.error("Erro ao remover item");
+    } finally {
+      setIsSubmitting(false);
+      setIsDeleteModalOpen(false);
+      setItemToDelete(null);
+    }
   };
 
   const handleUpdateItem = async (data: { name: string; category: Category; quantity: number; unit: string }) => {
@@ -163,7 +187,7 @@ function EdicaoPageContent() {
   }
 
   const toggleMarketMode = () => {
-    const p = new URLSearchParams(searchParams.toString());
+    const p = new URLSearchParams(searchParams?.toString());
     if (isAtMarket) {
       p.delete("mode");
     } else {
@@ -298,7 +322,7 @@ function EdicaoPageContent() {
           isAtMarket={isAtMarket}
           onToggle={(itemId) => toggleItemPicked(listId, itemId)}
           onQuantityChange={(itemId, qty) => updateItemQuantity(listId, itemId, qty)}
-          onRemove={(itemId) => removeItemFromList(listId, itemId)}
+          onRemove={handleRemoveItemRequest}
           onEdit={handleEditItem}
         />
 
@@ -375,6 +399,20 @@ function EdicaoPageContent() {
           setEditingItem(null);
         }}
         onConfirm={handleUpdateItem}
+        isLoading={isSubmitting}
+      />
+
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setItemToDelete(null);
+        }}
+        onConfirm={handleConfirmDelete}
+        title="Remover Item"
+        description="Tem certeza que deseja remover este item da lista? Esta ação não pode ser desfeita."
+        confirmText="Remover"
+        variant="danger"
         isLoading={isSubmitting}
       />
     </main>

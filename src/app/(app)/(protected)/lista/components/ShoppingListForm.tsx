@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
+import { EditItemModal } from "@/components/ui/EditItemModal";
 import { Input } from "@/components/ui/Input";
 import { Category, ShoppingItem } from "@/types";
 import { ArrowLeft, Save, ShoppingBag } from "lucide-react";
@@ -8,7 +9,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AddItemForm } from "./AddItemForm";
 import { CategorySection } from "./CategorySection";
-import { EditItemModal } from "@/components/ui/EditItemModal";
 
 interface ShoppingListFormProps {
   initialData?: {
@@ -32,7 +32,9 @@ export function ShoppingListForm({
   const [items, setItems] = useState<ShoppingItem[]>(initialData?.items || []);
   const [nameError, setNameError] = useState("");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<ShoppingItem | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
 
   const handleAddItem = (itemName: string, category: Category) => {
     const newItem: ShoppingItem = {
@@ -46,8 +48,16 @@ export function ShoppingListForm({
     setItems([...items, newItem]);
   };
 
-  const handleRemoveItem = (itemId: string) => {
-    setItems(items.filter((i) => i.id !== itemId));
+  const handleRemoveItemRequest = (itemId: string) => {
+    setItemToDelete(itemId);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (!itemToDelete) return;
+    setItems(items.filter((i) => i.id !== itemToDelete));
+    setIsDeleteModalOpen(false);
+    setItemToDelete(null);
   };
 
   const handleQuantityChange = (itemId: string, quantity: number) => {
@@ -143,7 +153,7 @@ export function ShoppingListForm({
             isAtMarket={false}
             onToggle={() => {}} // Not needed in form mode
             onQuantityChange={handleQuantityChange}
-            onRemove={handleRemoveItem}
+            onRemove={handleRemoveItemRequest}
             onEdit={handleEditItem}
           />
           
@@ -164,6 +174,19 @@ export function ShoppingListForm({
           setEditingItem(null);
         }}
         onConfirm={handleUpdateItem}
+      />
+
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setItemToDelete(null);
+        }}
+        onConfirm={handleConfirmDelete}
+        title="Remover Item"
+        description="Tem certeza que deseja remover este item da lista? Esta ação não pode ser desfeita."
+        confirmText="Remover"
+        variant="danger"
       />
     </div>
   );
