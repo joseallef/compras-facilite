@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { EditItemModal } from "@/components/ui/EditItemModal";
 import { Input } from "@/components/ui/Input";
 import { Category, ShoppingItem } from "@/types";

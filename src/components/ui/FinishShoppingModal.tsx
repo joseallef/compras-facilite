@@ -84,10 +84,10 @@ export function FinishShoppingModal({
           </p>
         </div>
 
-        <div className="flex gap-3 pt-2">
+        <div className="flex flex-col-reverse sm:flex-row gap-3 pt-2">
           <Button
             onClick={onClose}
-            className="flex-1 px-6 py-3 rounded-2xl font-bold border border-border hover:bg-muted/10 transition-all active:scale-95"
+            className="w-full sm:flex-1 px-6 py-3 rounded-2xl font-bold border border-border hover:bg-muted/10 transition-all active:scale-95 cursor-pointer"
             disabled={isLoading}
           >
             Cancelar
@@ -95,7 +95,7 @@ export function FinishShoppingModal({
           <Button
             onClick={handleConfirm}
             disabled={isLoading}
-            className="flex-1 px-6 py-3 rounded-2xl font-bold bg-emerald-600 text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full sm:flex-1 px-6 py-3 rounded-2xl font-bold bg-emerald-600 text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap"
           >
             {isLoading ? "Salvando..." : "Confirmar"}
           </Button>

@@ -85,7 +85,8 @@ function EdicaoPageContent() {
       await addItemToList(listId, { name, quantity: 1, unit: "un", category });
     } catch (error) {
       console.error("[handleAddItem]", error);
-      toast.error("Erro ao adicionar item");
+      const message = error instanceof Error ? error.message : "Erro ao adicionar item";
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -109,7 +110,8 @@ function EdicaoPageContent() {
       toast.success("Item removido com sucesso!");
     } catch (error) {
       console.error("[handleConfirmDelete]", error);
-      toast.error("Erro ao remover item");
+      const message = error instanceof Error ? error.message : "Erro ao remover item";
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
       setIsDeleteModalOpen(false);
@@ -125,7 +127,8 @@ function EdicaoPageContent() {
       toast.success("Item atualizado com sucesso!");
     } catch (error) {
       console.error("[handleUpdateItem]", error);
-      toast.error("Erro ao atualizar item");
+      const message = error instanceof Error ? error.message : "Erro ao atualizar item";
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
       setIsEditModalOpen(false);
@@ -142,9 +145,11 @@ function EdicaoPageContent() {
         totalValue 
       });
       toast.success("Compra finalizada com sucesso!");
+      router.push("/lista");
     } catch (error) {
       console.error("[handleFinishShopping]", error);
-      toast.error("Erro ao finalizar compra");
+      const message = error instanceof Error ? error.message : "Erro ao finalizar compra";
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -160,7 +165,8 @@ function EdicaoPageContent() {
       toast.success("Lista reaberta para edição");
     } catch (error) {
       console.error("[handleReopenShopping]", error);
-      toast.error("Erro ao reabrir lista");
+      const message = error instanceof Error ? error.message : "Erro ao reabrir lista";
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -221,8 +227,12 @@ function EdicaoPageContent() {
                 defaultValue={list.name}
                 onChange={(e) => handleUpdateListName(e.target.value)}
                 placeholder="Nome da Lista"
+                disabled={isClosed}
                 containerClassName="space-y-0"
-                inputClassName="text-2xl md:text-3xl font-bold bg-transparent border-none p-0 focus:ring-0 text-foreground outline-none rounded-none"
+                inputClassName={cn(
+                  "text-2xl md:text-3xl font-bold bg-transparent border-none p-0 focus:ring-0 text-foreground outline-none rounded-none",
+                  isClosed && "opacity-80"
+                )}
               />
               {isClosed && (
                 <div className="absolute -top-6 left-0 flex items-center gap-1.5 px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-emerald-200 dark:border-emerald-800">
@@ -246,18 +256,20 @@ function EdicaoPageContent() {
               </div>
             )}
             
-            <Button
-              onClick={toggleMarketMode}
-              className={cn(
-                "flex items-center gap-2 px-6 py-2.5 rounded-2xl font-bold transition-all shadow-lg active:scale-95",
-                isAtMarket
-                  ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800"
-                  : "bg-emerald-600 text-white shadow-emerald-600/20 hover:bg-emerald-700"
-              )}
-            >
-              <ShoppingCart size={20} />
-              {isAtMarket ? "Editar Lista" : "No Mercado"}
-            </Button>
+            {!isClosed && (
+              <Button
+                onClick={toggleMarketMode}
+                className={cn(
+                  "flex items-center gap-2 px-6 py-2.5 rounded-2xl font-bold transition-all shadow-lg active:scale-95",
+                  isAtMarket
+                    ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800"
+                    : "bg-emerald-600 text-white shadow-emerald-600/20 hover:bg-emerald-700"
+                )}
+              >
+                <ShoppingCart size={20} />
+                {isAtMarket ? "Editar Lista" : "No Mercado"}
+              </Button>
+            )}
           </div>
         </div>
 
@@ -275,7 +287,9 @@ function EdicaoPageContent() {
         </div>
 
         {!isAtMarket && !isClosed && (
-          <AddItemForm onAdd={handleAddItem} isLoading={isSubmitting} />
+          <div className="bg-card border-t border-border p-6 shadow-2xl">
+            <AddItemForm onAdd={handleAddItem} isLoading={isSubmitting} />
+          </div>
         )}
 
         {isAtMarket && (
@@ -319,11 +333,11 @@ function EdicaoPageContent() {
 
         <CategorySection
           items={filteredItems}
-          isAtMarket={isAtMarket}
-          onToggle={(itemId) => toggleItemPicked(listId, itemId)}
-          onQuantityChange={(itemId, qty) => updateItemQuantity(listId, itemId, qty)}
-          onRemove={handleRemoveItemRequest}
-          onEdit={handleEditItem}
+          isAtMarket={isAtMarket || isClosed}
+          onToggle={(itemId) => !isClosed && toggleItemPicked(listId, itemId)}
+          onQuantityChange={(itemId, qty) => !isClosed && updateItemQuantity(listId, itemId, qty)}
+          onRemove={(itemId) => !isClosed && handleRemoveItemRequest(itemId)}
+          onEdit={(item) => !isClosed && handleEditItem(item)}
         />
 
         {searchQuery && filteredItems.length === 0 && (

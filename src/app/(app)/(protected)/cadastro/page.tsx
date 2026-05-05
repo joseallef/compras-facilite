@@ -26,7 +26,8 @@ export default function CadastroPage() {
       router.push("/lista");
     } catch (error) {
       console.error("[handleSubmit]", error);
-      toast.error("Erro ao criar lista");
+      const message = error instanceof Error ? error.message : "Erro ao criar lista";
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }

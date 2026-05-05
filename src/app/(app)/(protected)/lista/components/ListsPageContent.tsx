@@ -3,8 +3,8 @@
 import { Button } from "@/components/ui/Button";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import {
-  PageHeaderSkeleton,
-  ShoppingListCardSkeleton,
+    PageHeaderSkeleton,
+    ShoppingListCardSkeleton,
 } from "@/components/ui/Skeleton";
 import { useShoppingLists } from "@/hooks/useShoppingLists";
 import { format, isSameMonth, isSameYear } from "date-fns";
@@ -87,7 +87,8 @@ export function ListsPageContent() {
       router.push(`/edicao/${newList.id}`);
     } catch (error) {
       console.error("[handleCreateListFromTemplate]", error);
-      toast.error("Erro ao criar lista");
+      const message = error instanceof Error ? error.message : "Erro ao criar lista";
+      toast.error(message);
     } finally {
       setIsCreating(false);
     }
@@ -103,7 +104,8 @@ export function ListsPageContent() {
       setListToDelete(null);
     } catch (error) {
       console.error("[handleDeleteConfirm]", error);
-      toast.error("Erro ao excluir lista");
+      const message = error instanceof Error ? error.message : "Erro ao excluir lista";
+      toast.error(message);
     } finally {
       setIsDeleting(false);
     }

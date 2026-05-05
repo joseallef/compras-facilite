@@ -24,7 +24,7 @@ export async function consumeRateLimit(params: {
   const resetAt = new Date(now.getTime() + params.windowMs);
 
   const rows = await prisma.$queryRaw<
-    Array<{ allowed: boolean; remaining: number; reset_at: Date }>
+    Array<{ allowed: boolean; remaining: bigint; reset_at: Date }>
   >`
     WITH upsert AS (
       INSERT INTO "RateLimit" ("key", "count", "resetAt", "createdAt", "updatedAt")
@@ -43,7 +43,7 @@ export async function consumeRateLimit(params: {
       RETURNING "count", "resetAt"
     )
     SELECT ("count" <= ${params.limit}) AS allowed,
-           GREATEST(${params.limit} - "count", 0) AS remaining,
+           GREATEST(${params.limit}::integer - "count", 0) AS remaining,
            "resetAt" AS reset_at
     FROM upsert;
   `;
@@ -55,7 +55,7 @@ export async function consumeRateLimit(params: {
 
   return {
     allowed: row.allowed,
-    remaining: row.remaining,
+    remaining: Number(row.remaining),
     resetAt: row.reset_at,
   };
 }

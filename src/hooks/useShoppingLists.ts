@@ -13,16 +13,18 @@ import {
   updateShoppingItemQuantity,
   updateShoppingList
 } from "@/services/shopping-lists.service";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { MONTHLY_SHOPPING_TEMPLATE } from "../data/templates";
 import { ShoppingItem, ShoppingList } from "../types";
-
-// Logic moved to Server Actions in src/app/actions/shopping-lists.ts
 
 export function useShoppingLists() {
   const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const [lists, setLists] = useState<ShoppingList[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Fila de sincronização para evitar múltiplas requests simultâneas
+  const syncQueue = useRef<Record<string, { listId: string; itemId: string; isPicked: boolean; timeout: NodeJS.Timeout }>>({});
 
   const fetchLists = useCallback(async () => {
     if (!user?.id) return;
@@ -34,6 +36,8 @@ export function useShoppingLists() {
       setLists(data as unknown as ShoppingList[]);
     } catch (error) {
       console.error("Failed to fetch lists", error);
+      const message = error instanceof Error ? error.message : "Erro ao carregar listas";
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
@@ -46,6 +50,13 @@ export function useShoppingLists() {
       setLists([]);
       setIsLoading(false);
     }
+
+    // Cleanup dos timeouts de sincronização ao desmontar
+    return () => {
+      Object.values(syncQueue.current).forEach((item) => {
+        clearTimeout(item.timeout);
+      });
+    };
   }, [isAuthLoading, isAuthenticated, fetchLists]);
 
   const createList = async (name: string, useTemplate = false) => {
@@ -138,47 +149,109 @@ export function useShoppingLists() {
   };
 
   const toggleItemPicked = async (listId: string, itemId: string) => {
-    const list = lists.find(l => l.id === listId);
-    const item = list?.items.find(i => i.id === itemId);
-    
+    const list = lists.find((l) => l.id === listId);
+    const item = list?.items.find((i) => i.id === itemId);
+
     if (!item) return;
-    
-    try {
-      const updatedItem = await toggleShoppingItem(listId, itemId, !item.isPicked);
-      setLists(prev => prev.map(l => {
+
+    const newIsPicked = !item.isPicked;
+
+    // 1. ATUALIZAÇÃO OTIMISTA (UI instantânea)
+    setLists((prev) =>
+      prev.map((l) => {
         if (l.id === listId) {
           return {
             ...l,
-            items: l.items.map(i => 
-              i.id === itemId ? { ...i, isPicked: updatedItem.isPicked } : i
+            items: l.items.map((i) =>
+              i.id === itemId ? { ...i, isPicked: newIsPicked } : i
             ),
-            updatedAt: new Date()
+            updatedAt: new Date(),
           };
         }
         return l;
-      }));
-    } catch (error) {
-      console.error("Failed to toggle item", error);
+      })
+    );
+
+    // 2. ESTRATÉGIA DE SINCRONIZAÇÃO COM DEBOUNCE POR ITEM
+    // Cancela o timeout anterior se o usuário clicar no mesmo item rápido demais
+    if (syncQueue.current[itemId]) {
+      clearTimeout(syncQueue.current[itemId].timeout);
     }
+
+    // Cria um novo timeout para enviar a alteração após 1 segundo de "paz" no item
+    const timeout = setTimeout(async () => {
+      try {
+        await toggleShoppingItem(listId, itemId, newIsPicked);
+        delete syncQueue.current[itemId];
+      } catch (error) {
+        console.error("Failed to toggle item sync", error);
+        // Reverte em caso de erro real na sincronização
+        setLists((prev) =>
+          prev.map((l) => {
+            if (l.id === listId) {
+              return {
+                ...l,
+                items: l.items.map((i) =>
+                  i.id === itemId ? { ...i, isPicked: !newIsPicked } : i
+                ),
+                updatedAt: new Date(),
+              };
+            }
+            return l;
+          })
+        );
+      }
+    }, 1000); // 1 segundo de debounce
+
+    syncQueue.current[itemId] = { listId, itemId, isPicked: newIsPicked, timeout };
   };
 
-  const updateItemQuantity = async (listId: string, itemId: string, quantity: number) => {
-    try {
-      await updateShoppingItemQuantity(listId, itemId, quantity);
-      setLists(prev => prev.map(l => {
+  const updateItemQuantity = async (
+    listId: string,
+    itemId: string,
+    quantity: number
+  ) => {
+    const list = lists.find((l) => l.id === listId);
+    const item = list?.items.find((i) => i.id === itemId);
+    if (!item) return;
+
+    const oldQuantity = item.quantity;
+
+    // 1. ATUALIZAÇÃO OTIMISTA
+    setLists((prev) =>
+      prev.map((l) => {
         if (l.id === listId) {
           return {
             ...l,
-            items: l.items.map(i => 
+            items: l.items.map((i) =>
               i.id === itemId ? { ...i, quantity } : i
             ),
-            updatedAt: new Date()
+            updatedAt: new Date(),
           };
         }
         return l;
-      }));
+      })
+    );
+
+    try {
+      await updateShoppingItemQuantity(listId, itemId, quantity);
     } catch (error) {
       console.error("Failed to update item quantity", error);
+      // 2. REVERTE
+      setLists((prev) =>
+        prev.map((l) => {
+          if (l.id === listId) {
+            return {
+              ...l,
+              items: l.items.map((i) =>
+                i.id === itemId ? { ...i, quantity: oldQuantity } : i
+              ),
+              updatedAt: new Date(),
+            };
+          }
+          return l;
+        })
+      );
     }
   };
 

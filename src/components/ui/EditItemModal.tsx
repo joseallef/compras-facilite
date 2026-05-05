@@ -111,19 +111,19 @@ export function EditItemModal({
           </div>
         </div>
 
-        <div className="flex gap-3 pt-2">
+        <div className="flex flex-col-reverse sm:flex-row gap-3 pt-2">
           <Button
             type="button"
             variant="ghost"
             onClick={onClose}
-            className="flex-1 rounded-2xl font-bold py-3 cursor-pointer"
+            className="w-full sm:flex-1 rounded-2xl font-bold py-3 cursor-pointer"
           >
             Cancelar
           </Button>
           <Button
             type="submit"
             disabled={isLoading || !name.trim()}
-            className="flex-1 bg-emerald-600 text-white rounded-2xl font-bold py-3 transition-all shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full sm:flex-1 bg-emerald-600 text-white rounded-2xl font-bold py-3 transition-all shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap"
           >
             <Save size={18} />
             Salvar Alterações

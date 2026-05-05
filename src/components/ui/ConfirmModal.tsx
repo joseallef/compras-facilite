@@ -47,11 +47,11 @@ export function ConfirmModal({
           <AlertCircle size={40} />
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 w-full mt-2">
+        <div className="flex flex-col-reverse sm:flex-row gap-3 w-full mt-2">
           <Button
             onClick={onClose}
             disabled={isLoading}
-            className="flex-1 px-6 py-3.5 rounded-2xl font-bold border border-border hover:bg-muted/10 transition-all active:scale-95 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+            className="w-full sm:flex-1 px-6 py-3.5 rounded-2xl font-bold border border-border hover:bg-muted/10 transition-all active:scale-95 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
           >
             {cancelText}
           </Button>
@@ -59,7 +59,7 @@ export function ConfirmModal({
             onClick={onConfirm}
             disabled={isLoading}
             className={cn(
-              "flex-1 px-6 py-3.5 rounded-2xl font-bold transition-all shadow-lg active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed",
+              "w-full sm:flex-1 px-6 py-3.5 rounded-2xl font-bold transition-all shadow-lg active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed whitespace-nowrap",
               variantStyles[variant]
             )}
           >

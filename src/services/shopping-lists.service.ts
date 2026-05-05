@@ -12,6 +12,17 @@ async function requireUserId() {
   if (!userId) {
     throw new Error("Unauthorized");
   }
+
+  // Verifica se o usuário ainda existe no banco (importante após resets de DB)
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true },
+  });
+
+  if (!user) {
+    throw new Error("User session is invalid. Please log in again.");
+  }
+
   return userId;
 }
 
@@ -116,21 +127,31 @@ export async function createShoppingListFromTemplate(name: string, items: {
       data: {
         name,
         userId,
-        items: {
-          create: items.map(item => ({
-            name: item.name,
-            quantity: item.quantity,
-            unit: item.unit,
-            category: item.category as Category,
-          })),
-        },
       },
+    });
+
+    if (items && items.length > 0) {
+      await prisma.shoppingItem.createMany({
+        data: items.map(item => ({
+          name: item.name,
+          quantity: item.quantity,
+          unit: item.unit,
+          category: item.category as Category,
+          shoppingListId: list.id,
+        })),
+      });
+    }
+
+    revalidatePath("/lista");
+    return await prisma.shoppingList.findUnique({
+      where: { id: list.id },
       include: { items: true },
     });
-    revalidatePath("/lista");
-    return list;
   } catch (error) {
     console.error("Error creating shopping list from template:", error);
+    if (error instanceof Error) {
+      throw error;
+    }
     throw new Error("Failed to create list from template");
   }
 }
