@@ -6,11 +6,13 @@ import { useEffect, useState } from "react";
 import { Button } from "./Button";
 
 import { cn } from "@/utils/cn";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
-export function ScrollToTop() {
+function ScrollToTopContent() {
   const [isVisible, setIsVisible] = useState(false);
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   // 1. Detect scroll position
   useEffect(() => {
@@ -38,6 +40,8 @@ export function ScrollToTop() {
   // 3. Calculate dynamic position
   // If we are in the edit page, there is an extra bottom bar in market mode
   const isEditPage = pathname?.startsWith("/edicao");
+  const isMarketMode = searchParams?.get("mode") === "market";
+  const hasBottomBar = isEditPage && isMarketMode;
 
   return (
     <AnimatePresence>
@@ -48,9 +52,9 @@ export function ScrollToTop() {
           exit={{ opacity: 0, scale: 0.5, y: 20 }}
           className={cn(
             "fixed right-6 md:right-8 z-[60] transition-all duration-300",
-            isEditPage 
-              ? "bottom-44 md:bottom-24" // Higher if market bar might be present
-              : "bottom-24 md:bottom-8"  // Default above MobileNav
+            hasBottomBar 
+              ? "bottom-48 md:bottom-28" // Increased distance from market bar
+              : "bottom-24 md:bottom-12" // Increased distance from MobileNav
           )}
         >
           <Button
@@ -64,5 +68,13 @@ export function ScrollToTop() {
         </motion.div>
       )}
     </AnimatePresence>
+  );
+}
+
+export function ScrollToTop() {
+  return (
+    <Suspense fallback={null}>
+      <ScrollToTopContent />
+    </Suspense>
   );
 }

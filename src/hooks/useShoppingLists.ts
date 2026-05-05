@@ -2,15 +2,16 @@
 
 import { useAuth } from "@/hooks/useAuth";
 import {
-    addShoppingItem,
-    createShoppingList,
-    createShoppingListFromTemplate,
-    deleteShoppingList,
-    getShoppingLists,
-    removeShoppingItem,
-    toggleShoppingItem,
-    updateShoppingItemQuantity,
-    updateShoppingList
+  addShoppingItem,
+  createShoppingList,
+  createShoppingListFromTemplate,
+  deleteShoppingList,
+  getShoppingLists,
+  removeShoppingItem,
+  toggleShoppingItem,
+  updateShoppingItem,
+  updateShoppingItemQuantity,
+  updateShoppingList
 } from "@/services/shopping-lists.service";
 import { useCallback, useEffect, useState } from "react";
 import { MONTHLY_SHOPPING_TEMPLATE } from "../data/templates";
@@ -181,6 +182,32 @@ export function useShoppingLists() {
     }
   };
 
+  const updateItemInList = async (listId: string, itemId: string, data: Partial<ShoppingItem>) => {
+    try {
+      const updatedItem = await updateShoppingItem(listId, itemId, {
+        name: data.name,
+        quantity: data.quantity,
+        unit: data.unit,
+        category: data.category
+      });
+      
+      setLists(prev => prev.map(l => {
+        if (l.id === listId) {
+          return {
+            ...l,
+            items: l.items.map(i => 
+              i.id === itemId ? { ...i, ...updatedItem as unknown as ShoppingItem } : i
+            ),
+            updatedAt: new Date()
+          };
+        }
+        return l;
+      }));
+    } catch (error) {
+      console.error("Failed to update item", error);
+    }
+  };
+
   return {
     lists,
     isLoaded: !isLoading && !isAuthLoading,
@@ -191,5 +218,6 @@ export function useShoppingLists() {
     removeItemFromList,
     toggleItemPicked,
     updateItemQuantity,
+    updateItemInList,
   };
 }

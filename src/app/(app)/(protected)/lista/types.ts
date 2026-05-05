@@ -17,6 +17,7 @@ export interface CategorySectionProps {
   onToggle: (itemId: string) => void;
   onQuantityChange: (itemId: string, quantity: number) => void;
   onRemove: (itemId: string) => void;
+  onEdit: (item: ShoppingItem) => void;
 }
 
 export interface ShoppingItemRowProps {
@@ -25,4 +26,5 @@ export interface ShoppingItemRowProps {
   onToggle: () => void;
   onQuantityChange: (quantity: number) => void;
   onRemove: () => void;
+  onEdit: () => void;
 }

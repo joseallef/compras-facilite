@@ -213,6 +213,40 @@ export async function toggleShoppingItem(listId: string, itemId: string, isPicke
   }
 }
 
+export async function updateShoppingItem(listId: string, itemId: string, data: {
+  name?: string;
+  quantity?: number;
+  unit?: string;
+  category?: string;
+}) {
+  const userId = await requireUserId();
+  try {
+    const result = await prisma.shoppingItem.updateMany({
+      where: {
+        id: itemId,
+        shoppingListId: listId,
+        shoppingList: { userId },
+      },
+      data: {
+        ...data,
+        category: data.category ? (data.category as Category) : undefined,
+      },
+    });
+    if (result.count === 0) {
+      throw new Error("Not found");
+    }
+    revalidatePath(`/edicao/${listId}`);
+    const item = await prisma.shoppingItem.findUnique({ where: { id: itemId } });
+    if (!item) {
+      throw new Error("Not found");
+    }
+    return item;
+  } catch (error) {
+    console.error("Error updating shopping item:", error);
+    throw new Error("Failed to update item");
+  }
+}
+
 export async function updateShoppingItemQuantity(listId: string, itemId: string, quantity: number) {
   const userId = await requireUserId();
   try {

@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AddItemForm } from "./AddItemForm";
 import { CategorySection } from "./CategorySection";
+import { EditItemModal } from "@/components/ui/EditItemModal";
 
 interface ShoppingListFormProps {
   initialData?: {
@@ -30,6 +31,8 @@ export function ShoppingListForm({
   const [name, setName] = useState(initialData?.name || "");
   const [items, setItems] = useState<ShoppingItem[]>(initialData?.items || []);
   const [nameError, setNameError] = useState("");
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<ShoppingItem | null>(null);
 
   const handleAddItem = (itemName: string, category: Category) => {
     const newItem: ShoppingItem = {
@@ -51,6 +54,20 @@ export function ShoppingListForm({
     setItems(
       items.map((i) => (i.id === itemId ? { ...i, quantity } : i))
     );
+  };
+
+  const handleEditItem = (item: ShoppingItem) => {
+    setEditingItem(item);
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdateItem = async (data: { name: string; category: Category; quantity: number; unit: string }) => {
+    if (!editingItem) return;
+    setItems(
+      items.map((i) => (i.id === editingItem.id ? { ...i, ...data } : i))
+    );
+    setIsEditModalOpen(false);
+    setEditingItem(null);
   };
 
   const handleSubmit = async () => {
@@ -127,6 +144,7 @@ export function ShoppingListForm({
             onToggle={() => {}} // Not needed in form mode
             onQuantityChange={handleQuantityChange}
             onRemove={handleRemoveItem}
+            onEdit={handleEditItem}
           />
           
           {items.length === 0 && (
@@ -137,6 +155,16 @@ export function ShoppingListForm({
           )}
         </div>
       </div>
+
+      <EditItemModal
+        item={editingItem}
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingItem(null);
+        }}
+        onConfirm={handleUpdateItem}
+      />
     </div>
   );
 }

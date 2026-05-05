@@ -12,6 +12,7 @@ export function CategorySection({
   onToggle,
   onQuantityChange,
   onRemove,
+  onEdit,
 }: CategorySectionProps) {
   // 1. STATES
 
@@ -53,6 +54,7 @@ export function CategorySection({
                   onToggle={() => onToggle(item.id)}
                   onQuantityChange={(qty) => onQuantityChange(item.id, qty)}
                   onRemove={() => onRemove(item.id)}
+                  onEdit={() => onEdit(item)}
                 />
               ))}
             </div>
