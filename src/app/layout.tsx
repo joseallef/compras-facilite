@@ -18,8 +18,39 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Compras Facilite",
-  description: "Facilite suas compras de mercado com listas inteligentes e controle em tempo real.",
+  title: {
+    default: "Compras Facilite",
+    template: "%s | Compras Facilite",
+  },
+  description: "Organize suas compras de mercado com facilidade. Crie listas, controle gastos e economize tempo.",
+  keywords: ["lista de compras", "mercado", "organização", "planejamento", "compras facilite"],
+  authors: [{ name: "José Allef" }],
+  creator: "José Allef",
+  openGraph: {
+    type: "website",
+    locale: "pt_BR",
+    url: "https://compras-facilite.vercel.app",
+    title: "Compras Facilite",
+    description: "Sua lista de mercado inteligente e fácil de usar.",
+    siteName: "Compras Facilite",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Compras Facilite - Sua lista de mercado inteligente",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Compras Facilite",
+    description: "Sua lista de mercado inteligente e fácil de usar.",
+    images: ["/og-image.png"],
+  },
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default async function RootLayout({
