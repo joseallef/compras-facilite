@@ -24,34 +24,30 @@ O sistema deve ser:
 ```
 src/
 │
-├── components/         # Componentes reutilizáveis globais (genéricos)
+├── components/         # Componentes reutilizáveis globais
+│   ├── layout/         # Header, Footer, Nav
+│   ├── providers/      # AuthProvider, etc.
+│   └── ui/             # Componentes base (Button, Input, Modal)
 │
 ├── app/
-│   ├── api/
-│   │   ├── auth/
-│   │   │   ├── [...nextauth]/route.ts  # Configuração NextAuth
-│   │
-│   ├── login/
-│   │   ├── page.tsx
-│   │   ├── types.ts
-│   │   ├── components/ (componentes específicos da página)
-│   │
-│   ├── (protected)/
-│   │   ├── layout.tsx  # Proteção de rotas (client-side)
-│   │   ├── listas/
-│   │       ├── page.tsx
-│   │       ├── [id]/
-│   │           ├── page.tsx
-│   │
-│   ├── layout.tsx      # Root layout (SessionProvider)
-│   ├── page.tsx        # Landing page
+│   ├── (app)/          # Grupo de rotas da aplicação logada
+│   │   ├── (protected)/# Rotas que exigem autenticação
+│   │   │   ├── dashboard/
+│   │   │   ├── lista/
+│   │   │   └── cadastro/
+│   │   └── layout.tsx  # Layout comum da app (Header/Footer)
+│   ├── api/            # Route Handlers (Auth, etc.)
+│   ├── login/          # Página de Login
+│   ├── register/       # Página de Registro
+│   ├── layout.tsx      # Root Layout (Fontes, Metadata, Providers)
+│   └── page.tsx        # Landing Page
 │
-├── hooks/              # Hooks globais (REGRA: todos hooks devem ficar aqui)
-├── services/           # Regras de negócio globais / Abstração de API / Auth Service
-├── contexts/           # React Contexts
-├── utils/              # Funções utilitárias
-├── types/              # Tipagens globais (entities, auth types)
-├── styles/             # Estilos globais
+├── hooks/              # Hooks customizados (useAuth, useListDetail)
+├── services/           # Abstração de chamadas API e regras de negócio
+├── lib/                # Configurações de bibliotecas (Prisma, Rate Limit)
+├── utils/              # Funções utilitárias (cn, dashboard-utils)
+├── types/              # Tipagens globais do TypeScript
+└── data/               # Dados estáticos e templates
 ```
 
 ---
