@@ -124,7 +124,7 @@ export function ShoppingListForm({
           id="shopping-list-name"
           type="text"
           label="Nome da Lista"
-          labelClassName="text-sm font-bold text-muted/60 uppercase tracking-wider ml-1"
+          labelClassName="text-sm font-bold text-muted/60 uppercase tracking-wider ml-4"
           value={name}
           onChange={(e) => {
             setName(e.target.value);
@@ -138,7 +138,7 @@ export function ShoppingListForm({
       </div>
 
       <div className="space-y-4">
-        <div className="flex items-center gap-2 px-2">
+        <div className="flex items-center gap-2 px-4">
           <ShoppingBag size={18} className="text-emerald-500" />
           <h2 className="font-bold text-lg">Itens da Lista</h2>
           <span className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs px-2 py-0.5 rounded-full">
@@ -148,7 +148,7 @@ export function ShoppingListForm({
 
         <AddItemForm onAdd={handleAddItem} />
 
-        <div className="bg-card rounded-[2.5rem] border border-border shadow-sm overflow-hidden">
+        <div className="bg-card p-6 rounded-[2.5rem] border border-border shadow-sm overflow-hidden">
           <CategorySection
             items={items}
             isAtMarket={false}

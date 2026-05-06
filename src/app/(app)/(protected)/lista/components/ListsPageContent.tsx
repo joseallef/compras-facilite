@@ -115,7 +115,7 @@ export function ListsPageContent() {
 
   // 5. RETURN (JSX)
   return (
-    <main className="max-w-4xl mx-auto w-full p-4 md:p-8">
+    <main className="max-w-7xl mx-auto w-full p-4 md:p-8">
       <div className="space-y-8">
         {!isLoaded ? (
           <>

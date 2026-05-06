@@ -34,7 +34,7 @@ export default function CadastroPage() {
   };
 
   return (
-    <main className="max-w-4xl mx-auto w-full p-4 md:p-8">
+    <main className="max-w-7xl mx-auto w-full p-4 md:p-8">
       <ShoppingListForm
         title="Nova Lista"
         onSubmit={handleSubmit}

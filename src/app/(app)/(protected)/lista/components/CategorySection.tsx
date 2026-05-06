@@ -33,7 +33,7 @@ export function CategorySection({
 
         return (
           <div key={category} className="space-y-3">
-            <div className="flex items-center gap-2 px-2">
+            <div className="flex items-center gap-2 px-4">
               <h2
                 className={cn(
                   "text-lg font-bold uppercase tracking-wider",

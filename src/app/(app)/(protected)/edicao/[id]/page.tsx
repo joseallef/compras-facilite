@@ -205,7 +205,7 @@ function EdicaoPageContent() {
   const isClosed = list.status === "CONCLUIDA";
 
   return (
-    <main className="max-w-4xl mx-auto w-full p-4 md:p-8">
+    <main className="max-w-7xl mx-auto w-full p-4 md:p-8">
       <motion.div
         key="detail"
         initial={{ opacity: 0, x: 20 }}

@@ -189,7 +189,7 @@ export function TableCardSkeleton({
 
 export function ShoppingListFormPageSkeleton() {
   return (
-    <main className="max-w-4xl mx-auto w-full p-4 md:p-8">
+    <main className="max-w-7xl mx-auto w-full p-4 md:p-8">
       <div className="space-y-6">
         <div className="flex items-center gap-4">
           <Skeleton className="h-11 w-11 rounded-2xl bg-muted/40" />
@@ -246,7 +246,7 @@ export function ShoppingListFormPageSkeleton() {
 
 export function ShoppingListEditPageSkeleton() {
   return (
-    <main className="max-w-4xl mx-auto w-full p-4 md:p-8">
+    <main className="max-w-7xl mx-auto w-full p-4 md:p-8">
       <div className="space-y-6 pb-24">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
           <div className="flex items-center gap-4 flex-1">
