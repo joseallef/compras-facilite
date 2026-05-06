@@ -45,11 +45,10 @@ export const metadata: Metadata = {
     siteName: "Compras Facilite",
     images: [
       {
-        url: "/og-image.png",
+        url: "https://compras-facilite.vercel.app/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Compras Facilite - Sua lista de mercado inteligente",
-        type: "image/png",
+        alt: "Compras Facilite - Organize suas compras com facilidade",
       },
     ],
   },
@@ -57,7 +56,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Compras Facilite | Sua Lista de Mercado Inteligente",
     description: "Organize suas compras com facilidade. Crie listas, controle gastos e economize tempo.",
-    images: ["/og-image.png"],
+    images: ["https://compras-facilite.vercel.app/og-image.png"],
     creator: "@joseallef",
   },
   robots: {
