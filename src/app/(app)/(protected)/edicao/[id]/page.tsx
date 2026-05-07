@@ -211,7 +211,7 @@ function EdicaoPageContent() {
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: -20 }}
-        className="space-y-6 pb-24"
+        className="space-y-6 pb-24 pt-4 md:pt-0"
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
           <div className="flex items-center gap-4 flex-1">
@@ -235,7 +235,7 @@ function EdicaoPageContent() {
                 )}
               />
               {isClosed && (
-                <div className="absolute -top-6 left-0 flex items-center gap-1.5 px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-emerald-200 dark:border-emerald-800">
+                <div className="absolute -top-5 md:-top-6 left-0 flex items-center gap-1.5 px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-emerald-200 dark:border-emerald-800">
                   <Lock size={10} />
                   Lista Concluída
                 </div>
