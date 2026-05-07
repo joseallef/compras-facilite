@@ -2,9 +2,11 @@
 
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { CATEGORIES, Category } from "@/types";
-import { Plus } from "lucide-react";
+import { CATEGORY_ICONS } from "@/utils/category-icons";
+import { Plus, Tag } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { AddItemFormProps } from "../types";
 
@@ -15,6 +17,11 @@ export function AddItemForm({ onAdd, isLoading }: AddItemFormProps) {
   const [nameError, setNameError] = useState("");
 
   // 2. VARIÁVEIS
+  const categoryOptions = CATEGORIES.map(cat => ({
+    value: cat,
+    label: cat,
+    icon: CATEGORY_ICONS[cat]
+  }));
 
   // 3. FUNÇÕES
   const handleSubmit = (e: FormEvent) => {
@@ -55,18 +62,15 @@ export function AddItemForm({ onAdd, isLoading }: AddItemFormProps) {
             inputClassName="text-foreground"
           />
         </div>
-        <select
+        <Select
           value={category}
-          onChange={(e) => setCategory(e.target.value as Category)}
-          className="bg-background border border-border rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-foreground"
+          onChange={(val) => setCategory(val as Category)}
           disabled={isLoading}
-        >
-          {CATEGORIES.map((cat) => (
-            <option key={cat} value={cat}>
-              {cat}
-            </option>
-          ))}
-        </select>
+          options={categoryOptions}
+          leftIcon={<Tag size={18} />}
+          containerClassName="space-y-0 w-full md:w-64"
+          selectClassName="text-foreground"
+        />
         <Button
           type="submit"
           disabled={isLoading || !name.trim()}

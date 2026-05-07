@@ -1,12 +1,13 @@
 "use client";
 
-import { ShoppingItem, CATEGORIES, Category } from "@/types";
+import { CATEGORIES, Category, ShoppingItem } from "@/types";
+import { CATEGORY_ICONS } from "@/utils/category-icons";
+import { cn } from "@/utils/cn";
+import { Save } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "./Button";
 import { Input } from "./Input";
 import { Modal } from "./Modal";
-import { Save } from "lucide-react";
-import { cn } from "@/utils/cn";
 
 interface EditItemModalProps {
   item: ShoppingItem | null;
@@ -98,12 +99,18 @@ export function EditItemModal({
                   type="button"
                   onClick={() => setCategory(cat)}
                   className={cn(
-                    "px-3 py-2 rounded-xl text-xs font-bold transition-all border",
+                    "flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl text-[10px] font-bold transition-all border",
                     category === cat
                       ? "bg-emerald-500 border-emerald-500 text-white shadow-lg shadow-emerald-500/20"
                       : "bg-card border-border text-muted hover:border-emerald-200 dark:hover:border-emerald-800"
                   )}
                 >
+                  <span className={cn(
+                    "transition-colors",
+                    category === cat ? "text-white" : "text-emerald-500"
+                  )}>
+                    {CATEGORY_ICONS[cat]}
+                  </span>
                   {cat}
                 </button>
               ))}
