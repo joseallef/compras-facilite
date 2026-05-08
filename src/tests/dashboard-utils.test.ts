@@ -1,5 +1,5 @@
-import { calculateDashboardStats } from "@/utils/dashboard-utils";
-import { ShoppingList } from "@/types";
+import { calculateDashboardStats } from "@/features/dashboard/services/dashboard-queries";
+import { ShoppingList } from "@/shared/types";
 
 describe("Dashboard Utils", () => {
   const mockLists: ShoppingList[] = [

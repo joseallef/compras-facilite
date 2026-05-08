@@ -1,4 +1,4 @@
-import { FinishShoppingModal } from "@/components/ui/FinishShoppingModal";
+import { FinishShoppingModal } from "@/shared/ui/finish-shopping-modal";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 
 describe("FinishShoppingModal Component", () => {

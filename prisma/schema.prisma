@@ -7,14 +7,18 @@ datasource db {
 }
 
 model User {
-  id                  String               @id @default(uuid())
-  email               String               @unique
-  name                String?
-  password            String
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
-  passwordResetTokens PasswordResetToken[]
-  lists               ShoppingList[]
+  id                    String                @id @default(uuid())
+  email                 String                @unique
+  name                  String?
+  password              String
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  passwordResetTokens   PasswordResetToken[]
+  lists                 ShoppingList[]
+  transactions          Transaction[]
+  transactionCategories TransactionCategory[]
+  cards                 Card[]
+  goals                 Goal[]
 }
 
 model PasswordResetToken {
@@ -39,15 +43,16 @@ model RateLimit {
 }
 
 model ShoppingList {
-  id         String         @id @default(uuid())
-  name       String
-  userId     String
-  createdAt  DateTime       @default(now())
-  updatedAt  DateTime       @updatedAt
-  status     ListStatus     @default(ABERTA)
-  totalValue Float?
-  items      ShoppingItem[]
-  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          String        @id @default(uuid())
+  name        String
+  userId      String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  status      ListStatus    @default(ABERTA)
+  totalValue  Float?
+  items       ShoppingItem[]
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transaction Transaction?
 
   @@index([userId])
 }
@@ -81,4 +86,87 @@ enum Category {
   Acougue
   Padaria
   Outros
+}
+
+// --- Novos Modelos Financeiros ---
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+  TRANSFER
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+model TransactionCategory {
+  id           String          @id @default(uuid())
+  name         String
+  icon         String?
+  color        String?
+  type         TransactionType
+  userId       String
+  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@unique([name, userId, type])
+}
+
+model Transaction {
+  id             String              @id @default(uuid())
+  description    String
+  amount         Float
+  date           DateTime
+  type           TransactionType
+  status         TransactionStatus   @default(COMPLETED)
+  isRecurring    Boolean             @default(false)
+  observation    String?
+  userId         String
+  categoryId     String
+  cardId         String?
+  shoppingListId String?             @unique
+  user           User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category       TransactionCategory @relation(fields: [categoryId], references: [id])
+  card           Card?               @relation(fields: [cardId], references: [id])
+  shoppingList   ShoppingList?       @relation(fields: [shoppingListId], references: [id])
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  @@index([userId])
+  @@index([categoryId])
+}
+
+model Card {
+  id           String        @id @default(uuid())
+  name         String
+  bank         String
+  limit        Float
+  color        String?
+  icon         String?
+  closingDay   Int
+  dueDay       Int
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([userId])
+}
+
+model Goal {
+  id            String    @id @default(uuid())
+  title         String
+  targetAmount  Float
+  currentAmount Float     @default(0)
+  deadline      DateTime?
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([userId])
 }

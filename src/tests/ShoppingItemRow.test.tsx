@@ -1,4 +1,4 @@
-import { ShoppingItemRow } from "@/app/(app)/(protected)/lista/components/ShoppingItemRow";
+import { ShoppingItemRow } from "@/features/shopping/components/shopping-item-row";
 import { fireEvent, render, screen } from "@testing-library/react";
 
 const defaultItem = {
@@ -17,6 +17,7 @@ describe("ShoppingItemRow", () => {
     onToggle: jest.fn(),
     onQuantityChange: jest.fn(),
     onRemove: jest.fn(),
+    onEdit: jest.fn(),
   };
 
   beforeEach(() => {

@@ -1,5 +1,5 @@
 // Mock useAuth and services before anything else
-jest.mock("@/services/shopping-lists.service", () => ({
+jest.mock("@/features/shopping/services/shopping-lists-service", () => ({
   getShoppingLists: jest.fn(),
   createShoppingList: jest.fn(),
   createShoppingListFromTemplate: jest.fn(),
@@ -11,13 +11,13 @@ jest.mock("@/services/shopping-lists.service", () => ({
   updateShoppingItemQuantity: jest.fn(),
 }));
 
-jest.mock("@/hooks/useAuth", () => ({
+jest.mock("@/features/auth/hooks/use-auth", () => ({
   useAuth: jest.fn(),
 }));
 
-import * as auth from "@/hooks/useAuth";
-import { useShoppingLists } from "@/hooks/useShoppingLists";
-import * as services from "@/services/shopping-lists.service";
+import * as auth from "@/features/auth/hooks/use-auth";
+import { useShoppingLists } from "@/features/shopping/hooks/use-shopping-lists";
+import * as services from "@/features/shopping/services/shopping-lists-service";
 import { act, renderHook, waitFor } from "@testing-library/react";
 
 const mockedServices = services as jest.Mocked<typeof services>;

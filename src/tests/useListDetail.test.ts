@@ -1,4 +1,4 @@
-import { useListDetail } from "@/hooks/useListDetail";
+import { useListDetail } from "@/features/shopping/hooks/use-list-detail";
 import { renderHook } from "@testing-library/react";
 
 const mockLists = [
@@ -26,7 +26,7 @@ const mockLists = [
   },
 ];
 
-jest.mock("@/hooks/useShoppingLists", () => ({
+jest.mock("@/features/shopping/hooks/use-shopping-lists", () => ({
   useShoppingLists: () => ({
     lists: mockLists,
     isLoaded: true,
