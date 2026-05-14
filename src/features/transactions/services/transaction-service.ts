@@ -1,59 +1,88 @@
 "use server";
 
-import { auth } from "@/core/auth/auth";
+import { requireValidSession } from "@/core/auth/server-utils";
 import { prisma } from "@/core/db/prisma";
 import { TransactionStatus, TransactionType } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
-async function requireUserId() {
-  const session = await auth();
-  const userId = session?.user?.id;
-  if (!userId) {
-    throw new Error("Unauthorized");
-  }
-  return userId;
-}
-
 export async function getTransactions(filters?: {
   month?: number;
   year?: number;
-  startDate?: Date;
-  endDate?: Date;
   type?: TransactionType;
+  status?: TransactionStatus;
   categoryId?: string;
-  cardId?: string;
+  isRecurring?: boolean;
 }) {
-  const userId = await requireUserId();
-  const { month, year, startDate, endDate, type, categoryId, cardId } = filters || {};
+  const userId = await requireValidSession();
+  const { month, year, type, status, categoryId, isRecurring } = filters || {};
 
   const where: any = { userId };
 
   if (type) where.type = type;
+  if (status) where.status = status;
   if (categoryId) where.categoryId = categoryId;
-  if (cardId) where.cardId = cardId;
+  if (isRecurring !== undefined) {
+    if (isRecurring) {
+      where.recurringTransactionId = { not: null };
+    } else {
+      where.recurringTransactionId = null;
+    }
+  }
 
-  if (startDate || endDate) {
-    where.date = {};
-    if (startDate) where.date.gte = startDate;
-    if (endDate) where.date.lte = endDate;
-  } else if (month !== undefined && year !== undefined) {
-    const start = new Date(year, month - 1, 1);
-    const end = new Date(year, month, 0, 23, 59, 59);
-    where.date = {
-      gte: start,
-      lte: end,
-    };
+  if (month !== undefined && year !== undefined) {
+    where.competencyMonth = month;
+    where.competencyYear = year;
   }
 
   try {
-    return await prisma.transaction.findMany({
+    let transactions = await prisma.transaction.findMany({
       where,
       include: {
         category: true,
-        card: true,
+        recurringTransaction: true,
       },
-      orderBy: { date: "desc" },
+      orderBy: [
+        { status: "asc" },
+        { dueDate: "asc" },
+      ],
     });
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const transactionsToUpdate = transactions.filter(
+      (t) =>
+        t.status === TransactionStatus.PENDING &&
+        t.dueDate
+    );
+
+    for (const transaction of transactionsToUpdate) {
+      const dueDate = new Date(transaction.dueDate!);
+      dueDate.setHours(0, 0, 0, 0);
+
+      if (dueDate < today) {
+        await prisma.transaction.update({
+          where: { id: transaction.id, userId },
+          data: { status: TransactionStatus.OVERDUE },
+        });
+      }
+    }
+
+    if (transactionsToUpdate.length > 0) {
+      transactions = await prisma.transaction.findMany({
+        where,
+        include: {
+          category: true,
+          recurringTransaction: true,
+        },
+        orderBy: [
+          { status: "asc" },
+          { dueDate: "asc" },
+        ],
+      });
+    }
+
+    return transactions;
   } catch (error) {
     console.error("Error fetching transactions:", error);
     return [];
@@ -61,37 +90,28 @@ export async function getTransactions(filters?: {
 }
 
 export async function createTransaction(data: {
-  description: string;
+  title: string;
   amount: number;
-  date: Date;
   type: TransactionType;
-  categoryId: string;
-  cardId?: string;
   status?: TransactionStatus;
-  isRecurring?: boolean;
-  observation?: string;
+  competencyMonth: number;
+  competencyYear: number;
+  categoryId: string;
+  notes?: string;
+  dueDate?: Date;
   shoppingListId?: string;
 }) {
-  const userId = await requireUserId();
+  const userId = await requireValidSession();
 
   try {
     const transaction = await prisma.transaction.create({
       data: {
-        description: data.description,
-        amount: data.amount,
-        date: data.date,
-        type: data.type,
-        categoryId: data.categoryId,
-        userId: userId,
-        cardId: data.cardId || null,
-        status: data.status || TransactionStatus.COMPLETED,
-        isRecurring: data.isRecurring || false,
-        observation: data.observation || null,
-        shoppingListId: data.shoppingListId || null,
+        ...data,
+        userId,
       },
     });
     revalidatePath("/dashboard");
-    revalidatePath("/transactions");
+    revalidatePath("/financas");
     return transaction;
   } catch (error) {
     console.error("Error creating transaction:", error);
@@ -102,36 +122,30 @@ export async function createTransaction(data: {
 export async function updateTransaction(
   id: string,
   data: Partial<{
-    description: string;
+    title: string;
     amount: number;
-    date: Date;
     type: TransactionType;
-    categoryId: string;
-    cardId: string | null;
     status: TransactionStatus;
-    isRecurring: boolean;
-    observation: string | null;
+    competencyMonth: number;
+    competencyYear: number;
+    categoryId: string;
+    notes: string | null;
+    dueDate: Date | null;
+    paidAt: Date | null;
   }>
 ) {
-  const userId = await requireUserId();
+  const userId = await requireValidSession();
 
   try {
     const transaction = await prisma.transaction.update({
       where: { id, userId },
       data: {
-        description: data.description,
-        amount: data.amount,
-        date: data.date,
-        type: data.type,
-        categoryId: data.categoryId,
-        cardId: data.cardId === undefined ? undefined : (data.cardId || null),
-        status: data.status,
-        isRecurring: data.isRecurring,
-        observation: data.observation === undefined ? undefined : (data.observation || null),
+        ...data,
+        paidAt: data.status === TransactionStatus.PAID ? new Date() : null,
       },
     });
     revalidatePath("/dashboard");
-    revalidatePath("/transactions");
+    revalidatePath("/financas");
     return transaction;
   } catch (error) {
     console.error("Error updating transaction:", error);
@@ -140,47 +154,22 @@ export async function updateTransaction(
 }
 
 export async function deleteTransaction(id: string) {
-  const userId = await requireUserId();
+  const userId = await requireValidSession();
 
   try {
     await prisma.transaction.delete({
       where: { id, userId },
     });
     revalidatePath("/dashboard");
-    revalidatePath("/transactions");
+    revalidatePath("/financas");
   } catch (error) {
     console.error("Error deleting transaction:", error);
     throw new Error("Failed to delete transaction");
   }
 }
 
-export async function createDefaultTransactionCategories(userId: string) {
-  const defaultCategories = [
-    { name: "Salário", type: TransactionType.INCOME, icon: "Wallet", color: "#10b981" },
-    { name: "Renda Extra", type: TransactionType.INCOME, icon: "PlusCircle", color: "#34d399" },
-    { name: "Alimentação", type: TransactionType.EXPENSE, icon: "Utensils", color: "#ef4444" },
-    { name: "Moradia", type: TransactionType.EXPENSE, icon: "Home", color: "#3b82f6" },
-    { name: "Transporte", type: TransactionType.EXPENSE, icon: "Car", color: "#f59e0b" },
-    { name: "Lazer", type: TransactionType.EXPENSE, icon: "Gamepad", color: "#8b5cf6" },
-    { name: "Mercado", type: TransactionType.EXPENSE, icon: "ShoppingCart", color: "#10b981" },
-    { name: "Saúde", type: TransactionType.EXPENSE, icon: "Heart", color: "#ec4899" },
-  ];
-
-  try {
-    await prisma.transactionCategory.createMany({
-      data: defaultCategories.map(cat => ({
-        ...cat,
-        userId,
-      })),
-      skipDuplicates: true,
-    });
-  } catch (error) {
-    console.error("Error creating default categories:", error);
-  }
-}
-
 export async function getTransactionCategories(type?: TransactionType) {
-  const userId = await requireUserId();
+  const userId = await requireValidSession();
   try {
     let categories = await prisma.transactionCategory.findMany({
       where: {
@@ -190,7 +179,6 @@ export async function getTransactionCategories(type?: TransactionType) {
       orderBy: { name: "asc" },
     });
 
-    // Se não houver categorias, cria as padrões e busca novamente
     if (categories.length === 0) {
       await createDefaultTransactionCategories(userId);
       categories = await prisma.transactionCategory.findMany({
@@ -209,13 +197,44 @@ export async function getTransactionCategories(type?: TransactionType) {
   }
 }
 
+export async function createDefaultTransactionCategories(userId: string) {
+  const defaultCategories = [
+    { name: "Salário", type: TransactionType.INCOME, icon: "Wallet", color: "#10b981" },
+    { name: "Renda Extra", type: TransactionType.INCOME, icon: "PlusCircle", color: "#34d399" },
+    { name: "Alimentação", type: TransactionType.EXPENSE, icon: "Utensils", color: "#ef4444" },
+    { name: "Moradia", type: TransactionType.EXPENSE, icon: "Home", color: "#3b82f6" },
+    { name: "Transporte", type: TransactionType.EXPENSE, icon: "Car", color: "#f59e0b" },
+    { name: "Lazer", type: TransactionType.EXPENSE, icon: "Gamepad", color: "#8b5cf6" },
+    { name: "Mercado", type: TransactionType.EXPENSE, icon: "ShoppingCart", color: "#10b981" },
+    { name: "Saúde", type: TransactionType.EXPENSE, icon: "Heart", color: "#ec4899" },
+    { name: "Educação", type: TransactionType.EXPENSE, icon: "BookOpen", color: "#8b5cf6" },
+  ];
+
+  try {
+    for (const cat of defaultCategories) {
+      try {
+        await prisma.transactionCategory.create({
+          data: {
+            ...cat,
+            userId,
+          },
+        });
+      } catch {
+        // Ignora erros de duplicata
+      }
+    }
+  } catch (error) {
+    console.error("Error creating default categories:", error);
+  }
+}
+
 export async function createTransactionCategory(data: {
   name: string;
   type: TransactionType;
   icon?: string;
   color?: string;
 }) {
-  const userId = await requireUserId();
+  const userId = await requireValidSession();
   try {
     return await prisma.transactionCategory.create({
       data: {

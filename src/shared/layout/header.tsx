@@ -1,10 +1,12 @@
 "use client";
 
-import { Button } from "@/shared/ui/button";
 import { useAuth } from "@/features/auth/hooks/use-auth";
+import { Button } from "@/shared/ui/button";
+import { cn } from "@/shared/utils/cn";
 import { AnimatePresence, motion } from "framer-motion";
-import { LogOut, ShoppingCart, User } from "lucide-react";
+import { Home, LogOut, ShoppingBag, ShoppingCart, TrendingUp, User, Wallet } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 export function Header() {
@@ -12,6 +14,7 @@ export function Header() {
   const showUserMenu = isAuthenticated && Boolean(user);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname() ?? "";
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -35,48 +38,58 @@ export function Header() {
               <span className="hidden xs:block tracking-tight">ComprasFácil</span>
             </Link>
             
-            <nav className="hidden md:flex items-center gap-1 bg-muted/5 p-1 rounded-xl border border-border/50">
-              <Link
-                href="/"
-                className="text-sm font-bold px-4 py-2 rounded-lg text-muted hover:text-foreground hover:bg-muted/10 transition-all"
-              >
-                Início
-              </Link>
-              {showUserMenu && (
-                <>
-                  <Link
-                    href="/dashboard"
-                    className="text-sm font-bold px-4 py-2 rounded-lg text-muted hover:text-foreground hover:bg-muted/10 transition-all"
-                  >
-                    Dashboard
-                  </Link>
-                  <Link
-                    href="/transactions"
-                    className="text-sm font-bold px-4 py-2 rounded-lg text-muted hover:text-foreground hover:bg-muted/10 transition-all"
-                  >
-                    Transações
-                  </Link>
-                  <Link
-                    href="/cards"
-                    className="text-sm font-bold px-4 py-2 rounded-lg text-muted hover:text-foreground hover:bg-muted/10 transition-all"
-                  >
-                    Cartões
-                  </Link>
-                  <Link
-                    href="/goals"
-                    className="text-sm font-bold px-4 py-2 rounded-lg text-muted hover:text-foreground hover:bg-muted/10 transition-all"
-                  >
-                    Metas
-                  </Link>
-                  <Link
-                    href="/shopping"
-                    className="text-sm font-bold px-4 py-2 rounded-lg text-muted hover:text-foreground hover:bg-muted/10 transition-all"
-                  >
-                    Mercado
-                  </Link>
-                </>
-              )}
-            </nav>
+            {showUserMenu && (
+              <nav className="hidden md:flex items-center gap-1 bg-muted/5 p-1 rounded-xl border border-border/50">
+                <Link
+                  href="/"
+                  className={cn(
+                    "text-sm font-bold px-4 py-2 rounded-lg transition-all flex items-center gap-2",
+                    pathname === "/"
+                      ? "bg-white dark:bg-zinc-800 shadow-sm text-emerald-600"
+                      : "text-muted hover:text-foreground hover:bg-muted/10"
+                  )}
+                >
+                  <Home size={16} />
+                  Início
+                </Link>
+                <Link
+                  href="/dashboard"
+                  className={cn(
+                    "text-sm font-bold px-4 py-2 rounded-lg transition-all flex items-center gap-2",
+                    pathname === "/dashboard"
+                      ? "bg-white dark:bg-zinc-800 shadow-sm text-emerald-600"
+                      : "text-muted hover:text-foreground hover:bg-muted/10"
+                  )}
+                >
+                  <TrendingUp size={16} />
+                  Dashboard
+                </Link>
+                <Link
+                  href="/financas"
+                  className={cn(
+                    "text-sm font-bold px-4 py-2 rounded-lg transition-all flex items-center gap-2",
+                    pathname === "/financas"
+                      ? "bg-white dark:bg-zinc-800 shadow-sm text-emerald-600"
+                      : "text-muted hover:text-foreground hover:bg-muted/10"
+                  )}
+                >
+                  <Wallet size={16} />
+                  Finanças
+                </Link>
+                <Link
+                  href="/shopping"
+                  className={cn(
+                    "text-sm font-bold px-4 py-2 rounded-lg transition-all flex items-center gap-2",
+                    pathname.startsWith("/shopping")
+                      ? "bg-white dark:bg-zinc-800 shadow-sm text-emerald-600"
+                      : "text-muted hover:text-foreground hover:bg-muted/10"
+                  )}
+                >
+                  <ShoppingBag size={16} />
+                  Mercado
+                </Link>
+              </nav>
+            )}
           </div>
 
           <div className="flex items-center gap-4">

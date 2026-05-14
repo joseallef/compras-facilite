@@ -57,7 +57,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   return (
     <div className={cn("space-y-2", containerClassName)}>
       {label ? (
-        <label htmlFor={id} className={cn("block text-sm font-medium", labelClassName)}>
+        <label htmlFor={id} className={cn("block text-sm font-bold text-muted/60 uppercase tracking-wider ml-1", labelClassName)}>
           {label}
         </label>
       ) : null}
@@ -79,12 +79,12 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           id={id}
           ref={ref}
           className={cn(
-            "w-full py-3 bg-background border rounded-xl focus:ring-2 outline-none transition-all",
-            hasLeftIcon ? "pl-12" : "pl-4",
-            hasRightSlot ? "pr-12" : "pr-4",
+            "w-full flex items-center bg-card border rounded-2xl py-3.5 outline-none transition-all shadow-sm",
+            hasLeftIcon ? "pl-12" : "pl-5",
+            hasRightSlot ? "pr-12" : "pr-5",
             error
-              ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-              : "border-border focus:ring-emerald-500 focus:border-emerald-500",
+              ? "border-red-500 ring-4 ring-red-500/10"
+              : "border-border hover:border-emerald-200 dark:hover:border-emerald-800 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500",
             inputClassName
           )}
           aria-invalid={ariaInvalid ?? Boolean(error)}

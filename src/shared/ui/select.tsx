@@ -4,11 +4,11 @@ import { cn } from "@/shared/utils/cn";
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, ChevronDown } from "lucide-react";
 import {
-  forwardRef,
-  type ReactNode,
-  useEffect,
-  useRef,
-  useState
+    forwardRef,
+    type ReactNode,
+    useEffect,
+    useRef,
+    useState
 } from "react";
 
 export interface SelectOption {
@@ -143,7 +143,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(function Select
               transition={{ duration: 0.15, ease: "easeOut" }}
               className="absolute z-[110] w-full mt-2 bg-card border border-border rounded-2xl shadow-2xl overflow-hidden py-2"
             >
-              <div className="max-h-60 overflow-y-auto custom-scrollbar">
+              <div className="max-h-32 overflow-y-auto custom-scrollbar">
                 {options.length > 0 ? (
                   options.map((option) => {
                     const isSelected = option.value === value;
@@ -153,7 +153,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(function Select
                         type="button"
                         onClick={() => handleSelect(option.value)}
                         className={cn(
-                          "w-full flex items-center gap-3 px-5 py-3.5 transition-colors text-left",
+                          "w-full flex items-center gap-3 px-5 py-3 transition-colors text-left",
                           isSelected 
                             ? "bg-emerald-500 text-white" 
                             : "hover:bg-muted/10 text-foreground"
@@ -175,7 +175,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(function Select
                     );
                   })
                 ) : (
-                  <div className="px-5 py-8 text-center text-muted-foreground">
+                  <div className="px-5 py-6 text-center text-muted-foreground">
                     <p className="text-sm font-medium">Nenhuma opção disponível</p>
                   </div>
                 )}

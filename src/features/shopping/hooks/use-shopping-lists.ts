@@ -1,20 +1,22 @@
 "use client";
 
-import { MONTHLY_SHOPPING_TEMPLATE } from "@/shared/constants/templates";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import {
-  addShoppingItem,
-  createShoppingList,
-  createShoppingListFromTemplate,
-  deleteShoppingList,
-  getShoppingLists,
-  removeShoppingItem,
-  toggleShoppingItem,
-  updateShoppingItem,
-  updateShoppingItemQuantity,
-  updateShoppingList
+    addShoppingItem,
+    createShoppingList,
+    createShoppingListFromTemplate,
+    deleteShoppingList,
+    duplicateShoppingList,
+    getShoppingListForMonth,
+    getShoppingLists,
+    removeShoppingItem,
+    toggleShoppingItem,
+    updateShoppingItem,
+    updateShoppingItemQuantity,
+    updateShoppingList
 } from "@/features/shopping/services/shopping-lists-service";
 import { ShoppingItem, ShoppingList } from "@/features/shopping/types";
+import { MONTHLY_SHOPPING_TEMPLATE } from "@/shared/constants/templates";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -281,6 +283,29 @@ export function useShoppingLists() {
     }
   };
 
+  const duplicateList = async (listId: string, newName: string) => {
+    setIsLoading(true);
+    try {
+      const newList = await duplicateShoppingList(listId, newName);
+      await fetchLists();
+      return newList as unknown as ShoppingList;
+    } catch (error) {
+      console.error("Failed to duplicate list", error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getListForMonth = async (month: number, year: number) => {
+    try {
+      return await getShoppingListForMonth(month, year);
+    } catch (error) {
+      console.error("Failed to get monthly list", error);
+      return null;
+    }
+  };
+
   return {
     lists,
     isLoaded: !isLoading && !isAuthLoading,
@@ -292,5 +317,7 @@ export function useShoppingLists() {
     toggleItemPicked,
     updateItemQuantity,
     updateItemInList,
+    duplicateList,
+    getListForMonth,
   };
 }

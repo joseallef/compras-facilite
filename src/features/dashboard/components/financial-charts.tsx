@@ -17,7 +17,13 @@ import {
 
 interface FinancialChartsProps {
   categoryExpenses: { name: string; value: number; color: string }[];
-  monthlyEvolution?: { month: string; income: number; expense: number }[];
+  monthlyEvolution?: { 
+    month: string; 
+    income: number; 
+    expense: number;
+    investment: number;
+    reserve: number;
+  }[];
 }
 
 const COLORS = ["#10b981", "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4"];
@@ -27,7 +33,7 @@ export function FinancialCharts({ categoryExpenses, monthlyEvolution }: Financia
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Gráfico de Gastos por Categoria */}
       <div className="bg-card p-6 rounded-[2.5rem] border border-border shadow-sm">
-        <h3 className="text-xl font-bold mb-8">Gastos por Categoria</h3>
+        <h3 className="text-xl font-bold mb-8">Composição de Gastos</h3>
         <div className="h-[350px] w-full flex flex-col md:flex-row items-center">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
@@ -75,7 +81,7 @@ export function FinancialCharts({ categoryExpenses, monthlyEvolution }: Financia
 
       {/* Gráfico de Evolução Mensal */}
       <div className="bg-card p-6 rounded-[2.5rem] border border-border shadow-sm">
-        <h3 className="text-xl font-bold mb-8">Receitas x Despesas</h3>
+        <h3 className="text-xl font-bold mb-8">Fluxo de Caixa</h3>
         <div className="h-[350px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={monthlyEvolution || []}>
@@ -105,8 +111,10 @@ export function FinancialCharts({ categoryExpenses, monthlyEvolution }: Financia
                 formatter={(value: any) => formatCurrency(Number(value))}
               />
               <Legend verticalAlign="top" align="right" iconType="circle" />
-              <Bar name="Receitas" dataKey="income" fill="#10b981" radius={[4, 4, 0, 0]} barSize={20} />
-              <Bar name="Despesas" dataKey="expense" fill="#ef4444" radius={[4, 4, 0, 0]} barSize={20} />
+              <Bar name="Receitas" dataKey="income" fill="#10b981" stackId="a" radius={[0, 0, 0, 0]} barSize={30} />
+              <Bar name="Despesas" dataKey="expense" fill="#ef4444" stackId="b" radius={[0, 0, 0, 0]} barSize={30} />
+              <Bar name="Invest." dataKey="investment" fill="#3b82f6" stackId="b" radius={[0, 0, 0, 0]} barSize={30} />
+              <Bar name="Reserva" dataKey="reserve" fill="#f59e0b" stackId="b" radius={[4, 4, 0, 0]} barSize={30} />
             </BarChart>
           </ResponsiveContainer>
         </div>

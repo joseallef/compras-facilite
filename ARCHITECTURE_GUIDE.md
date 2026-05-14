@@ -39,9 +39,9 @@ src/
 ├── core/               # Infraestrutura e configurações base
 │   ├── db/             # Prisma client e migrações
 │   ├── auth/           # Configurações do Auth.js (NextAuth)
-│   └── security/       # Middlewares, rate limit e segurança
+│   └── security/       # Proxies, rate limit e segurança
 │
-├── middleware.ts       # Middleware central do Next.js
+├── proxy.ts            # Proxy central do Next.js
 └── tests/              # Suíte de testes (unit, integration, e2e)
 ```
 

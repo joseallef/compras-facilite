@@ -1,33 +1,13 @@
 "use server";
 
-import { auth } from "@/core/auth/auth";
+import { requireValidSession } from "@/core/auth/server-utils";
 import { prisma } from "@/core/db/prisma";
 import { consumeRateLimit, getClientIp } from "@/core/security/rate-limit";
 import { Category } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
-async function requireUserId() {
-  const session = await auth();
-  const userId = session?.user?.id;
-  if (!userId) {
-    throw new Error("Unauthorized");
-  }
-
-  // Verifica se o usuário ainda existe no banco (importante após resets de DB)
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { id: true },
-  });
-
-  if (!user) {
-    throw new Error("User session is invalid. Please log in again.");
-  }
-
-  return userId;
-}
-
 export async function getShoppingLists() {
-  const userId = await requireUserId();
+  const userId = await requireValidSession();
   try {
     return await prisma.shoppingList.findMany({
       where: { userId },
@@ -40,8 +20,88 @@ export async function getShoppingLists() {
   }
 }
 
+export async function getShoppingListForMonth(month: number, year: number) {
+  const userId = await requireValidSession();
+  try {
+    const startDate = new Date(year, month, 1);
+    const endDate = new Date(year, month + 1, 0);
+    
+    return await prisma.shoppingList.findFirst({
+      where: {
+        userId,
+        createdAt: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+      include: { items: true },
+    });
+  } catch (error) {
+    console.error("Error fetching monthly shopping list:", error);
+    return null;
+  }
+}
+
+export async function duplicateShoppingList(listId: string, newName: string) {
+  const userId = await requireValidSession();
+  const ip = await getClientIp();
+
+  const limitResult = await consumeRateLimit({
+    key: `create-list:${userId}:${ip}`,
+    limit: 10,
+    windowMs: 60 * 60 * 1000, // 1 hour
+  });
+
+  if (!limitResult.allowed) {
+    throw new Error("Muitas listas criadas. Tente novamente mais tarde.");
+  }
+
+  try {
+    const originalList = await prisma.shoppingList.findFirst({
+      where: { id: listId, userId },
+      include: { items: true },
+    });
+
+    if (!originalList) {
+      throw new Error("Lista original não encontrada");
+    }
+
+    const newList = await prisma.shoppingList.create({
+      data: {
+        name: newName,
+        userId,
+      },
+    });
+
+    if (originalList.items && originalList.items.length > 0) {
+      await prisma.shoppingItem.createMany({
+        data: originalList.items.map(item => ({
+          name: item.name,
+          quantity: item.quantity,
+          unit: item.unit,
+          category: item.category as Category,
+          shoppingListId: newList.id,
+          isPicked: false,
+        })),
+      });
+    }
+
+    revalidatePath("/shopping");
+    return await prisma.shoppingList.findUnique({
+      where: { id: newList.id },
+      include: { items: true },
+    });
+  } catch (error) {
+    console.error("Error duplicating shopping list:", error);
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error("Failed to duplicate list");
+  }
+}
+
 export async function createShoppingList(name: string) {
-  const userId = await requireUserId();
+  const userId = await requireValidSession();
   const ip = await getClientIp();
 
   const limitResult = await consumeRateLimit({
@@ -70,7 +130,7 @@ export async function createShoppingList(name: string) {
 }
 
 export async function deleteShoppingList(listId: string) {
-  const userId = await requireUserId();
+  const userId = await requireValidSession();
   try {
     const result = await prisma.shoppingList.deleteMany({ where: { id: listId, userId } });
     if (result.count === 0) {
@@ -88,7 +148,7 @@ export async function updateShoppingList(listId: string, data: {
   status?: "ABERTA" | "CONCLUIDA"; 
   totalValue?: number | null 
 }) {
-  const userId = await requireUserId();
+  const userId = await requireValidSession();
   try {
     const result = await prisma.shoppingList.updateMany({ where: { id: listId, userId }, data });
     if (result.count === 0) {
@@ -109,7 +169,7 @@ export async function createShoppingListFromTemplate(name: string, items: {
   unit: string;
   category: string;
 }[]) {
-  const userId = await requireUserId();
+  const userId = await requireValidSession();
   const ip = await getClientIp();
 
   const limitResult = await consumeRateLimit({
@@ -162,7 +222,7 @@ export async function addShoppingItem(listId: string, data: {
   unit: string;
   category: string;
 }) {
-  const userId = await requireUserId();
+  const userId = await requireValidSession();
   try {
     const list = await prisma.shoppingList.findFirst({
       where: { id: listId, userId },
@@ -189,7 +249,7 @@ export async function addShoppingItem(listId: string, data: {
 }
 
 export async function removeShoppingItem(listId: string, itemId: string) {
-  const userId = await requireUserId();
+  const userId = await requireValidSession();
   try {
     const result = await prisma.shoppingItem.deleteMany({
       where: {
@@ -209,7 +269,7 @@ export async function removeShoppingItem(listId: string, itemId: string) {
 }
 
 export async function toggleShoppingItem(listId: string, itemId: string, isPicked: boolean) {
-  const userId = await requireUserId();
+  const userId = await requireValidSession();
   try {
     const result = await prisma.shoppingItem.updateMany({
       where: {
@@ -240,7 +300,7 @@ export async function updateShoppingItem(listId: string, itemId: string, data: {
   unit?: string;
   category?: string;
 }) {
-  const userId = await requireUserId();
+  const userId = await requireValidSession();
   try {
     const result = await prisma.shoppingItem.updateMany({
       where: {
@@ -269,7 +329,7 @@ export async function updateShoppingItem(listId: string, itemId: string, data: {
 }
 
 export async function updateShoppingItemQuantity(listId: string, itemId: string, quantity: number) {
-  const userId = await requireUserId();
+  const userId = await requireValidSession();
   try {
     const result = await prisma.shoppingItem.updateMany({
       where: {

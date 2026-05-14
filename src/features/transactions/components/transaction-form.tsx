@@ -1,37 +1,36 @@
 "use client";
 
+import { getTransactionCategoriesAction } from "@/features/recurring-transactions/actions/recurring-actions";
 import { Button } from "@/shared/ui/button";
+import { CurrencyInput } from "@/shared/ui/currency-input";
 import { Input } from "@/shared/ui/input";
 import { Select } from "@/shared/ui/select";
-import { getCards } from "@/features/cards/services/card-service";
+import { parseCurrency } from "@/shared/utils/currency";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { TransactionStatus, TransactionType } from "@prisma/client";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
-import * as z from "zod";
-import { createTransaction, getTransactionCategories } from "../services/transaction-service";
+import { createTransactionSchema } from "../schemas/transaction-schemas";
+import { createTransaction, updateTransaction } from "../services/transaction-service";
+const TransactionType = {
+  INCOME: "INCOME",
+  EXPENSE: "EXPENSE",
+} as const;
 
-const transactionSchema = z.object({
-  description: z.string().min(1, "Descrição é obrigatória"),
-  amount: z.string().min(1, "Valor é obrigatório"),
-  date: z.string().min(1, "Data é obrigatória"),
-  type: z.nativeEnum(TransactionType),
-  categoryId: z.string().min(1, "Categoria é obrigatória"),
-  cardId: z.string().optional(),
-  observation: z.string().optional(),
-});
+const TransactionStatus = {
+  PENDING: "PENDING",
+  PAID: "PAID",
+  OVERDUE: "OVERDUE",
+} as const;
 
-type TransactionFormValues = z.infer<typeof transactionSchema>;
-
-interface AddTransactionModalProps {
+interface TransactionFormProps {
   onSuccess: () => void;
   onClose: () => void;
+  initialData?: any;
 }
 
-export function TransactionForm({ onSuccess, onClose }: AddTransactionModalProps) {
+export function TransactionForm({ onSuccess, onClose, initialData }: TransactionFormProps) {
   const [categories, setCategories] = useState<any[]>([]);
-  const [cards, setCards] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const {
@@ -41,147 +40,153 @@ export function TransactionForm({ onSuccess, onClose }: AddTransactionModalProps
     setValue,
     control,
     formState: { errors },
-  } = useForm<TransactionFormValues>({
-    resolver: zodResolver(transactionSchema),
+  } = useForm({
+    resolver: zodResolver(createTransactionSchema),
     defaultValues: {
-      type: TransactionType.EXPENSE,
-      date: new Date().toISOString().split("T")[0],
-      categoryId: "",
-      cardId: "",
-      description: "",
-      amount: "",
+      title: initialData?.title || "",
+      notes: initialData?.notes || "",
+      amount: initialData?.amount?.toString() || "",
+      type: initialData?.type || TransactionType.EXPENSE,
+      categoryId: initialData?.categoryId || "",
+      status: initialData?.status || TransactionStatus.PENDING,
+      competencyMonth: initialData?.competencyMonth || new Date().getMonth(),
+      competencyYear: initialData?.competencyYear || new Date().getFullYear(),
     },
   });
 
   const selectedType = watch("type");
 
   useEffect(() => {
-    async function loadData() {
-      const [cats, crds] = await Promise.all([
-        getTransactionCategories(selectedType),
-        getCards(),
-      ]);
-      setCategories(cats);
-      setCards(crds);
-      
-      if (cats.length > 0) {
-        setValue("categoryId", cats[0].id);
+    async function loadCategories() {
+      try {
+        const cats = await getTransactionCategoriesAction(selectedType);
+        setCategories(cats);
+        if (cats.length > 0 && !initialData?.categoryId) {
+          setValue("categoryId", cats[0].id);
+        }
+      } catch (error) {
+        console.error("Error loading categories:", error);
       }
     }
-    loadData();
-  }, [selectedType, setValue]);
+    loadCategories();
+  }, [selectedType, setValue, initialData]);
 
-  const onSubmit = async (values: TransactionFormValues) => {
+  const onSubmit = async (values: any) => {
     setIsLoading(true);
     try {
-      const amount = parseFloat(values.amount.replace(",", "."));
-      await createTransaction({
-        ...values,
-        amount,
-        date: new Date(values.date),
-        status: TransactionStatus.COMPLETED,
-      });
-      toast.success("Transação criada com sucesso!");
+      const amount = parseCurrency(values.amount);
+      
+      if (initialData?.id) {
+        await updateTransaction(initialData.id, {
+          ...values,
+          amount,
+        });
+        toast.success("Transação atualizada com sucesso!");
+      } else {
+        await createTransaction({
+          ...values,
+          amount,
+        });
+        toast.success("Transação criada com sucesso!");
+      }
+      
       onSuccess();
       onClose();
-    } catch (error) {
-      toast.error("Erro ao criar transação");
+    } catch {
+      toast.error(initialData?.id ? "Erro ao atualizar transação" : "Erro ao criar transação");
     } finally {
       setIsLoading(false);
     }
   };
 
+  const typeOptions = [
+    { value: TransactionType.EXPENSE, label: "Despesa" },
+    { value: TransactionType.INCOME, label: "Receita" },
+  ];
+
+  const statusOptions = [
+    { value: TransactionStatus.PENDING, label: "Pendente" },
+    { value: TransactionStatus.PAID, label: "Pago" },
+    { value: TransactionStatus.OVERDUE, label: "Atrasado" },
+  ];
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div className="grid grid-cols-2 gap-2 p-1 bg-muted rounded-xl">
-        <button
-          type="button"
-          onClick={() => setValue("type", TransactionType.EXPENSE)}
-          className={`py-2 text-sm font-bold rounded-lg transition-all ${
-            selectedType === TransactionType.EXPENSE
-              ? "bg-white shadow-sm text-red-600"
-              : "text-muted-foreground"
-          }`}
-        >
-          Despesa
-        </button>
-        <button
-          type="button"
-          onClick={() => setValue("type", TransactionType.INCOME)}
-          className={`py-2 text-sm font-bold rounded-lg transition-all ${
-            selectedType === TransactionType.INCOME
-              ? "bg-white shadow-sm text-emerald-600"
-              : "text-muted-foreground"
-          }`}
-        >
-          Receita
-        </button>
+      <div className="grid grid-cols-2 gap-2 p-1 bg-muted/50 rounded-2xl border border-border/50">
+        {typeOptions.map((opt) => (
+          <button
+            key={opt.value}
+            type="button"
+            onClick={() => setValue("type", opt.value)}
+            className={`py-3 text-sm font-bold rounded-xl transition-all ${
+              selectedType === opt.value
+                ? "bg-white dark:bg-zinc-800 shadow-sm text-emerald-600"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+            }`}
+          >
+            {opt.label}
+          </button>
+        ))}
       </div>
 
       <Input
-        label="Descrição"
+        label="Título"
         placeholder="Ex: Aluguel, Salário..."
-        {...register("description")}
-        error={errors.description?.message}
+        {...register("title")}
+        error={errors.title?.message as string}
       />
 
       <div className="grid grid-cols-2 gap-4">
-        <Input
-          label="Valor"
-          placeholder="0,00"
-          {...register("amount")}
-          error={errors.amount?.message}
-        />
-        <Input
-          label="Data"
-          type="date"
-          {...register("date")}
-          error={errors.date?.message}
-        />
-      </div>
-
-      <div className="space-y-2">
         <Controller
-          name="categoryId"
+          name="amount"
+          control={control}
+          render={({ field }) => (
+            <CurrencyInput
+              label="Valor"
+              value={field.value}
+              onChange={(formatted) => field.onChange(formatted)}
+              error={errors.amount?.message as string}
+            />
+          )}
+        />
+
+        <Controller
+          name="status"
           control={control}
           render={({ field }) => (
             <Select
-              label="Categoria"
-              value={field.value}
+              label="Status"
+              value={field.value as string}
               onChange={field.onChange}
-              error={errors.categoryId?.message}
-              options={categories.map((cat) => ({
-                value: cat.id,
-                label: cat.name,
-              }))}
+              options={statusOptions}
             />
           )}
         />
       </div>
 
-      {selectedType === TransactionType.EXPENSE && (
-        <div className="space-y-2">
-          <Controller
-            name="cardId"
-            control={control}
-            render={({ field }) => (
-              <Select
-                label="Cartão (Opcional)"
-                value={field.value || ""}
-                onChange={field.onChange}
-                placeholder="Nenhum"
-                options={[
-                  { value: "", label: "Nenhum" },
-                  ...cards.map((card) => ({
-                    value: card.id,
-                    label: card.name,
-                  })),
-                ]}
-              />
-            )}
+      <Controller
+        name="categoryId"
+        control={control}
+        render={({ field }) => (
+          <Select
+            label="Categoria"
+            value={field.value}
+            onChange={field.onChange}
+            error={errors.categoryId?.message as string}
+            placeholder={categories.length === 0 ? "Carregando..." : "Selecione"}
+            options={categories.map((cat) => ({
+              value: cat.id,
+              label: cat.name,
+            }))}
           />
-        </div>
-      )}
+        )}
+      />
+
+      <Input
+        label="Observações (opcional)"
+        placeholder="Alguma observação sobre essa transação..."
+        {...register("notes")}
+      />
 
       <div className="flex gap-3 pt-4">
         <Button

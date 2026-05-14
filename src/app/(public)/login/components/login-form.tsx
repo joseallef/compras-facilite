@@ -1,12 +1,12 @@
 "use client";
 
+import { useAuth } from "@/features/auth/hooks/use-auth";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
-import { useAuth } from "@/features/auth/hooks/use-auth";
 import { ArrowRight, Eye, EyeOff, Loader2, Lock, Mail, ShoppingCart } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { FormEvent, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 function isValidEmail(value: string) {
@@ -25,6 +25,18 @@ export function LoginForm() {
   // 2. VARIÁVEIS
   const { login } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // 3. EFFECTS
+  useEffect(() => {
+    const sessionParam = searchParams.get("session");
+    if (sessionParam === "expired") {
+      toast.warning("Sua sessão expirou. Por favor, faça login novamente.");
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete("session");
+      router.replace(newUrl.toString(), { scroll: false });
+    }
+  }, [searchParams, router]);
 
   // 3. FUNÇÕES
   const handleSubmit = async (e: FormEvent) => {

@@ -50,11 +50,11 @@ export function Modal({
                     className
                   )}
                 >
-                  <div className="flex-1 overflow-y-auto custom-scrollbar p-6 sm:p-8">
+                  <div className="flex-1 overflow-y-auto custom-scrollbar p-5 sm:p-6">
                     {(title || description) && (
-                      <div className="flex flex-col gap-2 mb-6 pr-8">
+                      <div className="flex flex-col gap-2 mb-4 pr-8">
                         {title && (
-                          <Dialog.Title className="text-xl sm:text-2xl font-bold tracking-tight">
+                          <Dialog.Title className="text-xl font-bold tracking-tight">
                             {title}
                           </Dialog.Title>
                         )}

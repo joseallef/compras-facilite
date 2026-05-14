@@ -14,7 +14,7 @@ const buttonVariants = cva("cursor-pointer disabled:cursor-not-allowed", {
       outline:
         "border border-border bg-transparent hover:bg-muted/10 text-foreground font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed",
       ghost:
-        "bg-transparent hover:bg-muted/10 text-foreground transition-all disabled:opacity-50 disabled:cursor-not-allowed",
+        "bg-transparent hover:bg-muted/10 text-foreground transition-all disabled:opacity-50 disabled:cursor-not-allowed border border-border",
       danger:
         "bg-red-500 hover:bg-red-600 shadow-red-500/20 text-white font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed",
     },
