@@ -62,7 +62,9 @@ export function LoginForm() {
 
       await login(emailValue, passwordValue);
       toast.success("Login realizado com sucesso!");
-      router.push("/shopping");
+      
+      const callbackUrl = searchParams.get("callbackUrl");
+      router.push(callbackUrl || "/dashboard");
     } catch {
       const errorMessage = "Erro ao fazer login. Verifique suas credenciais.";
       setFormError(errorMessage);

@@ -12,11 +12,12 @@ function isValidUser(user: any): user is User {
 }
 
 export function useAuth() {
-  const { data: session, status, update } = useSession();
+  const { data: session, status } = useSession();
   const pathname = usePathname() ?? "";
   const router = useRouter();
   const searchParams = useSearchParams();
   const wasAuthenticated = useRef(false);
+  const redirectInProgress = useRef(false);
 
   const user: User | null =
     session?.user && isValidUser(session.user)
@@ -33,20 +34,39 @@ export function useAuth() {
   useEffect(() => {
     if (isAuthenticated) {
       wasAuthenticated.current = true;
+      redirectInProgress.current = false;
     }
   }, [isAuthenticated]);
 
   useEffect(() => {
-    if (!isLoading) {
-      if (!isAuthenticated) {
+    if (isLoading || redirectInProgress.current) {
+      return;
+    }
+
+    if (!isAuthenticated) {
+      const publicRoutes = ["/", "/login", "/register", "/forgot-password", "/reset-password", "/auth/error"];
+      const isPublicRoute = publicRoutes.includes(pathname);
+      
+      if (!isPublicRoute) {
+        redirectInProgress.current = true;
         handleRedirectToLogin();
       }
     }
-  }, [isAuthenticated, isLoading]);
+  }, [isAuthenticated, isLoading, pathname]);
 
   const handleRedirectToLogin = async () => {
+    if (pathname === "/login") {
+      redirectInProgress.current = false;
+      return;
+    }
+    
     const loginUrl = new URL("/login", window.location.origin);
-    loginUrl.searchParams.set("callbackUrl", pathname + searchParams.toString());
+    const publicRoutes = ["/", "/login", "/register", "/forgot-password", "/reset-password", "/auth/error"];
+    const isPublicRoute = publicRoutes.includes(pathname);
+    
+    if (!isPublicRoute) {
+      loginUrl.searchParams.set("callbackUrl", pathname);
+    }
     
     if (wasAuthenticated.current) {
       await signOut({ redirect: false });

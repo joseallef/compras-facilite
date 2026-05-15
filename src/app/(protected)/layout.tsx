@@ -31,8 +31,12 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
       </div>
     );
   }
-
+  
+  
   if (!isAuthenticated) {
+    // toast.warning("Sua sessão expirou. Por favor, faça login novamente.");
+    // redirect("/login");
+
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="h-8 w-8 rounded-full bg-muted/30 animate-pulse" />

@@ -1,17 +1,14 @@
 import { auth } from "@/core/auth/auth";
-import { redirect } from "next/navigation";
 import { getDashboardTransactionsAction } from "@/features/dashboard/actions/dashboard-actions";
+import { redirect } from "next/navigation";
 import { DashboardClient } from "./dashboard-client";
 
 export default async function DashboardPage() {
   const session = await auth();
-  
+
   if (!session?.user?.id || !session?.user?.email) {
     redirect("/login");
   }
-
-  const userId = session.user.id;
-  const userEmail = session.user.email;
 
   const currentDate = new Date();
   const initialMonth = currentDate.getMonth();
