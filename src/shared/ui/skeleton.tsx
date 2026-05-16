@@ -220,7 +220,7 @@ export function TableCardSkeleton({
 
 export function ShoppingListFormPageSkeleton() {
   return (
-    <div className="space-y-6">
+    <main className="max-w-7xl mx-auto w-full p-4 md:p-8 space-y-6">
       <div className="flex items-center gap-4">
         <Skeleton className="h-11 w-11 rounded-2xl bg-muted/40" />
         <Skeleton className="h-10 w-40 rounded-xl bg-muted/40" />
@@ -269,7 +269,7 @@ export function ShoppingListFormPageSkeleton() {
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
 
@@ -465,7 +465,7 @@ export function DashboardSkeleton() {
 
 export function ShoppingListEditPageSkeleton() {
   return (
-    <div className="space-y-6 pb-24">
+    <main className="max-w-7xl mx-auto w-full p-4 md:p-8 space-y-6 pb-24 pt-4 md:pt-0">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
         <div className="flex items-center gap-4 flex-1">
           <Skeleton className="h-11 w-11 rounded-2xl bg-muted/40" />
@@ -530,6 +530,6 @@ export function ShoppingListEditPageSkeleton() {
           <Skeleton className="h-12 w-44 rounded-2xl bg-muted/40" />
         </div>
       </div>
-    </div>
+    </main>
   );
 }

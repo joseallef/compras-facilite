@@ -36,9 +36,9 @@ export function MobileNav() {
     },
     {
       label: "Mercado",
-      href: "/shopping",
+      href: "/mercado",
       icon: ShoppingBag,
-      active: pathname.startsWith("/shopping"),
+      active: pathname.startsWith("/mercado"),
     },
   ];
 

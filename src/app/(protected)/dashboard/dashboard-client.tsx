@@ -324,7 +324,7 @@ export function DashboardClient({
               Minhas Finanças
             </Button>
           </Link>
-          <Link href="/shopping">
+          <Link href="/mercado">
             <Button className="bg-emerald-600 text-white rounded-xl font-bold px-6 py-2.5 hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20 active:scale-95">
               Listas de Compras
             </Button>
@@ -338,7 +338,7 @@ export function DashboardClient({
               Minhas Finanças
             </Button>
           </Link>
-          <Link href="/shopping" className="w-full">
+          <Link href="/mercado" className="w-full">
             <Button className="w-full bg-emerald-600 text-white rounded-2xl font-bold px-4 py-3.5 hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20 active:scale-95">
               Listas de Compras
             </Button>

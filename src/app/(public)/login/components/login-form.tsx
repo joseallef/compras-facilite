@@ -1,9 +1,11 @@
 "use client";
 
+import { AuthLoading } from "@/features/auth/components/auth-loading";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
-import { ArrowRight, Eye, EyeOff, Loader2, Lock, Mail, ShoppingCart } from "lucide-react";
+import { motion } from "framer-motion";
+import { Apple, ArrowRight, Beef, Carrot, Eye, EyeOff, Lock, Mail, Milk, Package, ShoppingBag, ShoppingCart, TrendingUp, Wallet } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
@@ -77,9 +79,119 @@ export function LoginForm() {
   // 4. EFFECTS
 
   // 5. RETURN (JSX)
+  const sideIcons = [
+    { Icon: ShoppingCart, color: "text-emerald-500", delay: 0 },
+    { Icon: ShoppingBag, color: "text-blue-500", delay: 0.2 },
+    { Icon: TrendingUp, color: "text-purple-500", delay: 0.4 },
+    { Icon: Wallet, color: "text-orange-500", delay: 0.6 },
+    { Icon: Package, color: "text-pink-500", delay: 0.8 },
+    { Icon: Apple, color: "text-red-500", delay: 1 },
+    { Icon: Carrot, color: "text-orange-600", delay: 1.2 },
+    { Icon: Beef, color: "text-rose-600", delay: 1.4 },
+    { Icon: Milk, color: "text-sky-500", delay: 1.6 },
+  ];
+
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-muted/30">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-muted/30 relative overflow-hidden">
+      {/* Animações nas laterais (desktop) e topo/baixo (mobile) - apenas durante loading */}
+      {isLoading && (
+        <>
+          <div className="hidden lg:block absolute left-4 top-1/2 -translate-y-1/2 space-y-8">
+            {sideIcons.slice(0, 5).map(({ Icon, color, delay }, index) => (
+              <motion.div
+                key={`left-${index}`}
+                initial={{ x: -100, opacity: 0 }}
+                animate={{
+                  x: [0, 20, 0],
+                  opacity: [0.3, 1, 0.3],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  delay: delay,
+                  ease: "easeInOut",
+                }}
+              >
+                <div className="bg-muted/30 p-3 rounded-2xl">
+                  <Icon className={`h-7 w-7 ${color}`} />
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="hidden lg:block absolute right-4 top-1/2 -translate-y-1/2 space-y-8">
+            {sideIcons.slice(5).map(({ Icon, color, delay }, index) => (
+              <motion.div
+                key={`right-${index}`}
+                initial={{ x: 100, opacity: 0 }}
+                animate={{
+                  x: [0, -20, 0],
+                  opacity: [0.3, 1, 0.3],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  delay: delay,
+                  ease: "easeInOut",
+                }}
+              >
+                <div className="bg-muted/30 p-3 rounded-2xl">
+                  <Icon className={`h-7 w-7 ${color}`} />
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Animações no topo e baixo para mobile - apenas durante loading */}
+          <div className="lg:hidden absolute top-4 left-1/2 -translate-x-1/2 flex gap-4">
+            {sideIcons.slice(0, 4).map(({ Icon, color, delay }, index) => (
+              <motion.div
+                key={`top-${index}`}
+                initial={{ y: -50, opacity: 0 }}
+                animate={{
+                  y: [0, 15, 0],
+                  opacity: [0.3, 1, 0.3],
+                }}
+                transition={{
+                  duration: 2.5,
+                  repeat: Infinity,
+                  delay: delay * 0.5,
+                  ease: "easeInOut",
+                }}
+              >
+                <div className="bg-muted/30 p-2 rounded-xl">
+                  <Icon className={`h-5 w-5 ${color}`} />
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="lg:hidden absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-4">
+            {sideIcons.slice(5).map(({ Icon, color, delay }, index) => (
+              <motion.div
+                key={`bottom-${index}`}
+                initial={{ y: 50, opacity: 0 }}
+                animate={{
+                  y: [0, -15, 0],
+                  opacity: [0.3, 1, 0.3],
+                }}
+                transition={{
+                  duration: 2.5,
+                  repeat: Infinity,
+                  delay: delay * 0.5,
+                  ease: "easeInOut",
+                }}
+              >
+                <div className="bg-muted/30 p-2 rounded-xl">
+                  <Icon className={`h-5 w-5 ${color}`} />
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </>
+      )}
+
+      <div className="max-w-md w-full space-y-8 relative z-10">
         <div className="text-center">
           <Link href="/" className="inline-flex items-center gap-2 font-bold text-2xl mb-8">
             <div className="bg-emerald-100 dark:bg-emerald-900/30 p-2 rounded-xl">
@@ -164,7 +276,7 @@ export function LoginForm() {
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <AuthLoading />
                   Entrando...
                 </>
               ) : (

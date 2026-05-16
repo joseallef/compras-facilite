@@ -58,7 +58,7 @@ export function EditPageClient() {
 
   useEffect(() => {
     if (isLoaded && !listId) {
-      router.replace("/shopping");
+      router.replace("/mercado");
     }
   }, [isLoaded, listId, router]);
 
@@ -177,7 +177,7 @@ export function EditPageClient() {
       }
 
       toast.success("Compra finalizada e registrada no financeiro!");
-      router.push("/shopping");
+      router.push("/mercado");
     } catch (error) {
       console.error("[handleFinishShopping]", error);
       const message = error instanceof Error ? error.message : "Erro ao finalizar compra";
@@ -214,7 +214,7 @@ export function EditPageClient() {
         <div className="text-center">
           <h2 className="text-2xl font-bold">Lista não encontrada</h2>
           <Button
-            onClick={() => router.push("/shopping")}
+            onClick={() => router.push("/mercado")}
             className="mt-4 text-emerald-600 hover:text-emerald-700 font-medium"
           >
             Voltar para minhas listas
@@ -248,7 +248,7 @@ export function EditPageClient() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
           <div className="flex items-center gap-4 flex-1">
             <Button
-              onClick={() => router.push("/shopping")}
+              onClick={() => router.push("/mercado")}
               className="bg-card p-2.5 rounded-2xl border border-border text-muted hover:text-emerald-600 hover:border-emerald-200 dark:hover:border-emerald-800 transition-all active:scale-90"
             >
               <ArrowLeft size={20} />

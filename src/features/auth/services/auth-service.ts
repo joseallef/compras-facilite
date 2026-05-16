@@ -23,7 +23,7 @@ export const authService = {
   },
 
   async logout() {
-    await signOut({ callbackUrl: "/login" });
+    await signOut({ redirect: true, callbackUrl: "/login" });
   },
 
   async register(data: Parameters<typeof registerAction>[0]) {

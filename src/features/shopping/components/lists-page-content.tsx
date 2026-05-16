@@ -146,7 +146,7 @@ export function ListsPageContent() {
     try {
       const newList = await createList("Nova Lista", false);
       toast.success("Lista criada com sucesso!");
-      router.push(`/shopping/edit/${newList.id}`);
+      router.push(`/mercado/edit/${newList.id}`);
     } catch {
       toast.error("Erro ao criar lista");
     } finally {
@@ -162,7 +162,7 @@ export function ListsPageContent() {
       const listName = `Cópia de ${originalList?.name || "Lista"}`;
       const newList = await duplicateList(listId, listName);
       toast.success("Lista duplicada com sucesso!");
-      router.push(`/shopping/edit/${newList.id}`);
+      router.push(`/mercado/edit/${newList.id}`);
     } catch {
       toast.error("Erro ao duplicar lista");
     } finally {
@@ -212,7 +212,7 @@ export function ListsPageContent() {
                   key={list.id}
                   list={list}
                   onDelete={() => setListToDelete(list.id)}
-                  onClick={() => router.push(`/shopping/edit/${list.id}`)}
+                  onClick={() => router.push(`/mercado/edit/${list.id}`)}
                 />
               ))}
             </div>

@@ -12,7 +12,7 @@ export const authConfig = {
       }
       
       const now = Math.floor(Date.now() / 1000);
-      const maxAge = 60; // * 60 * 24 * 7; // 7 dias em segundos
+      const maxAge = 60 * 60 * 24; // 1 dia em segundos (padrão)
       
       if (!token.iat) {
         token.iat = now;
@@ -24,12 +24,12 @@ export const authConfig = {
     },
     async session({ session, token }) {
       if (!token.id || !token.email) {
-        return session;
+        return { ...session, user: null };
       }
       
       const now = Math.floor(Date.now() / 1000);
       if (token.exp && token.exp < now) {
-        return session;
+        return { ...session, user: null };
       }
       
       if (session.user) {
@@ -46,10 +46,10 @@ export const authConfig = {
   },
   session: {
     strategy: "jwt",
-    maxAge: 60, // * 60 * 24 * 7, // 7 dias
+    maxAge: 60 * 60 * 24, // 1 dia (padrão)
   },
   jwt: {
-    maxAge: 60, // * 60 * 24 * 7, // 7 dias
+    maxAge: 60 * 60 * 24, // 1 dia (padrão)
   },
   secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
 } satisfies NextAuthConfig;

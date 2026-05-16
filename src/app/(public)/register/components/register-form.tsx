@@ -73,7 +73,7 @@ export function RegisterForm() {
 
       // Auto-login after registration
       await login(emailValue, passwordValue);
-      router.push("/shopping");
+      router.push("/mercado");
     } catch (err) {
       const errorMessage =
         err instanceof Error

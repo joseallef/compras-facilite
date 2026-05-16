@@ -86,7 +86,7 @@ export async function duplicateShoppingList(listId: string, newName: string) {
       });
     }
 
-    revalidatePath("/shopping");
+    revalidatePath("/mercado");
     return await prisma.shoppingList.findUnique({
       where: { id: newList.id },
       include: { items: true },
@@ -136,7 +136,7 @@ export async function deleteShoppingList(listId: string) {
     if (result.count === 0) {
       throw new Error("Not found");
     }
-    revalidatePath("/shopping");
+    revalidatePath("/mercado");
   } catch (error) {
     console.error("Error deleting shopping list:", error);
     throw new Error("Failed to delete list");
@@ -155,7 +155,7 @@ export async function updateShoppingList(listId: string, data: {
       throw new Error("Not found");
     }
     revalidatePath("/shopping");
-    revalidatePath(`/shopping/edit/${listId}`);
+    revalidatePath(`/mercado/edit/${listId}`);
     return await prisma.shoppingList.findUnique({ where: { id: listId } });
   } catch (error) {
     console.error("Error updating shopping list:", error);
@@ -240,7 +240,7 @@ export async function addShoppingItem(listId: string, data: {
         shoppingListId: listId,
       },
     });
-    revalidatePath(`/shopping/edit/${listId}`);
+    revalidatePath(`/mercado/edit/${listId}`);
     return item;
   } catch (error) {
     console.error("Error adding shopping item:", error);
@@ -261,7 +261,7 @@ export async function removeShoppingItem(listId: string, itemId: string) {
     if (result.count === 0) {
       throw new Error("Not found");
     }
-    revalidatePath(`/shopping/edit/${listId}`);
+    revalidatePath(`/mercado/edit/${listId}`);
   } catch (error) {
     console.error("Error removing shopping item:", error);
     throw new Error("Failed to remove item");
@@ -282,7 +282,7 @@ export async function toggleShoppingItem(listId: string, itemId: string, isPicke
     if (result.count === 0) {
       throw new Error("Not found");
     }
-    revalidatePath(`/shopping/edit/${listId}`);
+    revalidatePath(`/mercado/edit/${listId}`);
     const item = await prisma.shoppingItem.findUnique({ where: { id: itemId } });
     if (!item) {
       throw new Error("Not found");
@@ -316,7 +316,7 @@ export async function updateShoppingItem(listId: string, itemId: string, data: {
     if (result.count === 0) {
       throw new Error("Not found");
     }
-    revalidatePath(`/shopping/edit/${listId}`);
+    revalidatePath(`/mercado/edit/${listId}`);
     const item = await prisma.shoppingItem.findUnique({ where: { id: itemId } });
     if (!item) {
       throw new Error("Not found");
@@ -342,7 +342,7 @@ export async function updateShoppingItemQuantity(listId: string, itemId: string,
     if (result.count === 0) {
       throw new Error("Not found");
     }
-    revalidatePath(`/shopping/edit/${listId}`);
+    revalidatePath(`/mercado/edit/${listId}`);
     const item = await prisma.shoppingItem.findUnique({ where: { id: itemId } });
     if (!item) {
       throw new Error("Not found");

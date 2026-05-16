@@ -39,7 +39,7 @@ function ScrollToTopContent() {
 
   // 3. Calculate dynamic position
   // If we are in the edit page, there is an extra bottom bar in market mode
-  const isEditPage = pathname?.startsWith("/shopping/edit");
+  const isEditPage = pathname?.startsWith("/mercado/edit");
   const isMarketMode = searchParams?.get("mode") === "market";
   const hasBottomBar = isEditPage && isMarketMode;
 

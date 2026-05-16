@@ -23,7 +23,7 @@ export function CreatePageClient() {
       }
       
       toast.success("Lista criada com sucesso!");
-      router.push("/shopping");
+      router.push("/mercado");
     } catch (error) {
       console.error("[handleSubmit]", error);
       const message = error instanceof Error ? error.message : "Erro ao criar lista";

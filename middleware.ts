@@ -25,26 +25,32 @@ const { auth } = NextAuth(authConfig);
 
 export default auth(async (req) => {
   const isLoggedIn = isValidSession(req.auth);
-  const isPublicRoute = ["/login", "/register", "/forgot-password", "/reset-password", "/", "/auth/error"].some(
+  const publicRoutes = ["/login", "/register", "/forgot-password", "/reset-password", "/", "/auth/error"];
+  const isPublicRoute = publicRoutes.some(
+    (path) => req.nextUrl.pathname === path || 
+              (path !== "/" && req.nextUrl.pathname.startsWith(path + "/"))
+  );
+  
+  const protectedRoutes = ["/dashboard", "/mercado", "/financas"];
+  const isProtectedRoute = protectedRoutes.some(
     (path) => req.nextUrl.pathname.startsWith(path)
   );
-  const isProtectedRoute = req.nextUrl.pathname.startsWith("/dashboard") ||
-    req.nextUrl.pathname.startsWith("/shopping") ||
-    req.nextUrl.pathname.startsWith("/financas");
 
   if (isProtectedRoute && !isLoggedIn) {
     const newUrl = new URL("/login", req.nextUrl.origin);
-    newUrl.searchParams.set("callbackUrl", req.nextUrl.pathname + req.nextUrl.search);
+    const hasExpiredSession = hadSessionCookie(req);
     
-    if (hadSessionCookie(req)) {
+    if (hasExpiredSession) {
+      newUrl.searchParams.set("callbackUrl", req.nextUrl.pathname + req.nextUrl.search);
       newUrl.searchParams.set("session", "expired");
     }
     
     const response = NextResponse.redirect(newUrl);
     
     response.cookies.delete("next-auth.session-token");
-    response.cookies.delete("__Secure-next-auth.session-token");
     response.cookies.delete("next-auth.csrf-token");
+    response.cookies.delete("__Secure-next-auth.session-token");
+    response.cookies.delete("__Secure-next-auth.csrf-token");
     
     return response;
   }

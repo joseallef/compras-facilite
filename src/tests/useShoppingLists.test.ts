@@ -65,7 +65,7 @@ describe("useShoppingLists Hook", () => {
 
     expect(result.current.lists).toHaveLength(1);
     expect(result.current.lists[0].name).toBe("Lista 1");
-    expect(mockedServices.getShoppingLists).toHaveBeenCalledWith("user-1");
+    expect(mockedServices.getShoppingLists).toHaveBeenCalledWith();
   });
 
   it("should create a new list", async () => {
@@ -97,7 +97,7 @@ describe("useShoppingLists Hook", () => {
       created = await result.current.createList("Nova Lista");
     });
 
-    expect(mockedServices.createShoppingList).toHaveBeenCalledWith("user-1", "Nova Lista");
+    expect(mockedServices.createShoppingList).toHaveBeenCalledWith("Nova Lista");
     expect(created).toBeDefined();
     expect(result.current.lists).toHaveLength(1);
   });

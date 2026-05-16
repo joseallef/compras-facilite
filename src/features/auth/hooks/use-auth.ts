@@ -2,7 +2,7 @@
 
 import { authService } from "@/features/auth/services/auth-service";
 import { User } from "@/features/auth/types/auth-types";
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
@@ -11,6 +11,8 @@ function isValidUser(user: any): user is User {
   return !!user?.id && !!user?.email;
 }
 
+const MANUAL_LOGOUT_KEY = "auth:manual-logout-in-progress";
+
 export function useAuth() {
   const { data: session, status } = useSession();
   const pathname = usePathname() ?? "";
@@ -18,6 +20,7 @@ export function useAuth() {
   const searchParams = useSearchParams();
   const wasAuthenticated = useRef(false);
   const redirectInProgress = useRef(false);
+  const isMounted = useRef(true);
 
   const user: User | null =
     session?.user && isValidUser(session.user)
@@ -32,14 +35,20 @@ export function useAuth() {
   const isLoading = status === "loading";
 
   useEffect(() => {
-    if (isAuthenticated) {
-      wasAuthenticated.current = true;
-      redirectInProgress.current = false;
-    }
-  }, [isAuthenticated]);
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   useEffect(() => {
-    if (isLoading || redirectInProgress.current) {
+    const manualLogoutInProgress = sessionStorage.getItem(MANUAL_LOGOUT_KEY) === "true";
+    
+    if (manualLogoutInProgress) {
+      return;
+    }
+
+    if (isLoading || redirectInProgress.current || !isMounted.current) {
       return;
     }
 
@@ -51,10 +60,21 @@ export function useAuth() {
         redirectInProgress.current = true;
         handleRedirectToLogin();
       }
+    } else {
+      wasAuthenticated.current = true;
+      redirectInProgress.current = false;
+      sessionStorage.removeItem(MANUAL_LOGOUT_KEY);
     }
   }, [isAuthenticated, isLoading, pathname]);
 
   const handleRedirectToLogin = async () => {
+    const manualLogoutInProgress = sessionStorage.getItem(MANUAL_LOGOUT_KEY) === "true";
+    
+    if (manualLogoutInProgress) {
+      redirectInProgress.current = false;
+      return;
+    }
+    
     if (pathname === "/login") {
       redirectInProgress.current = false;
       return;
@@ -69,7 +89,6 @@ export function useAuth() {
     }
     
     if (wasAuthenticated.current) {
-      await signOut({ redirect: false });
       toast.warning("Sua sessão expirou. Por favor, faça login novamente.");
       loginUrl.searchParams.set("session", "expired");
     }
@@ -82,7 +101,9 @@ export function useAuth() {
   };
 
   const logout = async () => {
+    sessionStorage.setItem(MANUAL_LOGOUT_KEY, "true");
     wasAuthenticated.current = false;
+    redirectInProgress.current = true;
     await authService.logout();
   };
 
