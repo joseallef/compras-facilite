@@ -154,7 +154,7 @@ export async function updateShoppingList(listId: string, data: {
     if (result.count === 0) {
       throw new Error("Not found");
     }
-    revalidatePath("/shopping");
+    revalidatePath("/mercado");
     revalidatePath(`/mercado/edit/${listId}`);
     return await prisma.shoppingList.findUnique({ where: { id: listId } });
   } catch (error) {
@@ -202,7 +202,7 @@ export async function createShoppingListFromTemplate(name: string, items: {
       });
     }
 
-    revalidatePath("/shopping");
+    revalidatePath("/mercado");
     return await prisma.shoppingList.findUnique({
       where: { id: list.id },
       include: { items: true },

@@ -49,6 +49,7 @@ interface CreateListModalProps {
   lists: any[];
   onDuplicate: (listId: string) => void;
   onCreateFromScratch: () => void;
+  onCreateFromTemplate: () => void;
   isLoading: boolean;
 }
 
@@ -58,6 +59,7 @@ function CreateListModal({
   lists,
   onDuplicate,
   onCreateFromScratch,
+  onCreateFromTemplate,
   isLoading,
 }: CreateListModalProps) {
   return (
@@ -75,6 +77,22 @@ function CreateListModal({
             <div className="text-left">
               <p className="font-bold text-base">Criar do zero</p>
               <p className="text-xs text-white/70">Uma lista completamente nova</p>
+            </div>
+          </div>
+        </Button>
+
+        <Button
+          onClick={onCreateFromTemplate}
+          className="w-full bg-gradient-to-r from-teal-600 to-emerald-600 text-white hover:from-teal-700 hover:to-emerald-700 justify-start h-14 px-4 rounded-2xl shadow-lg shadow-teal-600/20"
+          disabled={isLoading}
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+              <ShoppingCart size={22} className="text-white" />
+            </div>
+            <div className="text-left">
+              <p className="font-bold text-base">Lista padrão mensal</p>
+              <p className="text-xs text-white/70">Lista com itens básicos mensais</p>
             </div>
           </div>
         </Button>
@@ -145,6 +163,20 @@ export function ListsPageContent() {
     setIsCreating(true);
     try {
       const newList = await createList("Nova Lista", false);
+      toast.success("Lista criada com sucesso!");
+      router.push(`/mercado/edit/${newList.id}`);
+    } catch {
+      toast.error("Erro ao criar lista");
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const handleCreateFromTemplate = async () => {
+    setShowCreateModal(false);
+    setIsCreating(true);
+    try {
+      const newList = await createList("Lista Mensal Padrão", true);
       toast.success("Lista criada com sucesso!");
       router.push(`/mercado/edit/${newList.id}`);
     } catch {
@@ -247,6 +279,7 @@ export function ListsPageContent() {
         lists={lists}
         onDuplicate={handleDuplicate}
         onCreateFromScratch={handleCreateFromScratch}
+        onCreateFromTemplate={handleCreateFromTemplate}
         isLoading={isCreating}
       />
     </div>
