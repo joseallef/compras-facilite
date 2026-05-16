@@ -465,20 +465,22 @@ export function DashboardSkeleton() {
 
 export function MarketEditPageSkeleton() {
   return (
-    <main className="max-w-7xl mx-auto w-full p-4 md:p-8 space-y-6 pb-24 pt-4 md:pt-0">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
-        <div className="flex items-center gap-4 flex-1">
-          <Skeleton className="h-11 w-11 rounded-2xl bg-muted/40" />
-          <div className="flex-1 space-y-2">
-            <Skeleton className="h-9 w-56 rounded-xl bg-muted/40" />
-            <Skeleton className="h-4 w-32 rounded bg-muted/40" />
+    <main className="max-w-7xl mx-auto w-full p-4 md:p-8">
+      <div className="space-y-6 pb-24 pt-4 md:pt-0">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
+          <div className="flex items-center gap-4 flex-1">
+            {/* Botão de voltar é estático, não precisa de skeleton */}
+            <div className="h-11 w-11 rounded-2xl bg-card border border-border flex items-center justify-center">
+              <div className="h-5 w-5 text-muted" />
+            </div>
+            <div className="flex-1 space-y-2">
+              <Skeleton className="h-9 w-56 rounded-xl bg-muted/40" />
+              <Skeleton className="h-4 w-32 rounded bg-muted/40" />
+            </div>
           </div>
+          {/* Botão de mercado é estático, não precisa de skeleton */}
+          <div className="h-11 w-40 rounded-2xl bg-emerald-600/20" />
         </div>
-
-        <div className="flex items-center gap-2">
-          <Skeleton className="h-11 w-40 rounded-2xl bg-muted/40" />
-        </div>
-      </div>
 
       <div className="bg-card p-4 rounded-3xl border border-border shadow-sm flex items-center gap-4">
         <div className="flex-1 h-3 bg-muted/20 rounded-full overflow-hidden border border-muted/10">
@@ -529,6 +531,7 @@ export function MarketEditPageSkeleton() {
           </div>
           <Skeleton className="h-12 w-44 rounded-2xl bg-muted/40" />
         </div>
+      </div>
       </div>
     </main>
   );
