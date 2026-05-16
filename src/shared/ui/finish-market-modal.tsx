@@ -6,19 +6,19 @@ import { Modal } from "@/shared/ui/modal";
 import { CheckCircle2, DollarSign } from "lucide-react";
 import { useState } from "react";
 
-interface FinishShoppingModalProps {
+interface FinishMarketModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: (totalValue: number) => Promise<void>;
   isLoading?: boolean;
 }
 
-export function FinishShoppingModal({
+export function FinishMarketModal({
   isOpen,
   onClose,
   onConfirm,
   isLoading = false,
-}: FinishShoppingModalProps) {
+}: FinishMarketModalProps) {
   const [value, setValue] = useState<string>("");
 
   const formatCurrency = (val: string) => {

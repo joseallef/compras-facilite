@@ -4,7 +4,7 @@ import { useAuth } from "@/features/auth/hooks/use-auth";
 import { Footer } from "@/shared/layout/footer";
 import { Header } from "@/shared/layout/header";
 import { MobileNav } from "@/shared/layout/mobile-nav";
-import { DashboardSkeleton, ShoppingListEditPageSkeleton, ShoppingListFormPageSkeleton } from "@/shared/ui/skeleton";
+import { DashboardSkeleton, MarketEditPageSkeleton, MarketFormPageSkeleton } from "@/shared/ui/skeleton";
 import { usePathname, useRouter } from "next/navigation";
 import { ReactNode, useEffect, useRef } from "react";
 
@@ -30,11 +30,11 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
   const renderContent = () => {
     if (isLoading) {
       if (pathname.startsWith("/mercado/create")) {
-        return <ShoppingListFormPageSkeleton />;
+        return <MarketFormPageSkeleton />;
       }
 
       if (pathname.startsWith("/mercado/edit")) {
-        return <ShoppingListEditPageSkeleton />;
+        return <MarketEditPageSkeleton />;
       }
 
       if (pathname.startsWith("/dashboard")) {

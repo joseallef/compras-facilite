@@ -4,16 +4,16 @@ import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/utils/cn";
 import { motion } from "framer-motion";
 import { CheckCircle2, Circle, Edit2, MinusCircle, PlusCircle, Trash2 } from "lucide-react";
-import { ShoppingItemRowProps } from "../types";
+import { MarketItemRowProps } from "../types";
 
-export function ShoppingItemRow({
+export function MarketItemRow({
   item,
   isAtMarket,
   onToggle,
   onQuantityChange,
   onRemove,
   onEdit,
-}: ShoppingItemRowProps) {
+}: MarketItemRowProps) {
   // 1. STATES
 
   // 2. VARIÁVEIS

@@ -2,27 +2,27 @@
 
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import {
-    addShoppingItem,
-    createShoppingList,
-    createShoppingListFromTemplate,
-    deleteShoppingList,
-    duplicateShoppingList,
-    getShoppingListForMonth,
-    getShoppingLists,
-    removeShoppingItem,
-    toggleShoppingItem,
-    updateShoppingItem,
-    updateShoppingItemQuantity,
-    updateShoppingList
-} from "@/features/shopping/services/shopping-lists-service";
-import { ShoppingItem, ShoppingList } from "@/features/shopping/types";
+  addShoppingItem,
+  createShoppingList,
+  createShoppingListFromTemplate,
+  deleteShoppingList,
+  duplicateShoppingList,
+  getShoppingListForMonth,
+  getShoppingLists,
+  removeShoppingItem,
+  toggleShoppingItem,
+  updateShoppingItem,
+  updateShoppingItemQuantity,
+  updateShoppingList
+} from "@/features/mercado/services/market-lists-service";
+import { MarketItem, MarketList } from "@/features/mercado/types";
 import { MONTHLY_SHOPPING_TEMPLATE } from "@/shared/constants/templates";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
-export function useShoppingLists() {
+export function useMarketLists() {
   const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
-  const [lists, setLists] = useState<ShoppingList[]>([]);
+  const [lists, setLists] = useState<MarketList[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
   // Fila de sincronização para evitar múltiplas requests simultâneas
@@ -35,7 +35,7 @@ export function useShoppingLists() {
     try {
       const data = await getShoppingLists();
       // Prisma returns Date objects, which is fine for date-fns
-      setLists(data as unknown as ShoppingList[]);
+      setLists(data as unknown as MarketList[]);
     } catch (error) {
       console.error("Failed to fetch lists", error);
       const message = error instanceof Error ? error.message : "Erro ao carregar listas";
@@ -75,7 +75,7 @@ export function useShoppingLists() {
       
       // Update local state or just refetch
       await fetchLists();
-      return newList as unknown as ShoppingList;
+      return newList as unknown as MarketList;
     } catch (error) {
       console.error("Failed to create list", error);
       throw error;
@@ -96,7 +96,7 @@ export function useShoppingLists() {
     }
   };
 
-  const updateList = async (id: string, updates: Partial<ShoppingList>) => {
+  const updateList = async (id: string, updates: Partial<MarketList>) => {
     try {
       const { name, status, totalValue } = updates;
       await updateShoppingList(id, { name, status, totalValue });
@@ -108,7 +108,7 @@ export function useShoppingLists() {
     }
   };
 
-  const addItemToList = async (listId: string, item: Omit<ShoppingItem, "id" | "isPicked">) => {
+  const addItemToList = async (listId: string, item: Omit<MarketItem, "id" | "isPicked">) => {
     try {
       const newItem = await addShoppingItem(listId, {
         name: item.name,
@@ -121,7 +121,7 @@ export function useShoppingLists() {
         if (l.id === listId) {
           return {
             ...l,
-            items: [...(l.items || []), newItem as unknown as ShoppingItem],
+            items: [...(l.items || []), newItem as unknown as MarketItem],
             updatedAt: new Date()
           };
         }
@@ -139,7 +139,7 @@ export function useShoppingLists() {
         if (l.id === listId) {
           return {
             ...l,
-            items: l.items.filter((i: ShoppingItem) => i.id !== itemId),
+            items: l.items.filter((i: MarketItem) => i.id !== itemId),
             updatedAt: new Date()
           };
         }
@@ -152,7 +152,7 @@ export function useShoppingLists() {
 
   const toggleItemPicked = async (listId: string, itemId: string) => {
     const list = lists.find((l) => l.id === listId);
-    const item = list?.items.find((i: ShoppingItem) => i.id === itemId);
+    const item = list?.items.find((i: MarketItem) => i.id === itemId);
 
     if (!item) return;
 
@@ -164,7 +164,7 @@ export function useShoppingLists() {
         if (l.id === listId) {
           return {
             ...l,
-            items: l.items.map((i: ShoppingItem) =>
+            items: l.items.map((i: MarketItem) =>
               i.id === itemId ? { ...i, isPicked: newIsPicked } : i
             ),
             updatedAt: new Date(),
@@ -193,7 +193,7 @@ export function useShoppingLists() {
             if (l.id === listId) {
               return {
                 ...l,
-                items: l.items.map((i: ShoppingItem) =>
+                items: l.items.map((i: MarketItem) =>
                   i.id === itemId ? { ...i, isPicked: !newIsPicked } : i
                 ),
                 updatedAt: new Date(),
@@ -214,7 +214,7 @@ export function useShoppingLists() {
     quantity: number
   ) => {
     const list = lists.find((l) => l.id === listId);
-    const item = list?.items.find((i: ShoppingItem) => i.id === itemId);
+    const item = list?.items.find((i: MarketItem) => i.id === itemId);
     if (!item) return;
 
     const oldQuantity = item.quantity;
@@ -225,7 +225,7 @@ export function useShoppingLists() {
         if (l.id === listId) {
           return {
             ...l,
-            items: l.items.map((i: ShoppingItem) =>
+            items: l.items.map((i: MarketItem) =>
               i.id === itemId ? { ...i, quantity } : i
             ),
             updatedAt: new Date(),
@@ -245,7 +245,7 @@ export function useShoppingLists() {
           if (l.id === listId) {
             return {
               ...l,
-              items: l.items.map((i: ShoppingItem) =>
+              items: l.items.map((i: MarketItem) =>
                 i.id === itemId ? { ...i, quantity: oldQuantity } : i
               ),
               updatedAt: new Date(),
@@ -257,7 +257,7 @@ export function useShoppingLists() {
     }
   };
 
-  const updateItemInList = async (listId: string, itemId: string, data: Partial<ShoppingItem>) => {
+  const updateItemInList = async (listId: string, itemId: string, data: Partial<MarketItem>) => {
     try {
       const updatedItem = await updateShoppingItem(listId, itemId, {
         name: data.name,
@@ -270,8 +270,8 @@ export function useShoppingLists() {
         if (l.id === listId) {
           return {
             ...l,
-            items: l.items.map((i: ShoppingItem) => 
-              i.id === itemId ? { ...i, ...updatedItem as unknown as ShoppingItem } : i
+            items: l.items.map((i: MarketItem) => 
+              i.id === itemId ? { ...i, ...updatedItem as unknown as MarketItem } : i
             ),
             updatedAt: new Date()
           };
@@ -288,7 +288,7 @@ export function useShoppingLists() {
     try {
       const newList = await duplicateShoppingList(listId, newName);
       await fetchLists();
-      return newList as unknown as ShoppingList;
+      return newList as unknown as MarketList;
     } catch (error) {
       console.error("Failed to duplicate list", error);
       throw error;

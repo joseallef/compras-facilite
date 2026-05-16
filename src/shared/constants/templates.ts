@@ -1,6 +1,6 @@
-import { ShoppingItem } from "../types";
+import { MarketItem } from "@/shared/types";
 
-export const MONTHLY_SHOPPING_TEMPLATE: Omit<ShoppingItem, "id" | "isPicked">[] = [
+export const MONTHLY_SHOPPING_TEMPLATE: Omit<MarketItem, "id" | "isPicked">[] = [
   // Alimentos
   { name: "Arroz (5kg)", quantity: 2, unit: "pct", category: "Alimentos" },
   { name: "Feijão (1kg)", quantity: 4, unit: "pct", category: "Alimentos" },

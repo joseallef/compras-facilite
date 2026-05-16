@@ -1,19 +1,17 @@
 "use client";
 
-import { useShoppingLists } from "@/features/shopping/hooks/use-shopping-lists";
+import { useMarketLists } from "@/features/mercado/hooks/use-market-lists";
+import { MarketList } from "@/shared/types";
 import { Button } from "@/shared/ui/button";
 import { ConfirmModal } from "@/shared/ui/confirm-modal";
 import { Modal } from "@/shared/ui/modal";
-import {
-  ShoppingListCardSkeleton
-} from "@/shared/ui/skeleton";
+import { MarketListCardSkeleton } from "@/shared/ui/skeleton";
 import { motion } from "framer-motion";
 import { Copy, Plus, ShoppingCart } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { ShoppingListCard } from "./shopping-list-card";
-
+import { MarketListCard } from "./market-list-card";
 function ListsPageHeader({
   isCreating,
   onCreateList,
@@ -46,7 +44,7 @@ function ListsPageHeader({
 interface CreateListModalProps {
   isOpen: boolean;
   onClose: () => void;
-  lists: any[];
+  lists: MarketList[];
   onDuplicate: (listId: string) => void;
   onCreateFromScratch: () => void;
   onCreateFromTemplate: () => void;
@@ -108,7 +106,7 @@ function CreateListModal({
             </div>
 
             <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
-              {lists.map((list) => (
+              {lists.map((list: MarketList) => (
                 <button
                   key={list.id}
                   type="button"
@@ -153,7 +151,7 @@ function CreateListModal({
 
 export function ListsPageContent() {
   const router = useRouter();
-  const { lists, isLoaded, createList, deleteList, duplicateList } = useShoppingLists();
+  const { lists, isLoaded, createList, deleteList, duplicateList } = useMarketLists();
   const [isCreating, setIsCreating] = useState(false);
   const [listToDelete, setListToDelete] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -212,7 +210,7 @@ export function ListsPageContent() {
       {!isLoaded ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
-            <ShoppingListCardSkeleton key={i} />
+            <MarketListCardSkeleton key={i} />
           ))}
         </div>
       ) : (
@@ -240,7 +238,7 @@ export function ListsPageContent() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {lists.map((list) => (
-                <ShoppingListCard
+                <MarketListCard
                   key={list.id}
                   list={list}
                   onDelete={() => setListToDelete(list.id)}

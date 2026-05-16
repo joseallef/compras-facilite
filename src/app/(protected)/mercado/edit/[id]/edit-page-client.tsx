@@ -1,28 +1,33 @@
 "use client";
 
-import { AddItemForm } from "@/features/shopping/components/add-item-form";
-import { CategorySection } from "@/features/shopping/components/category-section";
-import { useListDetail } from "@/features/shopping/hooks/use-list-detail";
+import { AddItemForm } from "@/features/mercado/components/add-item-form";
+import { CategorySection } from "@/features/mercado/components/category-section";
+import { useListDetail } from "@/features/mercado/hooks/use-list-detail";
 import {
   createTransaction,
   getTransactionCategories
 } from "@/features/transactions/services/transaction-service";
-import { Category, ShoppingItem } from "@/shared/types";
+import { Category, MarketItem } from "@/shared/types";
 import { Button } from "@/shared/ui/button";
 import { ConfirmModal } from "@/shared/ui/confirm-modal";
 import { EditItemModal } from "@/shared/ui/edit-item-modal";
-import { FinishShoppingModal } from "@/shared/ui/finish-shopping-modal";
+import { FinishMarketModal } from "@/shared/ui/finish-market-modal";
 import { Input } from "@/shared/ui/input";
-import { ShoppingListEditPageSkeleton } from "@/shared/ui/skeleton";
+import { MarketEditPageSkeleton } from "@/shared/ui/skeleton";
 import { cn } from "@/shared/utils/cn";
 import { normalizeString } from "@/shared/utils/string";
-import { TransactionType } from "@prisma/client";
 import { motion } from "framer-motion";
 import { ArrowLeft, CheckCircle2, DollarSign, Lock, Search, ShoppingCart, X } from "lucide-react";
 import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useDebouncedCallback } from "use-debounce";
+
+const TransactionType = {
+  INCOME: "INCOME",
+  EXPENSE: "EXPENSE",
+} as const;
+type TransactionType = typeof TransactionType[keyof typeof TransactionType];
 
 export function EditPageClient() {
   const router = useRouter();
@@ -52,7 +57,7 @@ export function EditPageClient() {
   const [isFinishModalOpen, setIsFinishModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<ShoppingItem | null>(null);
+  const [editingItem, setEditingItem] = useState<MarketItem | null>(null);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -67,7 +72,7 @@ export function EditPageClient() {
     if (!searchQuery.trim()) return list.items;
     
     const query = normalizeString(searchQuery);
-    return list.items.filter((item: ShoppingItem) => 
+    return list.items.filter((item: MarketItem) => 
       normalizeString(item.name).includes(query) || 
       normalizeString(item.category).includes(query)
     );
@@ -97,7 +102,7 @@ export function EditPageClient() {
     }
   };
 
-  const handleEditItem = (item: ShoppingItem) => {
+  const handleEditItem = (item: MarketItem) => {
     setEditingItem(item);
     setIsEditModalOpen(true);
   };
@@ -205,7 +210,7 @@ export function EditPageClient() {
   };
 
   if (!isLoaded) {
-    return <ShoppingListEditPageSkeleton />;
+    return <MarketEditPageSkeleton />;
   }
 
   if (!listId || !list) {
@@ -295,7 +300,7 @@ export function EditPageClient() {
                   "flex items-center gap-2 px-6 py-2.5 rounded-2xl font-bold transition-all shadow-lg active:scale-95",
                   isAtMarket
                     ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800"
-                    : "bg-emerald-600 text-white shadow-emerald-600/20 hover:bg-emerald-700"
+                    : "bg-emerald-600 text-white shadow-emerald-600/20 hover:bg-emerald-70"
                 )}
               >
                 <ShoppingCart size={20} />
@@ -369,7 +374,7 @@ export function EditPageClient() {
           onToggle={(itemId: string) => !isClosed && toggleItemPicked(listId, itemId)}
           onQuantityChange={(itemId: string, qty: number) => !isClosed && updateItemQuantity(listId, itemId, qty)}
           onRemove={(itemId: string) => !isClosed && handleRemoveItemRequest(itemId)}
-          onEdit={(item: ShoppingItem) => !isClosed && handleEditItem(item)}
+          onEdit={(item: MarketItem) => !isClosed && handleEditItem(item)}
         />
 
         {searchQuery && filteredItems.length === 0 && (
@@ -411,7 +416,7 @@ export function EditPageClient() {
             {pickedCount === totalCount && totalCount > 0 && !isClosed ? (
               <Button
                 onClick={() => setIsFinishModalOpen(true)}
-                className="bg-emerald-600 text-white px-8 py-3 rounded-2xl font-bold flex items-center gap-2 shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-all active:scale-95"
+                className="bg-emerald-600 text-white px-8 py-3 rounded-2xl font-bold flex items-center gap-2 shadow-lg shadow-emerald-600/20 hover:bg-emerald-70 transition-all active:scale-95"
               >
                 <CheckCircle2 size={20} />
                 Finalizar Compra
@@ -430,7 +435,7 @@ export function EditPageClient() {
         </div>
       )}
 
-      <FinishShoppingModal
+      <FinishMarketModal
         isOpen={isFinishModalOpen}
         onClose={() => setIsFinishModalOpen(false)}
         onConfirm={handleFinishShopping}

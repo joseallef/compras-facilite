@@ -1,9 +1,9 @@
-import { Category, ShoppingItem, ShoppingList } from "@/shared/types";
+import { Category, MarketItem, MarketList } from "@/shared/types";
 
-export type { Category, ShoppingItem, ShoppingList };
+export type { Category, MarketItem, MarketList };
 
-export interface ShoppingListCardProps {
-  list: ShoppingList;
+export interface MarketListCardProps {
+  list: MarketList;
   onClick: () => void;
   onDelete: () => void;
 }
@@ -14,16 +14,16 @@ export interface AddItemFormProps {
 }
 
 export interface CategorySectionProps {
-  items: ShoppingItem[];
+  items: MarketItem[];
   isAtMarket: boolean;
   onToggle: (itemId: string) => void;
   onQuantityChange: (itemId: string, quantity: number) => void;
   onRemove: (itemId: string) => void;
-  onEdit: (item: ShoppingItem) => void;
+  onEdit: (item: MarketItem) => void;
 }
 
-export interface ShoppingItemRowProps {
-  item: ShoppingItem;
+export interface MarketItemRowProps {
+  item: MarketItem;
   isAtMarket: boolean;
   onToggle: () => void;
   onQuantityChange: (quantity: number) => void;

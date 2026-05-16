@@ -1,7 +1,7 @@
-import { FinishShoppingModal } from "@/shared/ui/finish-shopping-modal";
+import { FinishMarketModal } from "@/shared/ui/finish-market-modal";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 
-describe("FinishShoppingModal Component", () => {
+describe("FinishMarketModal Component", () => {
   const mockOnConfirm = jest.fn();
   const mockOnClose = jest.fn();
 
@@ -11,7 +11,7 @@ describe("FinishShoppingModal Component", () => {
 
   it("should render correctly when open", () => {
     render(
-      <FinishShoppingModal
+      <FinishMarketModal
         isOpen={true}
         onClose={mockOnClose}
         onConfirm={mockOnConfirm}
@@ -24,7 +24,7 @@ describe("FinishShoppingModal Component", () => {
 
   it("should format currency correctly as user types", () => {
     render(
-      <FinishShoppingModal
+      <FinishMarketModal
         isOpen={true}
         onClose={mockOnClose}
         onConfirm={mockOnConfirm}
@@ -42,7 +42,7 @@ describe("FinishShoppingModal Component", () => {
 
   it("should call onConfirm with the correct number value", async () => {
     render(
-      <FinishShoppingModal
+      <FinishMarketModal
         isOpen={true}
         onClose={mockOnClose}
         onConfirm={mockOnConfirm}
@@ -63,7 +63,7 @@ describe("FinishShoppingModal Component", () => {
 
   it("should call onConfirm with zero if input is empty", async () => {
     render(
-      <FinishShoppingModal
+      <FinishMarketModal
         isOpen={true}
         onClose={mockOnClose}
         onConfirm={mockOnConfirm}
@@ -81,7 +81,7 @@ describe("FinishShoppingModal Component", () => {
 
   it("should show loading state when isLoading is true", () => {
     render(
-      <FinishShoppingModal
+      <FinishMarketModal
         isOpen={true}
         onClose={mockOnClose}
         onConfirm={mockOnConfirm}

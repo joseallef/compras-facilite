@@ -8,7 +8,7 @@ export type Category =
   | "Padaria"
   | "Outros";
 
-export interface ShoppingItem {
+export interface MarketItem {
   id: string;
   name: string;
   quantity: number;
@@ -19,20 +19,20 @@ export interface ShoppingItem {
 
 export type ListStatus = "ABERTA" | "CONCLUIDA";
 
-export interface ShoppingList {
+export interface MarketList {
   id: string;
   name: string;
   userId: string;
-  items: ShoppingItem[];
+  items: MarketItem[];
   status: ListStatus;
   totalValue?: number | null;
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface ShoppingListTemplate {
+export interface MarketListTemplate {
   name: string;
-  items: Omit<ShoppingItem, "id" | "isPicked">[];
+  items: Omit<MarketItem, "id" | "isPicked">[];
 }
 
 export * from "@/features/auth/types/auth-types";

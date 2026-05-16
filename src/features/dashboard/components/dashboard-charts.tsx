@@ -1,6 +1,6 @@
 "use client";
 
-import { ShoppingList } from "@/shared/types";
+import { MarketItem, MarketList } from "@/shared/types";
 import { endOfMonth, format, isWithinInterval, startOfMonth, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useMemo } from "react";
@@ -18,7 +18,7 @@ import {
 } from "recharts";
 
 interface DashboardChartsProps {
-  lists: ShoppingList[];
+  lists: MarketList[];
 }
 
 const COLORS = ["#10b981", "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4"];

@@ -1,7 +1,7 @@
 import { auth } from "@/core/auth/auth";
+import { MarketEditPageSkeleton } from "@/shared/ui/skeleton";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { ShoppingListEditPageSkeleton } from "@/shared/ui/skeleton";
 import { EditPageClient } from "./edit-page-client";
 
 export default async function EditPage() {
@@ -12,7 +12,7 @@ export default async function EditPage() {
   }
 
   return (
-    <Suspense fallback={<ShoppingListEditPageSkeleton />}>
+    <Suspense fallback={<MarketEditPageSkeleton />}>
       <EditPageClient />
     </Suspense>
   );

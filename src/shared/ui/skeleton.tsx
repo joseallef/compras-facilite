@@ -46,7 +46,7 @@ export function PageHeaderSkeleton({
   );
 }
 
-export function ShoppingListCardSkeleton({
+export function MarketListCardSkeleton({
   highlighted = false,
 }: {
   highlighted?: boolean;
@@ -218,7 +218,7 @@ export function TableCardSkeleton({
   );
 }
 
-export function ShoppingListFormPageSkeleton() {
+export function MarketFormPageSkeleton() {
   return (
     <main className="max-w-7xl mx-auto w-full p-4 md:p-8 space-y-6">
       <div className="flex items-center gap-4">
@@ -463,7 +463,7 @@ export function DashboardSkeleton() {
   );
 }
 
-export function ShoppingListEditPageSkeleton() {
+export function MarketEditPageSkeleton() {
   return (
     <main className="max-w-7xl mx-auto w-full p-4 md:p-8 space-y-6 pb-24 pt-4 md:pt-0">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">

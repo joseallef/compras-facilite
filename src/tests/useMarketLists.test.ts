@@ -1,5 +1,5 @@
 // Mock useAuth and services before anything else
-jest.mock("@/features/shopping/services/shopping-lists-service", () => ({
+jest.mock("@/features/mercado/services/market-lists-service", () => ({
   getShoppingLists: jest.fn(),
   createShoppingList: jest.fn(),
   createShoppingListFromTemplate: jest.fn(),
@@ -16,8 +16,8 @@ jest.mock("@/features/auth/hooks/use-auth", () => ({
 }));
 
 import * as auth from "@/features/auth/hooks/use-auth";
-import { useShoppingLists } from "@/features/shopping/hooks/use-shopping-lists";
-import * as services from "@/features/shopping/services/shopping-lists-service";
+import { useMarketLists } from "@/features/mercado/hooks/use-market-lists";
+import * as services from "@/features/mercado/services/market-lists-service";
 import { act, renderHook, waitFor } from "@testing-library/react";
 
 const mockedServices = services as jest.Mocked<typeof services>;
@@ -25,7 +25,7 @@ const mockedAuth = auth as jest.Mocked<typeof auth>;
 
 const mockUser = { id: "user-1", email: "test@example.com", name: "Test User" };
 
-describe("useShoppingLists Hook", () => {
+describe("useMarketLists Hook", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockedAuth.useAuth.mockReturnValue({
@@ -57,7 +57,7 @@ describe("useShoppingLists Hook", () => {
       mockLists as unknown as Awaited<ReturnType<typeof services.getShoppingLists>>
     );
 
-    const { result } = renderHook(() => useShoppingLists());
+    const { result } = renderHook(() => useMarketLists());
 
     await waitFor(() => {
       expect(result.current.isLoaded).toBe(true);
@@ -90,7 +90,7 @@ describe("useShoppingLists Hook", () => {
       ] as unknown as Awaited<ReturnType<typeof services.getShoppingLists>>
     );
 
-    const { result } = renderHook(() => useShoppingLists());
+    const { result } = renderHook(() => useMarketLists());
 
     let created;
     await act(async () => {
@@ -122,7 +122,7 @@ describe("useShoppingLists Hook", () => {
       undefined as unknown as Awaited<ReturnType<typeof services.deleteShoppingList>>
     );
 
-    const { result } = renderHook(() => useShoppingLists());
+    const { result } = renderHook(() => useMarketLists());
 
     await waitFor(() => {
       expect(result.current.isLoaded).toBe(true);
@@ -156,7 +156,7 @@ describe("useShoppingLists Hook", () => {
       undefined as unknown as Awaited<ReturnType<typeof services.updateShoppingList>>
     );
 
-    const { result } = renderHook(() => useShoppingLists());
+    const { result } = renderHook(() => useMarketLists());
 
     await waitFor(() => {
       expect(result.current.isLoaded).toBe(true);

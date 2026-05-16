@@ -3,7 +3,7 @@
 import { CATEGORIES } from "@/shared/types";
 import { cn } from "@/shared/utils/cn";
 import { CategorySectionProps } from "../types";
-import { ShoppingItemRow } from "./shopping-item-row";
+import { MarketItemRow } from "./market-item-row";
 
 export function CategorySection({
   items,
@@ -37,7 +37,7 @@ export function CategorySection({
 
             <div className="space-y-2">
               {categoryItems.map((item) => (
-                <ShoppingItemRow
+                <MarketItemRow
                   key={item.id}
                   item={item}
                   isAtMarket={isAtMarket}

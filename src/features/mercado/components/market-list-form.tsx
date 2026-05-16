@@ -1,44 +1,44 @@
 "use client";
 
+import { Category, MarketItem } from "@/shared/types";
 import { Button } from "@/shared/ui/button";
 import { ConfirmModal } from "@/shared/ui/confirm-modal";
 import { EditItemModal } from "@/shared/ui/edit-item-modal";
 import { Input } from "@/shared/ui/input";
-import { Category, ShoppingItem } from "@/shared/types";
 import { ArrowLeft, Save, ShoppingBag } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AddItemForm } from "./add-item-form";
 import { CategorySection } from "./category-section";
 
-interface ShoppingListFormProps {
+interface MarketListFormProps {
   initialData?: {
     id: string;
     name: string;
-    items: ShoppingItem[];
+    items: MarketItem[];
   };
-  onSubmit: (name: string, items: Omit<ShoppingItem, "id" | "isPicked">[]) => Promise<void>;
+  onSubmit: (name: string, items: Omit<MarketItem, "id" | "isPicked">[]) => Promise<void>;
   title: string;
   isSubmitting?: boolean;
 }
 
-export function ShoppingListForm({
+export function MarketListForm({
   initialData,
   onSubmit,
   title,
   isSubmitting = false,
-}: ShoppingListFormProps) {
+}: MarketListFormProps) {
   const router = useRouter();
   const [name, setName] = useState(initialData?.name || "");
-  const [items, setItems] = useState<ShoppingItem[]>(initialData?.items || []);
+  const [items, setItems] = useState<MarketItem[]>(initialData?.items || []);
   const [nameError, setNameError] = useState("");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<ShoppingItem | null>(null);
+  const [editingItem, setEditingItem] = useState<MarketItem | null>(null);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
 
   const handleAddItem = (itemName: string, category: Category) => {
-    const newItem: ShoppingItem = {
+    const newItem: MarketItem = {
       id: Math.random().toString(36).substr(2, 9), // Temporary ID for UI
       name: itemName,
       quantity: 1,
@@ -67,7 +67,7 @@ export function ShoppingListForm({
     );
   };
 
-  const handleEditItem = (item: ShoppingItem) => {
+  const handleEditItem = (item: MarketItem) => {
     setEditingItem(item);
     setIsEditModalOpen(true);
   };

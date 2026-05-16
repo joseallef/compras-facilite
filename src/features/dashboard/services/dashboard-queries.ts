@@ -1,4 +1,4 @@
-import { ShoppingList } from "@/shared/types";
+import { MarketList } from "@/shared/types";
 
 export interface DashboardStats {
   totalSpent: number;
@@ -9,7 +9,7 @@ export interface DashboardStats {
   completedCount: number;
 }
 
-export function calculateDashboardStats(lists: ShoppingList[]): DashboardStats {
+export function calculateDashboardStats(lists: MarketList[]): DashboardStats {
   const completedLists = lists.filter(l => l.status === "CONCLUIDA");
   const totalSpent = completedLists.reduce((sum, l) => sum + (l.totalValue || 0), 0);
   const avgSpent = completedLists.length > 0 ? totalSpent / completedLists.length : 0;

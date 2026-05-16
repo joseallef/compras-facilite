@@ -1,8 +1,8 @@
 import { calculateDashboardStats } from "@/features/dashboard/services/dashboard-queries";
-import { ShoppingList } from "@/shared/types";
+import { MarketList } from "@/shared/types";
 
 describe("Dashboard Utils", () => {
-  const mockLists: ShoppingList[] = [
+  const mockLists: MarketList[] = [
     {
       id: "1",
       name: "Lista 1",
@@ -64,7 +64,7 @@ describe("Dashboard Utils", () => {
   });
 
   it("should ignore open lists for spend calculations", () => {
-    const openOnly: ShoppingList[] = [mockLists[2]];
+    const openOnly: MarketList[] = [mockLists[2]];
     const stats = calculateDashboardStats(openOnly);
 
     expect(stats.totalSpent).toBe(0);

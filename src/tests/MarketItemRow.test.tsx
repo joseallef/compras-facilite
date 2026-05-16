@@ -1,4 +1,4 @@
-import { ShoppingItemRow } from "@/features/shopping/components/shopping-item-row";
+import { MarketItemRow } from "@/features/mercado/components/market-item-row";
 import { fireEvent, render, screen } from "@testing-library/react";
 
 const defaultItem = {
@@ -10,7 +10,7 @@ const defaultItem = {
   category: "Alimentos" as const,
 };
 
-describe("ShoppingItemRow", () => {
+describe("MarketItemRow", () => {
   const defaultProps = {
     item: defaultItem,
     isAtMarket: false,
@@ -25,14 +25,14 @@ describe("ShoppingItemRow", () => {
   });
 
   it("should Render item name and quantity", () => {
-    render(<ShoppingItemRow {...defaultProps} />);
+    render(<MarketItemRow {...defaultProps} />);
     
     expect(screen.getByText("Arroz")).toBeInTheDocument();
     expect(screen.getByText("2 pct")).toBeInTheDocument();
   });
 
   it("should Call onToggle when checkbox is clicked", () => {
-    render(<ShoppingItemRow {...defaultProps} />);
+    render(<MarketItemRow {...defaultProps} />);
     
     const button = screen.getByRole("button", { name: /marcar como pego/i });
     fireEvent.click(button);
@@ -41,14 +41,14 @@ describe("ShoppingItemRow", () => {
   });
 
   it("should Show checked icon when item is picked", () => {
-    render(<ShoppingItemRow {...defaultProps} item={{ ...defaultItem, isPicked: true }} />);
+    render(<MarketItemRow {...defaultProps} item={{ ...defaultItem, isPicked: true }} />);
     
     const checkedIcon = screen.getByRole("button", { name: /marcar como não pego/i });
     expect(checkedIcon).toBeInTheDocument();
   });
 
   it("should Show quantity controls when not in market mode", () => {
-    render(<ShoppingItemRow {...defaultProps} />);
+    render(<MarketItemRow {...defaultProps} />);
     
     const increaseButton = screen.getByRole("button", { name: /aumentar quantidade/i });
     const decreaseButton = screen.getByRole("button", { name: /diminuir quantidade/i });
@@ -58,7 +58,7 @@ describe("ShoppingItemRow", () => {
   });
 
   it("should Not show quantity controls in market mode", () => {
-    render(<ShoppingItemRow {...defaultProps} isAtMarket={true} />);
+    render(<MarketItemRow {...defaultProps} isAtMarket={true} />);
     
     const increaseButton = screen.queryByRole("button", { name: /aumentar quantidade/i });
     const decreaseButton = screen.queryByRole("button", { name: /diminuir quantidade/i });
@@ -68,7 +68,7 @@ describe("ShoppingItemRow", () => {
   });
 
   it("should Call onQuantityChange when increase button is clicked", () => {
-    render(<ShoppingItemRow {...defaultProps} />);
+    render(<MarketItemRow {...defaultProps} />);
     
     const increaseButton = screen.getByRole("button", { name: /aumentar quantidade/i });
     fireEvent.click(increaseButton);
@@ -77,7 +77,7 @@ describe("ShoppingItemRow", () => {
   });
 
   it("should Call onQuantityChange when decrease button is clicked", () => {
-    render(<ShoppingItemRow {...defaultProps} item={{ ...defaultItem, quantity: 3 }} />);
+    render(<MarketItemRow {...defaultProps} item={{ ...defaultItem, quantity: 3 }} />);
     
     const decreaseButton = screen.getByRole("button", { name: /diminuir quantidade/i });
     fireEvent.click(decreaseButton);
@@ -86,7 +86,7 @@ describe("ShoppingItemRow", () => {
   });
 
   it("should Not decrease quantity below 1", () => {
-    render(<ShoppingItemRow {...defaultProps} />);
+    render(<MarketItemRow {...defaultProps} />);
     
     const decreaseButton = screen.getByRole("button", { name: /diminuir quantidade/i });
     fireEvent.click(decreaseButton);
@@ -95,19 +95,19 @@ describe("ShoppingItemRow", () => {
   });
 
   it("should Show Falta badge in market mode for unpicked items", () => {
-    render(<ShoppingItemRow {...defaultProps} isAtMarket={true} />);
+    render(<MarketItemRow {...defaultProps} isAtMarket={true} />);
     
     expect(screen.getByText("Falta")).toBeInTheDocument();
   });
 
   it("should Not show Falta badge for picked items", () => {
-    render(<ShoppingItemRow {...defaultProps} item={{ ...defaultItem, isPicked: true }} isAtMarket={true} />);
+    render(<MarketItemRow {...defaultProps} item={{ ...defaultItem, isPicked: true }} isAtMarket={true} />);
     
     expect(screen.queryByText("Falta")).not.toBeInTheDocument();
   });
 
   it("should Apply strikethrough style for picked items", () => {
-    render(<ShoppingItemRow {...defaultProps} item={{ ...defaultItem, isPicked: true }} />);
+    render(<MarketItemRow {...defaultProps} item={{ ...defaultItem, isPicked: true }} />);
     
     const nameElement = screen.getByText("Arroz");
     expect(nameElement).toHaveClass("line-through");

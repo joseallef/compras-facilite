@@ -1,5 +1,5 @@
 import { auth } from "@/core/auth/auth";
-import { ListsPageContent } from "@/features/shopping/components/lists-page-content";
+import { ListsPageContent } from "@/features/mercado/components/lists-page-content";
 import { redirect } from "next/navigation";
 
 export default async function ListsPage() {

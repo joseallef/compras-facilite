@@ -1,6 +1,6 @@
 "use client";
 
-import { CATEGORIES, Category, ShoppingItem } from "@/shared/types";
+import { CATEGORIES, Category, MarketItem } from "@/shared/types";
 import { CATEGORY_ICONS } from "@/shared/utils/category-icons";
 import { cn } from "@/shared/utils/cn";
 import { Save } from "lucide-react";
@@ -10,7 +10,7 @@ import { Input } from "./input";
 import { Modal } from "./modal";
 
 interface EditItemModalProps {
-  item: ShoppingItem | null;
+  item: MarketItem | null;
   isOpen: boolean;
   onClose: () => void;
   onConfirm: (data: { name: string; category: Category; quantity: number; unit: string }) => Promise<void>;

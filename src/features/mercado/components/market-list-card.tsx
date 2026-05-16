@@ -7,9 +7,9 @@ import { Calendar, ChevronRight, DollarSign, ShoppingCart, Trash2 } from "lucide
 
 import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/utils/cn";
-import { ShoppingListCardProps } from "../types";
+import { MarketListCardProps } from "../types";
 
-export function ShoppingListCard({ list, onClick, onDelete }: ShoppingListCardProps) {
+export function MarketListCard({ list, onClick, onDelete }: MarketListCardProps) {
   const pickedCount = list.items.filter((i) => i.isPicked).length;
   const totalCount = list.items.length;
   const progress = totalCount > 0 ? (pickedCount / totalCount) * 100 : 0;
