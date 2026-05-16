@@ -1,86 +1,117 @@
-# 🏗️ Guia de Arquitetura - Compras Facilite
+# Guia de Arquitetura
 
-Este documento descreve a arquitetura profissional adotada no projeto, baseada em **Feature-Based Design** e **Shared Kernel**.
+## Estrutura Geral
 
-## 🎯 Objetivo da Estrutura
+Este projeto segue uma arquitetura **Feature-First (Feature-Based Design)** + **Shared Kernel**.
 
-A estrutura foi desenhada para ser escalável, clara e de fácil manutenção, seguindo as melhores práticas de produtos SaaS modernos.
+### Regras de Organização
 
----
+- Cada feature tem seu próprio diretório com:
+  - `components/`: Componentes específicos da feature
+  - `hooks/`: Hooks customizados da feature
+  - `services/`: Server Actions e integrações externas
+  - `actions/`: (opcional) Server Actions separados
+  - `types/`: (opcional) Tipos específicos da feature
+  - `constants/`: (opcional) Constantes específicas da feature
 
-## 📁 Estrutura de Pastas
+- Código compartilhado fica no diretório `shared/`
+- Infraestrutura (db, auth, configs) fica em `core/`
+
+## Estrutura de Diretórios Detalhada
 
 ```
 src/
+├── app/                          # Rotas (App Router)
+│   ├── (protected)/              # Rotas autenticadas
+│   │   ├── mercado/              # Listas de mercado (renomeado de shopping)
+│   │   ├── dashboard/            # Dashboard principal
+│   │   └── financas/             # Transações financeiras
+│   ├── (public)/                 # Rotas públicas (login, register, etc.)
+│   └── api/                      # API Routes (rotas de autenticação, etc.)
 │
-├── app/                # Next.js App Router (Apenas rotas e layouts)
-│   ├── (public)/       # Rotas acessíveis sem login (login, register)
-│   ├── (protected)/    # Rotas que exigem autenticação (dashboard, shopping)
-│   ├── api/            # API Route Handlers
-│   └── layout.tsx      # Root Layout
+├── features/                     # Módulos por domínio
+│   ├── auth/                     # Autenticação e gestão de usuários
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   ├── actions/
+│   │   └── ...
+│   │
+│   ├── mercado/                  # Listas de mercado
+│   │   ├── components/
+│   │   │   ├── market-list-card.tsx
+│   │   │   ├── market-item-row.tsx
+│   │   │   └── ...
+│   │   ├── hooks/
+│   │   │   ├── use-market-lists.ts
+│   │   │   └── use-list-detail.ts
+│   │   ├── services/
+│   │   │   └── market-lists-service.ts
+│   │   └── types/
+│   │       └── index.ts
+│   │
+│   ├── transactions/             # Transações financeiras
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   ├── services/
+│   │   └── ...
+│   │
+│   └── dashboard/                # Dashboard
+│       ├── components/
+│       ├── hooks/
+│       ├── services/
+│       └── ...
 │
-├── features/           # Módulos organizados por domínio (Feature-First)
-│   ├── auth/           # Gestão de identidade e acesso
-│   ├── dashboard/      # Painel financeiro e indicadores
-│   ├── transactions/   # Movimentações financeiras (receitas/despesas)
-│   ├── cards/          # Gestão de cartões de crédito
-│   ├── goals/          # Metas e objetivos financeiros
-│   └── shopping/       # Listas de mercado inteligentes
+├── shared/                       # Código reutilizável
+│   ├── ui/                       # Design System (Button, Input, Dialog, Skeleton, etc.)
+│   ├── layout/                   # Header, Footer, NavBar, MobileNav
+│   ├── providers/                # Providers (AuthProvider, ThemeProvider, etc.)
+│   ├── types/                    # Tipos globais (Category, MarketList, MarketItem, etc.)
+│   ├── constants/                # Constantes globais (templates de listas, categorias)
+│   └── utils/                    # Funções utilitárias (cn, currency formatters, etc.)
 │
-├── shared/             # Código reutilizável entre múltiplas features
-│   ├── ui/             # Design System / Componentes base (button, modal)
-│   ├── layout/         # Componentes de estrutura (header, footer, nav)
-│   ├── providers/      # Context Providers (Auth, Theme)
-│   ├── hooks/          # Hooks utilitários globais
-│   ├── utils/          # Funções auxiliares (format, validation)
-│   ├── constants/      # Valores estáticos e configurações
-│   └── types/          # Interfaces TypeScript globais
-│
-├── core/               # Infraestrutura e configurações base
-│   ├── db/             # Prisma client e migrações
-│   ├── auth/           # Configurações do Auth.js (NextAuth)
-│   └── security/       # Proxies, rate limit e segurança
-│
-├── proxy.ts            # Proxy central do Next.js
-└── tests/              # Suíte de testes (unit, integration, e2e)
+└── core/                         # Infraestrutura
+    ├── auth/                     # Configuração do Auth.js
+    ├── db/                       # Cliente Prisma
+    └── security/                 # Rate limit e configurações de segurança
 ```
 
----
+## Convenções
 
-## 📦 Anatomia de uma Feature
+### Nomenclatura de Arquivos
+- Arquivos de componentes: `kebab-case.tsx`
+- Hooks customizados: `use-something.ts`
+- Arquivos de tipos: `types/index.ts` ou `types.ts`
+- Arquivos de services/actions: `name-service.ts` ou `name-actions.ts`
 
-Cada pasta em `src/features/` deve conter tudo o que é necessário para aquele domínio funcionar de forma independente:
+### Importações
+- Importações absolutas usando o alias `@/`
+- Ordem de importação:
+  1. Bibliotecas externas
+  2. Imports de `@/features/`
+  3. Imports de `@/shared/`
+  4. Imports de `@/core/`
+  5. Imports relativos
 
-```
-features/feature-name/
-├── components/         # Componentes de UI específicos do domínio
-├── actions/            # Server Actions (Escrita no banco)
-├── queries/            # Consultas Prisma (Leitura de dados)
-├── services/           # Regras de negócio complexas
-├── hooks/              # Lógica de estado do domínio
-├── schemas/            # Validações Zod
-└── types/              # Tipagens exclusivas da feature
-```
+### Server Components vs Client Components
+- Por padrão, tudo é Server Component
+- Use `"use client"` apenas quando precisar de hooks de estado (`useState`, `useEffect`, etc.) ou interações do usuário
 
----
+### Server Actions
+- Coloque Server Actions em `features/[feature]/services/` ou `features/[feature]/actions/`
+- Sempre valide inputs no servidor
+- Sempre use revalidation adequada
 
-## 📏 Regras de Padronização
+## Design System
 
-1.  **Nomenclatura de Arquivos**: Sempre use `kebab-case.ts`.
-2.  **Componentes**: PascalCase para o nome da função/classe, mas o arquivo permanece kebab-case.
-3.  **Imports**: Utilize os aliases configurados para evitar caminhos relativos longos:
-    *   `@/app/*`
-    *   `@/features/*`
-    *   `@/shared/*`
-    *   `@/core/*`
-4.  **Shared UI**: Componentes em `shared/ui` devem ser "burros" (sem regra de negócio).
+Todos os componentes de UI base devem ficar em `shared/ui/` e devem ser:
+- Reutilizáveis
+- Sem lógica de negócio
+- Customizáveis via props
 
----
+## Segurança
 
-## 🔐 Camada de Autenticação
-
-A lógica de autenticação está centralizada em `src/core/auth/` e exposta através do hook `@/features/auth/hooks/use-auth`. NUNCA utilize as funções do NextAuth diretamente nos componentes de UI fora do módulo de autenticação.
-
-## 💾 Banco de Dados
-
-O acesso ao banco de dados é feito exclusivamente via Prisma, com o cliente instanciado em `src/core/db/prisma.ts`. Prefira sempre o uso de Server Actions para mutações e Queries separadas para leituras.
+Verifique sempre:
+- Rotas autenticadas em `app/(protected)/`
+- Autorização nas Server Actions (verifique a propriedade do recurso!)
+- Validação de dados no servidor
+- Não exponha secrets no cliente
