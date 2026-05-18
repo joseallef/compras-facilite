@@ -3,14 +3,15 @@
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Modal } from "@/shared/ui/modal";
-import { CheckCircle2, DollarSign } from "lucide-react";
-import { useState } from "react";
+import { CheckCircle2 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface FinishMarketModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: (totalValue: number) => Promise<void>;
   isLoading?: boolean;
+  initialValue?: number | null;
 }
 
 export function FinishMarketModal({
@@ -18,8 +19,21 @@ export function FinishMarketModal({
   onClose,
   onConfirm,
   isLoading = false,
+  initialValue,
 }: FinishMarketModalProps) {
   const [value, setValue] = useState<string>("");
+  
+  useEffect(() => {
+    if (isOpen && initialValue != null) {
+      const formatted = new Intl.NumberFormat("pt-BR", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(initialValue);
+      setValue(formatted);
+    } else if (isOpen) {
+      setValue("");
+    }
+  }, [isOpen, initialValue]);
 
   const formatCurrency = (val: string) => {
     // Remove all non-digits
@@ -75,7 +89,7 @@ export function FinishMarketModal({
             onChange={handleValueChange}
             placeholder="0,00"
             disabled={isLoading}
-            leftIcon={<DollarSign className="h-5 w-5" />}
+            leftIcon={<span className="text-xl font-bold text-muted">R$</span>}
             containerClassName="space-y-2"
             inputClassName="rounded-2xl text-xl font-bold border-border"
           />

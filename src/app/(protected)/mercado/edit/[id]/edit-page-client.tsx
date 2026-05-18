@@ -424,7 +424,7 @@ export function EditPageClient() {
             ) : isAtMarket ? (
               <div className="flex items-center gap-3">
                  <Button
-                  onClick={toggleMarketMode}
+                  onClick={() => setIsFinishModalOpen(true)}
                   className="bg-muted/10 hover:bg-muted/20 text-foreground px-6 py-3 rounded-2xl font-bold flex items-center gap-2 transition-all active:scale-95 border border-border"
                 >
                   Fechar
@@ -440,6 +440,7 @@ export function EditPageClient() {
         onClose={() => setIsFinishModalOpen(false)}
         onConfirm={handleFinishShopping}
         isLoading={isSubmitting}
+        initialValue={list?.totalValue}
       />
 
       <EditItemModal
