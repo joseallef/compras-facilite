@@ -153,6 +153,7 @@ enum Category {
 enum TransactionType {
   INCOME
   EXPENSE
+  INVESTMENT
 }
 
 enum TransactionStatus {

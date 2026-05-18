@@ -28,6 +28,7 @@ import {
 const TransactionType = {
   INCOME: "INCOME",
   EXPENSE: "EXPENSE",
+  INVESTMENT: "INVESTMENT",
 } as const;
 
 const TransactionStatus = {
@@ -108,6 +109,10 @@ export function DashboardClient({
       .filter((t) => t.type === TransactionType.EXPENSE)
       .reduce((acc, t) => acc + t.amount, 0);
 
+    const investments = currentMonthTransactions
+      .filter((t) => t.type === TransactionType.INVESTMENT)
+      .reduce((acc, t) => acc + t.amount, 0);
+
     const pending = currentMonthTransactions
       .filter((t) => t.status === TransactionStatus.PENDING)
       .reduce((acc, t) => acc + t.amount, 0);
@@ -120,7 +125,7 @@ export function DashboardClient({
       .filter((t) => t.status === TransactionStatus.OVERDUE)
       .reduce((acc, t) => acc + t.amount, 0);
 
-    const balance = incomes - expenses;
+    const balance = incomes - (expenses + investments);
 
     const categoryData: Record<string, { name: string; value: number; color: string }> = {};
     currentMonthTransactions
@@ -139,6 +144,7 @@ export function DashboardClient({
     return {
       incomes,
       expenses,
+      investments,
       balance,
       pending,
       paid,
@@ -163,12 +169,16 @@ export function DashboardClient({
       const expense = monthTrans
         .filter((t: any) => t.type === TransactionType.EXPENSE)
         .reduce((acc: number, t: any) => acc + t.amount, 0);
+      const investment = monthTrans
+        .filter((t: any) => t.type === TransactionType.INVESTMENT)
+        .reduce((acc: number, t: any) => acc + t.amount, 0);
       return {
         month: months[month].slice(0, 3),
         fullMonth: months[month],
         income,
         expense,
-        balance: income - expense,
+        investment,
+        balance: income - (expense + investment),
       };
     });
 
@@ -191,6 +201,7 @@ export function DashboardClient({
       yearlyCategoryExpenses: Object.values(categoryData).sort((a, b) => b.value - a.value),
       totalIncome: monthlyData.reduce((acc, m) => acc + m.income, 0),
       totalExpense: monthlyData.reduce((acc, m) => acc + m.expense, 0),
+      totalInvestment: monthlyData.reduce((acc, m) => acc + m.investment, 0),
       totalBalance: monthlyData.reduce((acc, m) => acc + m.balance, 0),
     };
   }, [yearlyData]);
@@ -374,7 +385,7 @@ export function DashboardClient({
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 md:gap-4">
+                <div className="grid grid-cols-3 gap-3 md:gap-4">
                   <div className="bg-white/15 backdrop-blur-md p-4 md:p-5 rounded-2xl md:rounded-3xl border border-white/20 hover:bg-white/20 transition-all">
                     <p className="text-[9px] md:text-[10px] font-bold text-emerald-100 uppercase mb-1.5 md:mb-2 tracking-wider">Receitas</p>
                     <p className="text-xl md:text-2xl font-black flex items-center gap-1">
@@ -387,6 +398,13 @@ export function DashboardClient({
                     <p className="text-xl md:text-2xl font-black flex items-center gap-1">
                       <ArrowDownRight size={18} className="text-red-200" />
                       {formatCurrency(viewMode === "month" ? stats.expenses : yearlyStats.totalExpense || 0)}
+                    </p>
+                  </div>
+                  <div className="bg-white/15 backdrop-blur-md p-4 md:p-5 rounded-2xl md:rounded-3xl border border-white/20 hover:bg-white/20 transition-all">
+                    <p className="text-[9px] md:text-[10px] font-bold text-emerald-100 uppercase mb-1.5 md:mb-2 tracking-wider">Investimentos</p>
+                    <p className="text-xl md:text-2xl font-black flex items-center gap-1">
+                      <TrendingUp size={18} className="text-emerald-200" />
+                      {formatCurrency(viewMode === "month" ? stats.investments : yearlyStats.totalInvestment || 0)}
                     </p>
                   </div>
                 </div>

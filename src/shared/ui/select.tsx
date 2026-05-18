@@ -95,7 +95,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(function Select
           disabled={disabled}
           onClick={() => !disabled && setIsOpen(!isOpen)}
           className={cn(
-            "w-full flex items-center bg-card border rounded-2xl py-3.5 outline-none transition-all cursor-pointer disabled:cursor-not-allowed disabled:opacity-50",
+            "w-full flex items-center bg-card border rounded-2xl py-2.5 outline-none transition-all cursor-pointer disabled:cursor-not-allowed disabled:opacity-50",
             leftIcon ? "pl-12" : "pl-5",
             "pr-12 text-left shadow-sm",
             error

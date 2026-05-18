@@ -10,17 +10,15 @@ import {
   updateTransactionAction
 } from "@/features/recurring-transactions/actions/recurring-actions";
 import { MonthlyTransactions } from "@/features/recurring-transactions/components/monthly-transactions";
-import { RecurringForm } from "@/features/recurring-transactions/components/recurring-form";
 import { RecurringList } from "@/features/recurring-transactions/components/recurring-list";
-import { AddTransactionModal } from "@/features/transactions/components/add-transaction-modal";
+import { UnifiedTransactionModal } from "@/features/transactions/components/unified-transaction-modal";
 import { Button } from "@/shared/ui/button";
 import { ConfirmModal } from "@/shared/ui/confirm-modal";
 import { Input } from "@/shared/ui/input";
-import { Modal } from "@/shared/ui/modal";
 import { Select } from "@/shared/ui/select";
 import { TableCardSkeleton } from "@/shared/ui/skeleton";
 import { cn } from "@/shared/utils/cn";
-import { ArrowDownCircle, ArrowUpCircle, ChevronLeft, ChevronRight, Plus, RepeatIcon, Search, X } from "lucide-react";
+import { ArrowDownCircle, ArrowUpCircle, ChevronLeft, ChevronRight, Plus, RepeatIcon, Search, TrendingUp, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -35,6 +33,7 @@ type TransactionStatus = typeof TransactionStatus[keyof typeof TransactionStatus
 const TransactionType = {
   INCOME: "INCOME",
   EXPENSE: "EXPENSE",
+  INVESTMENT: "INVESTMENT",
 } as const;
 
 type TransactionType = typeof TransactionType[keyof typeof TransactionType];
@@ -55,12 +54,11 @@ export function FinancasClient({
   const [recurrings, setRecurrings] = useState(initialRecurrings);
   const [transactions, setTransactions] = useState(initialTransactions);
   const [isLoading, setIsLoading] = useState(false);
-  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
-  const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<"single" | "recurring">("single");
   const [selectedMonth, setSelectedMonth] = useState(initialMonth);
   const [selectedYear, setSelectedYear] = useState(initialYear);
-  const [editingRecurring, setEditingRecurring] = useState<any>(null);
-  const [editingTransaction, setEditingTransaction] = useState<any>(null);
+  const [editingItem, setEditingItem] = useState<any>(null);
   const [transactionToDelete, setTransactionToDelete] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [activeType, setActiveType] = useState<TransactionType | "ALL">("ALL");
@@ -153,14 +151,15 @@ export function FinancasClient({
     }
   };
 
-  const handleFormSuccess = () => {
+  const handleModalSuccess = () => {
     loadData();
-    setEditingRecurring(null);
+    setEditingItem(null);
   };
 
   const handleEditTransaction = (transaction: any) => {
-    setEditingTransaction(transaction);
-    setIsTransactionModalOpen(true);
+    setEditingItem(transaction);
+    setModalMode("single");
+    setIsModalOpen(true);
   };
 
   const handleDeleteTransaction = async () => {
@@ -177,9 +176,9 @@ export function FinancasClient({
     }
   };
 
-  const handleCloseTransactionModal = () => {
-    setIsTransactionModalOpen(false);
-    setEditingTransaction(null);
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingItem(null);
   };
 
   const clearFilters = () => {
@@ -267,30 +266,24 @@ export function FinancasClient({
           </div>
         </div>
         
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-col sm:flex-wrap sm:flex-row gap-3 w-full sm:justify-end">
           <Button 
             onClick={handleGenerateTransactions}
-            className="bg-purple-600 text-white rounded-xl font-bold px-6 py-2.5 hover:bg-purple-700 transition-all shadow-lg shadow-purple-600/20 active:scale-95"
+            className="w-full sm:w-auto bg-purple-600 text-white rounded-xl font-bold px-6 py-2.5 hover:bg-purple-700 transition-all shadow-lg shadow-purple-600/20 active:scale-95"
           >
             <RepeatIcon size={20} className="mr-2" />
             Gerar Transações
           </Button>
           <Button 
-            onClick={() => setIsTransactionModalOpen(true)}
-            className="bg-emerald-600 text-white rounded-xl font-bold px-6 py-2.5 hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20 active:scale-95"
-          >
-            <Plus size={20} className="mr-2" />
-            Nova Transação
-          </Button>
-          <Button 
             onClick={() => {
-              setEditingRecurring(null);
-              setIsFormModalOpen(true);
+              setEditingItem(null);
+              setModalMode("single");
+              setIsModalOpen(true);
             }}
-            className="bg-blue-600 text-white rounded-xl font-bold px-6 py-2.5 hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 active:scale-95"
+            className="w-full sm:w-auto bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-bold px-8 py-2.5 hover:from-emerald-700 hover:to-teal-700 transition-all shadow-lg shadow-emerald-600/20 active:scale-95"
           >
             <Plus size={20} className="mr-2" />
-            Nova Conta Fixa
+            Nova Movimentação
           </Button>
         </div>
       </div>
@@ -355,6 +348,18 @@ export function FinancasClient({
             >
               <ArrowDownCircle size={16} />
               Despesas
+            </button>
+            <button
+              onClick={() => setActiveType(TransactionType.INVESTMENT)}
+              className={cn(
+                "flex-1 lg:flex-none px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 whitespace-nowrap h-11",
+                activeType === TransactionType.INVESTMENT 
+                  ? "bg-white dark:bg-zinc-800 shadow-sm text-emerald-700" 
+                  : "text-muted-foreground hover:text-emerald-700"
+              )}
+            >
+              <TrendingUp size={16} />
+              Investimentos
             </button>
           </div>
         </div>
@@ -429,8 +434,9 @@ export function FinancasClient({
           <RecurringList
             recurrings={filteredRecurrings}
             onEdit={(recurring) => {
-              setEditingRecurring(recurring);
-              setIsFormModalOpen(true);
+              setEditingItem(recurring);
+              setModalMode("recurring");
+              setIsModalOpen(true);
             }}
             onToggleActive={handleToggleRecurringActive}
             onDelete={handleDeleteRecurring}
@@ -438,12 +444,13 @@ export function FinancasClient({
         )}
       </div>
 
-      {/* Modal de Transação */}
-      <AddTransactionModal 
-        isOpen={isTransactionModalOpen} 
-        onClose={handleCloseTransactionModal} 
-        onSuccess={loadData} 
-        initialData={editingTransaction}
+      {/* Modal Unificado */}
+      <UnifiedTransactionModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSuccess={handleModalSuccess}
+        initialMode={modalMode}
+        initialData={editingItem}
       />
 
       {/* Confirmar Exclusão de Transação */}
@@ -456,25 +463,6 @@ export function FinancasClient({
         confirmText="Excluir"
         variant="danger"
       />
-
-      {/* Modal de Formulário */}
-      <Modal
-        isOpen={isFormModalOpen}
-        onClose={() => {
-          setIsFormModalOpen(false);
-          setEditingRecurring(null);
-        }}
-        title={editingRecurring ? "Editar Conta Fixa" : "Nova Conta Fixa"}
-      >
-        <RecurringForm
-          onSuccess={handleFormSuccess}
-          onClose={() => {
-            setIsFormModalOpen(false);
-            setEditingRecurring(null);
-          }}
-          initialData={editingRecurring}
-        />
-      </Modal>
     </main>
   );
 }

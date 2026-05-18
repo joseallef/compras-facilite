@@ -96,17 +96,48 @@ export async function createTransaction(data: {
   status?: TransactionStatus;
   competencyMonth: number;
   competencyYear: number;
-  categoryId: string;
+  categoryId?: string;
   notes?: string;
   dueDate?: Date;
   shoppingListId?: string;
 }) {
   const userId = await requireValidSession();
 
+  const finalData = { ...data };
+
+  if (finalData.type === TransactionType.INVESTMENT && !finalData.categoryId) {
+    let investmentCategory = await prisma.transactionCategory.findFirst({
+      where: {
+        userId,
+        name: "Aplicações/Investimentos",
+        type: TransactionType.INVESTMENT,
+      },
+    });
+
+    if (!investmentCategory) {
+      investmentCategory = await prisma.transactionCategory.create({
+        data: {
+          name: "Aplicações/Investimentos",
+          type: TransactionType.INVESTMENT,
+          icon: "TrendingUp",
+          color: "#059669",
+          userId,
+        },
+      });
+    }
+
+    finalData.categoryId = investmentCategory.id;
+  }
+
   try {
+    if (!finalData.categoryId) {
+      throw new Error("Categoria é obrigatória para criar a transação");
+    }
+
     const transaction = await prisma.transaction.create({
       data: {
-        ...data,
+        ...finalData,
+        categoryId: finalData.categoryId,
         userId,
       },
     });
@@ -128,7 +159,7 @@ export async function updateTransaction(
     status: TransactionStatus;
     competencyMonth: number;
     competencyYear: number;
-    categoryId: string;
+    categoryId?: string;
     notes: string | null;
     dueDate: Date | null;
     paidAt: Date | null;
@@ -188,6 +219,43 @@ export async function getTransactionCategories(type?: TransactionType) {
         },
         orderBy: { name: "asc" },
       });
+    } else {
+      const existingNames = categories.map(c => c.name);
+      const defaultCategories = [
+        { name: "Salário", type: TransactionType.INCOME, icon: "Wallet", color: "#10b981" },
+        { name: "Renda Extra", type: TransactionType.INCOME, icon: "PlusCircle", color: "#34d399" },
+        { name: "Alimentação", type: TransactionType.EXPENSE, icon: "Utensils", color: "#ef4444" },
+        { name: "Moradia", type: TransactionType.EXPENSE, icon: "Home", color: "#3b82f6" },
+        { name: "Transporte", type: TransactionType.EXPENSE, icon: "Car", color: "#f59e0b" },
+        { name: "Lazer", type: TransactionType.EXPENSE, icon: "Gamepad", color: "#8b5cf6" },
+        { name: "Mercado", type: TransactionType.EXPENSE, icon: "ShoppingCart", color: "#10b981" },
+        { name: "Saúde", type: TransactionType.EXPENSE, icon: "Heart", color: "#ec4899" },
+        { name: "Educação", type: TransactionType.EXPENSE, icon: "BookOpen", color: "#8b5cf6" },
+        { name: "Aplicações/Investimentos", type: TransactionType.INVESTMENT, icon: "TrendingUp", color: "#059669" },
+      ];
+
+      for (const cat of defaultCategories) {
+        if (!existingNames.includes(cat.name)) {
+          try {
+            await prisma.transactionCategory.create({
+              data: {
+                ...cat,
+                userId,
+              },
+            });
+          } catch {
+            // Ignora erros de duplicata
+          }
+        }
+      }
+
+      categories = await prisma.transactionCategory.findMany({
+        where: {
+          userId,
+          ...(type ? { type } : {}),
+        },
+        orderBy: { name: "asc" },
+      });
     }
 
     return categories;
@@ -208,6 +276,7 @@ export async function createDefaultTransactionCategories(userId: string) {
     { name: "Mercado", type: TransactionType.EXPENSE, icon: "ShoppingCart", color: "#10b981" },
     { name: "Saúde", type: TransactionType.EXPENSE, icon: "Heart", color: "#ec4899" },
     { name: "Educação", type: TransactionType.EXPENSE, icon: "BookOpen", color: "#8b5cf6" },
+    { name: "Aplicações/Investimentos", type: TransactionType.INVESTMENT, icon: "TrendingUp", color: "#059669" },
   ];
 
   try {

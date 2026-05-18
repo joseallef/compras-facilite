@@ -79,7 +79,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           id={id}
           ref={ref}
           className={cn(
-            "w-full flex items-center bg-card border rounded-2xl py-3.5 outline-none transition-all shadow-sm",
+            "w-full flex items-center bg-card border rounded-2xl py-2.5 outline-none transition-all shadow-sm",
             hasLeftIcon ? "pl-12" : "pl-5",
             hasRightSlot ? "pr-12" : "pr-5",
             error

@@ -24,12 +24,12 @@ export const authConfig = {
     },
     async session({ session, token }) {
       if (!token.id || !token.email) {
-        return { ...session, user: null };
+        return session;
       }
       
       const now = Math.floor(Date.now() / 1000);
       if (token.exp && token.exp < now) {
-        return { ...session, user: null };
+        return session;
       }
       
       if (session.user) {

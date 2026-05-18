@@ -42,7 +42,7 @@ export function DatePicker({
         onClick={() => !disabled && setIsOpen(true)}
         disabled={disabled}
         className={cn(
-          "w-full flex items-center justify-between bg-card border rounded-2xl py-3.5 outline-none transition-all shadow-sm hover:bg-card disabled:opacity-50 disabled:cursor-not-allowed relative",
+          "w-full flex items-center justify-between bg-card border rounded-2xl py-2.5 outline-none transition-all shadow-sm hover:bg-card disabled:opacity-50 disabled:cursor-not-allowed relative",
           "pl-5 pr-12 text-left",
           !value && "text-muted/60"
         )}
@@ -52,16 +52,15 @@ export function DatePicker({
         </span>
         <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
           {value && (
-            <button
-              type="button"
+            <div
               onClick={(e) => {
                 e.stopPropagation();
                 onChange?.(null);
               }}
-              className="text-muted hover:text-foreground p-1"
+              className="text-muted hover:text-foreground p-1 cursor-pointer"
             >
               <X size={16} />
-            </button>
+            </div>
           )}
           <CalendarIcon className="text-muted h-4 w-4 pointer-events-none" />
         </div>

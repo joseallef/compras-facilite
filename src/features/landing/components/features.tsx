@@ -1,25 +1,43 @@
-import { CheckCircle2, ShoppingCart, BarChart3, Clock, Users, Smartphone } from "lucide-react";
+import { CheckCircle2, ShoppingCart, BarChart3, Clock, Users, Smartphone, TrendingUp, Wallet, PieChart, Calendar, CreditCard, TrendingDown } from "lucide-react";
 
 const features = [
+  // Compras
   {
     icon: ShoppingCart,
-    title: "Listas Pré-Montadas",
-    description: "Comece rapidamente com modelos de listas para o mês inteiro, adaptados às necessidades da sua família.",
+    title: "Listas de Compras Inteligentes",
+    description: "Crie, edite e gerencie suas listas de mercado com itens organizados por categorias.",
   },
   {
-    icon: BarChart3,
-    title: "Controle em Tempo Real",
-    description: "Marque itens enquanto faz compras e acompanhe seu progresso instantaneamente.",
+    icon: CheckCircle2,
+    title: "Controle de Progresso",
+    description: "Marque itens enquanto faz compras e acompanhe seu progresso em tempo real.",
+  },
+  // Finanças
+  {
+    icon: Wallet,
+    title: "Controle de Receitas e Despesas",
+    description: "Registre todas as suas movimentações financeiras e tenha uma visão clara do seu dinheiro.",
   },
   {
-    icon: Clock,
-    title: "Economia de Tempo",
-    description: "Nunca mais esqueça itens importantes ou perca tempo no mercado.",
+    icon: TrendingUp,
+    title: "Investimentos Organizados",
+    description: "Monitore seus investimentos separadamente para um planejamento financeiro completo.",
   },
+  {
+    icon: Calendar,
+    title: "Contas Fixas",
+    description: "Gerencie suas contas recorrentes (mensais, semanais, anuais) e nunca mais esqueça um vencimento.",
+  },
+  {
+    icon: PieChart,
+    title: "Dashboard Completo",
+    description: "Visualização gráfica do seu desempenho financeiro com gráficos e relatórios intuitivos.",
+  },
+  // Geral
   {
     icon: Users,
     title: "Para Toda Família",
-    description: "Ideal para organizar as compras de casa, seja sozinho ou com sua família.",
+    description: "Ideal para organizar tanto as compras quanto as finanças da casa toda.",
   },
   {
     icon: Smartphone,
@@ -35,15 +53,15 @@ const features = [
 
 export function Features() {
   return (
-    <section className="py-24 bg-muted/30">
+    <section id="features" className="py-24 bg-muted/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
-            Tudo que você precisa para compras organizadas
+            Tudo que você precisa em um só sistema
           </h2>
           <p className="mt-4 text-lg text-muted">
-            ComprasFácil transforma a experiência de fazer compras com ferramentas 
-            intuitivas e eficientes que se adaptam à sua rotina.
+            ComprasFácil combina organização de listas de mercado com controle financeiro completo, 
+            tudo em uma plataforma intuitiva e fácil de usar.
           </p>
         </div>
 
@@ -51,7 +69,7 @@ export function Features() {
           {features.map((feature) => (
             <div
               key={feature.title}
-              className="bg-card p-8 rounded-3xl border border-border hover:border-emerald-200 dark:hover:border-emerald-800 transition-colors"
+              className="bg-card p-8 rounded-3xl border border-border hover:border-emerald-200 dark:hover:border-emerald-800 transition-all hover:shadow-lg"
             >
               <div className="bg-emerald-100 dark:bg-emerald-900/30 w-14 h-14 rounded-2xl flex items-center justify-center mb-6">
                 <feature.icon className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />

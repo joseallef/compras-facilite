@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/features/auth/hooks/use-auth";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, Wallet } from "lucide-react";
 import Link from "next/link";
 
 export function Footer() {
@@ -20,14 +20,14 @@ export function Footer() {
               <span>ComprasFácil</span>
             </Link>
             <p className="text-sm text-muted">
-              Facilitando suas compras de mercado com listas inteligentes e controle em tempo real.
+              Tudo o que você precisa para organizar compras e finanças em um só lugar.
             </p>
           </div>
 
           <div>
             <h3 className="font-semibold mb-4">Produto</h3>
             <ul className="space-y-2 text-sm text-muted">
-              <li><Link href="/" className="hover:text-foreground transition-colors">Funcionalidades</Link></li>
+              <li><Link href="#features" className="hover:text-foreground transition-colors">Funcionalidades</Link></li>
               <li><Link href="/" className="hover:text-foreground transition-colors">Preços</Link></li>
               <li><Link href="/" className="hover:text-foreground transition-colors">Tutorial</Link></li>
             </ul>

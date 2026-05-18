@@ -8,6 +8,7 @@ interface FinancialKpisProps {
   balance: number;
   incomes: number;
   expenses: number;
+  investments: number;
   pending: number;
   paid: number;
   overdue: number;
@@ -17,12 +18,13 @@ export function FinancialKpis({
   balance, 
   incomes, 
   expenses, 
+  investments,
   pending,
   paid,
   overdue
 }: FinancialKpisProps) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <KpiCard
         title="Saldo"
         value={formatCurrency(balance)}
@@ -43,6 +45,12 @@ export function FinancialKpis({
         value={formatCurrency(expenses)}
         icon={TrendingDown}
         iconClassName="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400"
+      />
+      <KpiCard
+        title="Investimentos"
+        value={formatCurrency(investments)}
+        icon={TrendingUp}
+        iconClassName="bg-emerald-700/10 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-500"
       />
       <KpiCard
         title="Pagas"

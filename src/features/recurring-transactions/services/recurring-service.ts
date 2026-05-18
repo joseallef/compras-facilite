@@ -75,7 +75,7 @@ export async function createRecurring(data: {
   title: string;
   description?: string;
   type: TransactionType;
-  categoryId: string;
+  categoryId?: string;
   defaultAmount: number;
   frequency: FrequencyType;
   dueDay?: number;
@@ -83,10 +83,37 @@ export async function createRecurring(data: {
   endDate?: Date;
 }) {
   const userId = await requireValidSession();
+
+  const finalData = { ...data };
+
+  if (finalData.type === TransactionType.INVESTMENT && !finalData.categoryId) {
+    let investmentCategory = await prisma.transactionCategory.findFirst({
+      where: {
+        userId,
+        name: "Aplicações/Investimentos",
+        type: TransactionType.INVESTMENT,
+      },
+    });
+
+    if (!investmentCategory) {
+      investmentCategory = await prisma.transactionCategory.create({
+        data: {
+          name: "Aplicações/Investimentos",
+          type: TransactionType.INVESTMENT,
+          icon: "TrendingUp",
+          color: "#059669",
+          userId,
+        },
+      });
+    }
+
+    finalData.categoryId = investmentCategory.id;
+  }
+
   try {
     const recurring = await prisma.recurringTransaction.create({
       data: {
-        ...data,
+        ...(finalData as any),
         userId,
       },
     });
@@ -107,7 +134,7 @@ export async function updateRecurring(
     title: string;
     description?: string;
     type: TransactionType;
-    categoryId: string;
+    categoryId?: string;
     defaultAmount: number;
     frequency: FrequencyType;
     dueDay?: number;

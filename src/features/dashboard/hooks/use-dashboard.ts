@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 const TransactionType = {
   INCOME: "INCOME",
   EXPENSE: "EXPENSE",
+  INVESTMENT: "INVESTMENT",
 } as const;
 
 const TransactionStatus = {
@@ -49,6 +50,10 @@ export function useDashboard() {
       .filter((t) => t.type === TransactionType.EXPENSE)
       .reduce((acc, t) => acc + t.amount, 0);
 
+    const investments = currentMonthTransactions
+      .filter((t) => t.type === TransactionType.INVESTMENT)
+      .reduce((acc, t) => acc + t.amount, 0);
+
     const pending = currentMonthTransactions
       .filter((t) => t.status === TransactionStatus.PENDING)
       .reduce((acc, t) => acc + t.amount, 0);
@@ -61,7 +66,7 @@ export function useDashboard() {
       .filter((t) => t.status === TransactionStatus.OVERDUE)
       .reduce((acc, t) => acc + t.amount, 0);
     
-    const balance = incomes - expenses;
+    const balance = incomes - (expenses + investments);
 
     const categoryData: Record<string, { name: string; value: number; color: string }> = {};
     currentMonthTransactions
@@ -80,6 +85,7 @@ export function useDashboard() {
     return {
       incomes,
       expenses,
+      investments,
       balance,
       pending,
       paid,

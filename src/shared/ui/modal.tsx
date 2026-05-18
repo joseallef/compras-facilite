@@ -46,11 +46,11 @@ export function Modal({
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95, y: 20 }}
                   className={cn(
-                    "relative w-full max-w-lg max-h-[90vh] flex flex-col bg-card border border-border rounded-[2.5rem] shadow-2xl outline-none",
+                    "relative w-full max-w-2xl max-h-[90vh] flex flex-col bg-card border border-border rounded-[2.5rem] shadow-2xl outline-none",
                     className
                   )}
                 >
-                  <div className="flex-1 overflow-y-auto custom-scrollbar p-5 sm:p-6">
+                  <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6">
                     {(title || description) && (
                       <div className="flex flex-col gap-2 mb-4 pr-8">
                         {title && (

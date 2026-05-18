@@ -10,9 +10,6 @@ export default async function FinancasPage() {
     redirect("/login");
   }
 
-  const userId = session.user.id;
-  const userEmail = session.user.email;
-
   const currentDate = new Date();
   const initialMonth = currentDate.getMonth();
   const initialYear = currentDate.getFullYear();

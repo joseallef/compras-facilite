@@ -295,7 +295,7 @@ export function DashboardSkeleton() {
               <Skeleton className="h-4 w-80 rounded bg-white/15" />
             </div>
 
-            <div className="grid grid-cols-2 gap-3 md:gap-4">
+            <div className="grid grid-cols-3 gap-3 md:gap-4">
               <div className="bg-white/15 backdrop-blur-md p-4 md:p-5 rounded-2xl md:rounded-3xl border border-white/20">
                 <Skeleton className="h-2 w-20 rounded bg-white/20 mb-2" />
                 <div className="flex items-center gap-1">
@@ -305,6 +305,13 @@ export function DashboardSkeleton() {
               </div>
               <div className="bg-white/15 backdrop-blur-md p-4 md:p-5 rounded-2xl md:rounded-3xl border border-white/20">
                 <Skeleton className="h-2 w-20 rounded bg-white/20 mb-2" />
+                <div className="flex items-center gap-1">
+                  <Skeleton className="h-5 w-5 rounded-full bg-white/20" />
+                  <Skeleton className="h-8 w-36 rounded-lg bg-white/15" />
+                </div>
+              </div>
+              <div className="bg-white/15 backdrop-blur-md p-4 md:p-5 rounded-2xl md:rounded-3xl border border-white/20">
+                <Skeleton className="h-2 w-24 rounded bg-white/20 mb-2" />
                 <div className="flex items-center gap-1">
                   <Skeleton className="h-5 w-5 rounded-full bg-white/20" />
                   <Skeleton className="h-8 w-36 rounded-lg bg-white/15" />
