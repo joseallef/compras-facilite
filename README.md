@@ -1,90 +1,101 @@
-# 🛒 Compras Facilite
+# Compras Facilite
 
-**Sua Lista de Mercado Inteligente** - Organize suas compras, controle gastos e economize tempo com uma interface moderna e intuitiva.
+Gerencie suas listas de mercado inteligentes, controle receitas, despesas e investimentos em um só lugar.
 
-[![Next.js](https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=next.js)](https://nextjs.org/)
-[![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748?style=flat-square&logo=prisma)](https://www.prisma.io/)
-[![Auth.js](https://img.shields.io/badge/Auth.js-v5-000?style=flat-square&logo=next.js)](https://authjs.dev/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.0-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
+## 🚀 Características Principais
 
----
+- 📝 Listas de mercado inteligentes com categorização
+- 💰 Controle financeiro completo (receitas, despesas, investimentos)
+- 📊 Dashboard visual e intuitivo com gráficos
+- 📅 Contas fixas/recorrentes
+- 🔐 Autenticação segura
+- 📱 Design moderno e responsivo
 
-## ✨ Funcionalidades
+## 🛠️ Tech Stack
 
-- 📝 **Gestão de Listas**: Crie, edite e organize múltiplas listas de compras.
-- 💡 **Listas Inteligentes**: Use templates pré-definidos para agilizar seu dia a dia.
-- 💰 **Controle de Gastos**: Acompanhe o valor total e o progresso da lista em tempo real.
-- 📱 **Mobile First**: Interface otimizada para uso no supermercado diretamente do celular.
-- 🔒 **Segurança**: Autenticação robusta com Auth.js e criptografia de senhas.
-- 📊 **Dashboard**: Visualize estatísticas sobre suas compras e economias.
+- **Framework**: Next.js 16 (App Router)
+- **Linguagem**: TypeScript
+- **Estilização**: Tailwind CSS 4
+- **ORM**: Prisma
+- **Autenticação**: Auth.js (NextAuth) v5
+- **Banco de Dados**: PostgreSQL
+- **Testes**: Jest + React Testing Library
 
----
+## 🏁 Iniciando o Projeto
 
-## 🚀 Tecnologias
+1. Instale as dependências:
+```bash
+npm install
+```
 
-- **Framework**: [Next.js 15 (App Router)](https://nextjs.org/)
-- **Linguagem**: [TypeScript](https://www.typescriptlang.org/)
-- **Estilização**: [Tailwind CSS 4](https://tailwindcss.com/) + [Lucide React](https://lucide.dev/)
-- **Banco de Dados**: [PostgreSQL](https://www.postgresql.org/) + [Prisma ORM](https://www.prisma.io/)
-- **Autenticação**: [Auth.js v5 (NextAuth)](https://authjs.dev/)
-- **Animações**: [Framer Motion](https://www.framer.com/motion/)
-- **Testes**: [Jest](https://jestjs.io/) + [React Testing Library](https://testing-library.com/)
+2. Configure as variáveis de ambiente:
+   - Copie o arquivo `.env.example` para `.env.local`
+   - Preencha as variáveis de ambiente
 
----
+3. Execute as migrações do banco de dados:
+```bash
+npx prisma migrate deploy
+```
 
-## 🛠️ Instalação e Configuração
+4. Inicie o servidor de desenvolvimento:
+```bash
+npm run dev
+```
 
-### Pré-requisitos
-- Node.js 20+
-- PostgreSQL (Local ou Cloud como Supabase/Neon)
+## 📦 Deploy
 
-### Passo a Passo
+### Vercel (Recomendado)
 
-1. **Clone o repositório**
-   ```bash
-   git clone https://github.com/seu-usuario/compras-facilite.git
-   cd compras-facilite
-   ```
+O projeto já está configurado para deploy no Vercel com o script `vercel-build`!
 
-2. **Instale as dependências**
-   ```bash
-   npm install
-   ```
+1. Conecte seu repositório ao Vercel
+2. Adicione as variáveis de ambiente no painel do Vercel:
+   - `DATABASE_URL` (URL do PostgreSQL)
+   - `NEXTAUTH_URL` (URL do seu app)
+   - `NEXTAUTH_SECRET` (gerada com `openssl rand -hex 32`)
+3. Faça o deploy!
 
-3. **Configure as variáveis de ambiente**
-   Crie um arquivo `.env` na raiz do projeto:
-   ```env
-   DATABASE_URL="postgresql://user:password@localhost:5432/compras_facilite"
-   NEXTAUTH_SECRET="seu_secret_aqui"
-   PASSWORD_PEPPER="uma_string_aleatoria_longa"
-   ```
+### Outros Providers
 
-4. **Prepare o banco de dados**
-   ```bash
-   npx prisma migrate dev
-   ```
+1. Build da aplicação:
+```bash
+npm run build
+```
 
-5. **Inicie o servidor de desenvolvimento**
-   ```bash
-   npm run dev
-   ```
+2. Execute as migrações:
+```bash
+npm run prisma:migrate:deploy
+```
 
----
+3. Inicie o servidor:
+```bash
+npm start
+```
 
-## 📖 Documentação Adicional
+## Scripts Úteis
 
-- [🏗️ Guia de Arquitetura](./ARCHITECTURE_GUIDE.md) - Padrões de código e estrutura de pastas.
-- [🛠️ Guia do Desenvolvedor (CLAUDE.md)](./CLAUDE.md) - Comandos úteis e fluxos de trabalho.
+- `npm run dev`: Inicia o servidor de desenvolvimento
+- `npm run build`: Cria a build de produção
+- `npm start`: Inicia o servidor de produção
+- `npm run lint`: Executa o ESLint
+- `npm test`: Executa os testes
+- `npm run prisma:generate`: Gera o cliente Prisma
+- `npm run prisma:migrate:deploy`: Executa as migrações em produção
 
----
+## 📁 Estrutura do Projeto
 
-## 🤝 Contribuição
+```
+src/
+├── app/              # Rotas da aplicação (App Router)
+├── features/         # Módulos por domínio (auth, mercado, transactions, etc.)
+├── shared/           # Código reutilizável (UI, layout, utils)
+└── core/             # Infraestrutura (auth, db, security)
+```
 
-Contribuições são sempre bem-vindas! Sinta-se à vontade para abrir issues ou enviar pull requests.
+## 📚 Documentação Adicional
 
-## 📄 Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
-
----
-Desenvolvido com ❤️ por [José Allef](https://github.com/joseallef)
+- [Guia de Arquitetura](./ARCHITECTURE_GUIDE.md)
+- [Relatório de Auditoria de Segurança](./SECURITY_AUDIT.md)
+- [Checklist de Segurança](./SECURITY_CHECKLIST.md)
+- [Análise do Projeto](./PROJECT_ANALYSIS.md)
+- [Guia LGPD](./LGPD_IMPLEMENTATION_GUIDE.md)

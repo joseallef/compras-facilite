@@ -1,6 +1,6 @@
-import { auth } from "@/auth";
-import { AuthProvider } from "@/components/providers/AuthProvider";
-import { ScrollToTop } from "@/components/ui/ScrollToTop";
+import { auth } from "@/core/auth/auth";
+import { AuthProvider } from "@/shared/providers/auth-provider";
+import { ScrollToTop } from "@/shared/ui/scroll-to-top";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import type { CSSProperties } from "react";

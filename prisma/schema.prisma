@@ -7,14 +7,17 @@ datasource db {
 }
 
 model User {
-  id                  String               @id @default(uuid())
-  email               String               @unique
-  name                String?
-  password            String
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
-  passwordResetTokens PasswordResetToken[]
-  lists               ShoppingList[]
+  id                    String                 @id @default(uuid())
+  email                 String                 @unique
+  name                  String?
+  password              String
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  passwordResetTokens   PasswordResetToken[]
+  recurringTransactions RecurringTransaction[]
+  lists                 ShoppingList[]
+  transactions          Transaction[]
+  transactionCategories TransactionCategory[]
 }
 
 model PasswordResetToken {
@@ -39,15 +42,16 @@ model RateLimit {
 }
 
 model ShoppingList {
-  id         String         @id @default(uuid())
-  name       String
-  userId     String
-  createdAt  DateTime       @default(now())
-  updatedAt  DateTime       @updatedAt
-  status     ListStatus     @default(ABERTA)
-  totalValue Float?
-  items      ShoppingItem[]
-  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          String         @id @default(uuid())
+  name        String
+  userId      String
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  status      ListStatus     @default(ABERTA)
+  totalValue  Float?
+  items       ShoppingItem[]
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transaction Transaction?
 
   @@index([userId])
 }
@@ -67,6 +71,69 @@ model ShoppingItem {
   @@index([shoppingListId])
 }
 
+model TransactionCategory {
+  id                    String                 @id @default(uuid())
+  name                  String
+  icon                  String?
+  color                 String?
+  type                  TransactionType
+  userId                String
+  recurringTransactions RecurringTransaction[]
+  transactions          Transaction[]
+  user                  User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([name, userId, type])
+}
+
+model RecurringTransaction {
+  id            String              @id @default(uuid())
+  userId        String
+  title         String
+  description   String?
+  type          TransactionType
+  categoryId    String
+  defaultAmount Float
+  frequency     FrequencyType       @default(MONTHLY)
+  dueDay        Int?
+  startDate     DateTime
+  endDate       DateTime?
+  active        Boolean             @default(true)
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  category      TransactionCategory @relation(fields: [categoryId], references: [id])
+  user          User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions  Transaction[]
+
+  @@index([userId])
+}
+
+model Transaction {
+  id                     String                @id @default(uuid())
+  recurringTransactionId String?
+  title                  String
+  amount                 Float
+  type                   TransactionType
+  status                 TransactionStatus     @default(PENDING)
+  competencyMonth        Int
+  competencyYear         Int
+  dueDate                DateTime?
+  paidAt                 DateTime?
+  notes                  String?
+  userId                 String
+  categoryId             String
+  shoppingListId         String?               @unique
+  createdAt              DateTime              @default(now())
+  updatedAt              DateTime              @updatedAt
+  category               TransactionCategory   @relation(fields: [categoryId], references: [id])
+  recurringTransaction   RecurringTransaction? @relation(fields: [recurringTransactionId], references: [id])
+  shoppingList           ShoppingList?         @relation(fields: [shoppingListId], references: [id])
+  user                   User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([categoryId])
+  @@index([competencyMonth, competencyYear, userId])
+}
+
 enum ListStatus {
   ABERTA
   CONCLUIDA
@@ -81,4 +148,22 @@ enum Category {
   Acougue
   Padaria
   Outros
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+  INVESTMENT
+}
+
+enum TransactionStatus {
+  PENDING
+  PAID
+  OVERDUE
+}
+
+enum FrequencyType {
+  MONTHLY
+  WEEKLY
+  YEARLY
 }
