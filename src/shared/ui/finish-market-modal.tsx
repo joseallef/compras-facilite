@@ -3,7 +3,7 @@
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Modal } from "@/shared/ui/modal";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, History, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface FinishMarketModalProps {
@@ -36,14 +36,9 @@ export function FinishMarketModal({
   }, [isOpen, initialValue]);
 
   const formatCurrency = (val: string) => {
-    // Remove all non-digits
     const digits = val.replace(/\D/g, "");
     if (!digits) return "";
-
-    // Convert to number (cents)
     const amount = parseInt(digits) / 100;
-    
-    // Format using pt-BR locale
     return new Intl.NumberFormat("pt-BR", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
@@ -51,10 +46,8 @@ export function FinishMarketModal({
   };
 
   const handleConfirm = async () => {
-    // Remove dots and replace comma with dot to get a float
     const rawDigits = value.replace(/\D/g, "");
     const numValue = rawDigits ? parseInt(rawDigits) / 100 : 0;
-    
     await onConfirm(numValue);
     onClose();
   };
@@ -62,6 +55,16 @@ export function FinishMarketModal({
   const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatCurrency(e.target.value);
     setValue(formatted);
+  };
+
+  const handleUsePreviousValue = () => {
+    if (initialValue != null) {
+      const formatted = new Intl.NumberFormat("pt-BR", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(initialValue);
+      setValue(formatted);
+    }
   };
 
   return (
@@ -73,17 +76,51 @@ export function FinishMarketModal({
     >
       <div className="space-y-6">
         <div className="text-center space-y-2">
-          <div className="bg-emerald-100 dark:bg-emerald-900/30 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border border-emerald-200 dark:border-emerald-800">
-            <CheckCircle2 className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
+          <div className="bg-gradient-to-br from-emerald-100 to-emerald-50 dark:from-emerald-900/30 dark:to-emerald-900/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-emerald-200 dark:border-emerald-800 shadow-lg">
+            <CheckCircle2 className="h-10 w-10 text-emerald-600 dark:text-emerald-400" />
           </div>
         </div>
 
-        <div className="space-y-2">
+        {initialValue != null && (
+          <div className="relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-emerald-50/80 via-amber-50/50 to-emerald-50/80 dark:from-emerald-900/10 dark:via-amber-900/5 dark:to-emerald-900/10" />
+            <div className="relative p-4 rounded-2xl border border-emerald-100 dark:border-emerald-900/30">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="bg-emerald-100 dark:bg-emerald-900/30 p-2 rounded-xl">
+                    <History size={18} className="text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-emerald-800 dark:text-emerald-300">
+                      Valor anterior
+                    </p>
+                    <p className="text-xl font-bold text-emerald-700 dark:text-emerald-400">
+                      {new Intl.NumberFormat("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                      }).format(initialValue)}
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  onClick={handleUsePreviousValue}
+                  disabled={isLoading}
+                  className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-medium transition-all active:scale-95 disabled:opacity-50 shadow-md"
+                >
+                  <Sparkles size={16} />
+                  Usar
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="space-y-3">
           <Input
             id="totalValue"
             type="text"
             inputMode="decimal"
-            label="Valor Total Gasto (R$)"
+            label="Valor Total Gasto"
             labelClassName="text-sm font-bold text-muted/60 uppercase tracking-wider ml-1"
             value={value}
             onChange={handleValueChange}
@@ -93,7 +130,7 @@ export function FinishMarketModal({
             containerClassName="space-y-2"
             inputClassName="rounded-2xl text-xl font-bold border-border"
           />
-          <p className="text-[10px] text-muted ml-1 italic">
+          <p className="text-[11px] text-muted/70 ml-1">
             * Opcional. Você pode deixar em branco se preferir.
           </p>
         </div>
