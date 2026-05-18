@@ -38,6 +38,7 @@ export function DatePicker({
       )}
 
       <Button
+        type="button"
         variant="ghost"
         onClick={() => !disabled && setIsOpen(true)}
         disabled={disabled}

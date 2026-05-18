@@ -1,13 +1,13 @@
 "use client";
 
 import {
-  deleteRecurringAction,
-  deleteTransactionAction,
-  ensureMonthlyTransactionsAction,
-  getRecurringsAction,
-  getTransactionsAction,
-  updateRecurringAction,
-  updateTransactionAction
+    deleteRecurringAction,
+    deleteTransactionAction,
+    ensureMonthlyTransactionsAction,
+    getRecurringsAction,
+    getTransactionsAction,
+    updateRecurringAction,
+    updateTransactionAction
 } from "@/features/recurring-transactions/actions/recurring-actions";
 import { MonthlyTransactions } from "@/features/recurring-transactions/components/monthly-transactions";
 import { RecurringList } from "@/features/recurring-transactions/components/recurring-list";
@@ -18,7 +18,7 @@ import { Input } from "@/shared/ui/input";
 import { Select } from "@/shared/ui/select";
 import { TableCardSkeleton } from "@/shared/ui/skeleton";
 import { cn } from "@/shared/utils/cn";
-import { ArrowDownCircle, ArrowUpCircle, ChevronLeft, ChevronRight, Plus, RepeatIcon, Search, TrendingUp, X } from "lucide-react";
+import { ArrowDownCircle, ArrowUpCircle, ChevronLeft, ChevronRight, PiggyBank, Plus, RepeatIcon, Search, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -358,7 +358,7 @@ export function FinancasClient({
                   : "text-muted-foreground hover:text-emerald-700"
               )}
             >
-              <TrendingUp size={16} />
+              <PiggyBank size={16} />
               Investimentos
             </button>
           </div>

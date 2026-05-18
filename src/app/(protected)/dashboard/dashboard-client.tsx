@@ -6,7 +6,7 @@ import { Button } from "@/shared/ui/button";
 import { Select } from "@/shared/ui/select";
 import { DashboardSkeleton } from "@/shared/ui/skeleton";
 import { formatCurrency } from "@/shared/utils/format";
-import { ArrowDownRight, ArrowUpRight, BarChart3, Calendar, ChevronLeft, ChevronRight, PieChart as PieChartIcon, TrendingUp } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, BarChart3, Calendar, ChevronLeft, ChevronRight, PieChart as PieChartIcon, PiggyBank, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -403,7 +403,7 @@ export function DashboardClient({
                   <div className="bg-white/15 backdrop-blur-md p-4 md:p-5 rounded-2xl md:rounded-3xl border border-white/20 hover:bg-white/20 transition-all">
                     <p className="text-[9px] md:text-[10px] font-bold text-emerald-100 uppercase mb-1.5 md:mb-2 tracking-wider">Investimentos</p>
                     <p className="text-xl md:text-2xl font-black flex items-center gap-1">
-                      <TrendingUp size={18} className="text-emerald-200" />
+                      <PiggyBank size={18} className="text-emerald-200" />
                       {formatCurrency(viewMode === "month" ? stats.investments : yearlyStats.totalInvestment || 0)}
                     </p>
                   </div>
@@ -571,6 +571,15 @@ export function DashboardClient({
                       activeDot={{ r: 7 }}
                       fill="url(#colorExpense)"
                     />
+                    <Line
+                      type="monotone"
+                      name="Investimentos"
+                      dataKey="investment"
+                      stroke="#3b82f6"
+                      strokeWidth={4}
+                      dot={{ r: 5, strokeWidth: 2, fill: "white" }}
+                      activeDot={{ r: 7 }}
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
@@ -613,6 +622,7 @@ export function DashboardClient({
                   <Legend verticalAlign="top" align="right" iconType="circle" />
                   <Bar name="Receitas" dataKey="income" fill="#10b981" radius={[6, 6, 0, 0]} barSize={32} />
                   <Bar name="Despesas" dataKey="expense" fill="#ef4444" radius={[6, 6, 0, 0]} barSize={32} />
+                  <Bar name="Investimentos" dataKey="investment" fill="#3b82f6" radius={[6, 6, 0, 0]} barSize={32} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

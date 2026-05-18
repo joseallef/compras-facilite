@@ -94,8 +94,8 @@ export async function createTransaction(data: {
   amount: number;
   type: TransactionType;
   status?: TransactionStatus;
-  competencyMonth: number;
-  competencyYear: number;
+  competencyMonth?: number;
+  competencyYear?: number;
   categoryId?: string;
   notes?: string;
   dueDate?: Date;
@@ -119,7 +119,7 @@ export async function createTransaction(data: {
         data: {
           name: "Aplicações/Investimentos",
           type: TransactionType.INVESTMENT,
-          icon: "TrendingUp",
+          icon: "PiggyBank",
           color: "#059669",
           userId,
         },
@@ -134,9 +134,15 @@ export async function createTransaction(data: {
       throw new Error("Categoria é obrigatória para criar a transação");
     }
 
+    const referenceDate = finalData.dueDate || new Date();
+    const competencyMonth = finalData.competencyMonth ?? referenceDate.getMonth();
+    const competencyYear = finalData.competencyYear ?? referenceDate.getFullYear();
+
     const transaction = await prisma.transaction.create({
       data: {
         ...finalData,
+        competencyMonth,
+        competencyYear,
         categoryId: finalData.categoryId,
         userId,
       },
@@ -157,8 +163,8 @@ export async function updateTransaction(
     amount: number;
     type: TransactionType;
     status: TransactionStatus;
-    competencyMonth: number;
-    competencyYear: number;
+    competencyMonth?: number;
+    competencyYear?: number;
     categoryId?: string;
     notes: string | null;
     dueDate: Date | null;
@@ -168,10 +174,17 @@ export async function updateTransaction(
   const userId = await requireValidSession();
 
   try {
+    const updateData = { ...data };
+    
+    if (updateData.dueDate) {
+      updateData.competencyMonth = updateData.competencyMonth ?? updateData.dueDate.getMonth();
+      updateData.competencyYear = updateData.competencyYear ?? updateData.dueDate.getFullYear();
+    }
+
     const transaction = await prisma.transaction.update({
       where: { id, userId },
       data: {
-        ...data,
+        ...updateData,
         paidAt: data.status === TransactionStatus.PAID ? new Date() : null,
       },
     });
@@ -231,9 +244,10 @@ export async function getTransactionCategories(type?: TransactionType) {
         { name: "Mercado", type: TransactionType.EXPENSE, icon: "ShoppingCart", color: "#10b981" },
         { name: "Saúde", type: TransactionType.EXPENSE, icon: "Heart", color: "#ec4899" },
         { name: "Educação", type: TransactionType.EXPENSE, icon: "BookOpen", color: "#8b5cf6" },
-        { name: "Aplicações/Investimentos", type: TransactionType.INVESTMENT, icon: "TrendingUp", color: "#059669" },
+        { name: "Aplicações/Investimentos", type: TransactionType.INVESTMENT, icon: "PiggyBank", color: "#059669" },
       ];
 
+      let created = false;
       for (const cat of defaultCategories) {
         if (!existingNames.includes(cat.name)) {
           try {
@@ -243,11 +257,13 @@ export async function getTransactionCategories(type?: TransactionType) {
                 userId,
               },
             });
+            created = true;
           } catch {
             // Ignora erros de duplicata
           }
         }
       }
+
 
       categories = await prisma.transactionCategory.findMany({
         where: {

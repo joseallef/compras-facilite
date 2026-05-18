@@ -3,7 +3,7 @@
 import { cn } from "@/shared/utils/cn";
 import { formatCurrency, formatShortDate } from "@/shared/utils/format";
 import { TransactionStatus, TransactionType } from "@prisma/client";
-import { ArrowDownCircle, ArrowUpCircle, CheckCircle2, Clock, XCircle } from "lucide-react";
+import { ArrowDownCircle, ArrowUpCircle, CheckCircle2, Clock, PiggyBank, XCircle } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -50,7 +50,7 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
       case TransactionTypeValues.EXPENSE:
         return <ArrowDownCircle size={20} />;
       default:
-        return <ArrowDownCircle size={20} />;
+        return <PiggyBank size={20} />;
     }
   };
 
@@ -61,7 +61,7 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
       case TransactionTypeValues.EXPENSE:
         return "bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400";
       default:
-        return "bg-gray-50 text-gray-600";
+        return "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-500";
     }
   };
 
@@ -72,7 +72,7 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
       case TransactionTypeValues.EXPENSE:
         return "text-red-600";
       default:
-        return "text-gray-600";
+        return "text-emerald-700";
     }
   };
 

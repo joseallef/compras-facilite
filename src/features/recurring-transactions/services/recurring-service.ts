@@ -3,20 +3,14 @@
 import { requireValidSession } from "@/core/auth/server-utils";
 import { prisma } from "@/core/db/prisma";
 import { FrequencyType, TransactionStatus, TransactionType } from "@prisma/client";
-import { endOfMonth, startOfMonth } from "date-fns";
 import { revalidatePath } from "next/cache";
 
 export async function ensureMonthlyTransactions(userId: string, month: number, year: number) {
   try {
-    const startDate = startOfMonth(new Date(year, month));
-    const endDate = endOfMonth(new Date(year, month));
-
     const activeRecurrings = await prisma.recurringTransaction.findMany({
       where: {
         userId,
         active: true,
-        startDate: { lte: endDate },
-        OR: [{ endDate: null }, { endDate: { gte: startDate } }],
       },
     });
 
@@ -79,8 +73,6 @@ export async function createRecurring(data: {
   defaultAmount: number;
   frequency: FrequencyType;
   dueDay?: number;
-  startDate: Date;
-  endDate?: Date;
 }) {
   const userId = await requireValidSession();
 
@@ -114,6 +106,7 @@ export async function createRecurring(data: {
     const recurring = await prisma.recurringTransaction.create({
       data: {
         ...(finalData as any),
+        startDate: new Date(),
         userId,
       },
     });
@@ -138,8 +131,6 @@ export async function updateRecurring(
     defaultAmount: number;
     frequency: FrequencyType;
     dueDay?: number;
-    startDate: Date;
-    endDate?: Date;
     active: boolean;
   }>
 ) {

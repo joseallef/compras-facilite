@@ -1,6 +1,6 @@
 "use client";
 
-import { createRecurringAction, getTransactionCategoriesAction, updateRecurringAction } from "@/features/recurring-transactions/actions/recurring-actions";
+import { createRecurringAction, updateRecurringAction } from "@/features/recurring-transactions/actions/recurring-actions";
 import { createRecurringSchema } from "@/features/recurring-transactions/schemas/recurring-schemas";
 import { Button } from "@/shared/ui/button";
 import { CurrencyInput } from "@/shared/ui/currency-input";
@@ -10,10 +10,11 @@ import { Modal } from "@/shared/ui/modal";
 import { Select } from "@/shared/ui/select";
 import { formatCurrency, parseCurrency } from "@/shared/utils/currency";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Calendar, Repeat } from "lucide-react";
+import * as Icons from "lucide-react";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { useCategories } from "../hooks/use-categories";
 import { createTransactionSchema } from "../schemas/transaction-schemas";
 import { createTransaction, updateTransaction } from "../services/transaction-service";
 
@@ -41,6 +42,11 @@ type TransactionStatus = typeof TransactionStatus[keyof typeof TransactionStatus
 
 type Mode = "single" | "recurring";
 
+const getIconComponent = (iconName: string) => {
+  const Icon = (Icons as any)[iconName];
+  return Icon ? <Icon size={18} /> : <Icons.Circle size={18} />;
+};
+
 interface UnifiedTransactionModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -57,7 +63,6 @@ export function UnifiedTransactionModal({
   initialData,
 }: UnifiedTransactionModalProps) {
   const [mode, setMode] = useState<Mode>(initialMode);
-  const [categories, setCategories] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const isEditing = !!initialData;
@@ -82,8 +87,6 @@ export function UnifiedTransactionModal({
           type: initialData?.type || TransactionType.EXPENSE,
           categoryId: initialData?.categoryId || "",
           status: initialData?.status || TransactionStatus.PENDING,
-          competencyMonth: initialData?.competencyMonth || new Date().getMonth(),
-          competencyYear: initialData?.competencyYear || new Date().getFullYear(),
           dueDate: initialData?.dueDate || undefined,
         }
       : {
@@ -94,12 +97,11 @@ export function UnifiedTransactionModal({
           defaultAmount: initialData?.defaultAmount ? formatCurrency(initialData.defaultAmount) : "",
           frequency: initialData?.frequency || FrequencyType.MONTHLY,
           dueDay: initialData?.dueDay?.toString() || "",
-          startDate: initialData?.startDate || new Date(),
-          endDate: initialData?.endDate || undefined,
         },
   });
 
   const selectedType = watch("type");
+  const { categories } = useCategories(selectedType === TransactionType.INVESTMENT ? undefined : selectedType);
 
   useEffect(() => {
     if (isOpen) {
@@ -113,8 +115,6 @@ export function UnifiedTransactionModal({
               type: initialData?.type || TransactionType.EXPENSE,
               categoryId: initialData?.categoryId || "",
               status: initialData?.status || TransactionStatus.PENDING,
-              competencyMonth: initialData?.competencyMonth || new Date().getMonth(),
-              competencyYear: initialData?.competencyYear || new Date().getFullYear(),
               dueDate: initialData?.dueDate || undefined,
             }
           : {
@@ -125,8 +125,6 @@ export function UnifiedTransactionModal({
               defaultAmount: initialData?.defaultAmount ? formatCurrency(initialData.defaultAmount) : "",
               frequency: initialData?.frequency || FrequencyType.MONTHLY,
               dueDay: initialData?.dueDay?.toString() || "",
-              startDate: initialData?.startDate || new Date(),
-              endDate: initialData?.endDate || undefined,
             }
       );
     }
@@ -142,8 +140,6 @@ export function UnifiedTransactionModal({
             type: initialData?.type || TransactionType.EXPENSE,
             categoryId: initialData?.categoryId || "",
             status: initialData?.status || TransactionStatus.PENDING,
-            competencyMonth: initialData?.competencyMonth || new Date().getMonth(),
-            competencyYear: initialData?.competencyYear || new Date().getFullYear(),
             dueDate: initialData?.dueDate || undefined,
           }
         : {
@@ -154,34 +150,25 @@ export function UnifiedTransactionModal({
             defaultAmount: initialData?.defaultAmount ? formatCurrency(initialData.defaultAmount) : "",
             frequency: initialData?.frequency || FrequencyType.MONTHLY,
             dueDay: initialData?.dueDay?.toString() || "",
-            startDate: initialData?.startDate || new Date(),
-            endDate: initialData?.endDate || undefined,
           };
       reset(defaultValues);
     }
   }, [mode, isOpen, isEditing, initialData, reset]);
 
   useEffect(() => {
-    async function loadCategories() {
-      try {
-        const cats = await getTransactionCategoriesAction(selectedType === TransactionType.INVESTMENT ? undefined : selectedType);
-        setCategories(cats);
-        if (cats.length > 0 && selectedType !== TransactionType.INVESTMENT) {
-          if (!initialData?.categoryId) {
-            setValue("categoryId", cats[0].id);
-          } else {
-            const exists = cats.some((c: any) => c.id === initialData.categoryId);
-            if (!exists) {
-              setValue("categoryId", cats[0].id);
-            }
-          }
+    if (categories.length > 0 && selectedType !== TransactionType.INVESTMENT) {
+      if (!initialData?.categoryId || (initialData && initialData.type !== selectedType)) {
+        setValue("categoryId", categories[0].id);
+      } else {
+        const exists = categories.some((c: any) => c.id === initialData.categoryId);
+        if (!exists) {
+          setValue("categoryId", categories[0].id);
         }
-      } catch (error) {
-        console.error("Error loading categories:", error);
       }
+    } else if (selectedType === TransactionType.INVESTMENT) {
+      setValue("categoryId", "");
     }
-    loadCategories();
-  }, [selectedType, setValue, initialData]);
+  }, [categories, selectedType, setValue, initialData]);
 
   const onSubmit = async (values: any) => {
     setIsLoading(true);
@@ -227,7 +214,8 @@ export function UnifiedTransactionModal({
       }
       onSuccess();
       onClose();
-    } catch {
+    } catch (error) {
+      console.error('Error submitting form:', error);
       toast.error(
         isEditing
           ? mode === "single"
@@ -242,22 +230,29 @@ export function UnifiedTransactionModal({
     }
   };
 
-  const typeOptions = [
-    { value: TransactionType.EXPENSE, label: "Despesa" },
-    { value: TransactionType.INCOME, label: "Receita" },
-    { value: TransactionType.INVESTMENT, label: "Investimento" },
-  ];
+  const getTypeOptions = (): Array<{ value: TransactionType; label: string }> => {
+    const options = [
+      { value: TransactionType.EXPENSE, label: "Despesa" },
+      { value: TransactionType.INCOME, label: "Receita" },
+    ] as Array<{ value: TransactionType; label: string }>;
+    
+    if (mode === "recurring") {
+      options.push({ value: TransactionType.INVESTMENT, label: "Investimento" });
+    }
+    
+    return options;
+  };
 
   const statusOptions = [
-    { value: TransactionStatus.PENDING, label: "Pendente" },
-    { value: TransactionStatus.PAID, label: "Pago" },
-    { value: TransactionStatus.OVERDUE, label: "Atrasado" },
+    { value: TransactionStatus.PENDING, label: "Pendente", icon: <Icons.Clock size={18} /> },
+    { value: TransactionStatus.PAID, label: "Pago", icon: <Icons.CheckCircle2 size={18} /> },
+    { value: TransactionStatus.OVERDUE, label: "Atrasado", icon: <Icons.AlertCircle size={18} /> },
   ];
 
   const frequencyOptions = [
-    { value: FrequencyType.MONTHLY, label: "Mensal" },
-    { value: FrequencyType.WEEKLY, label: "Semanal" },
-    { value: FrequencyType.YEARLY, label: "Anual" },
+    { value: FrequencyType.MONTHLY, label: "Mensal", icon: <Icons.Calendar size={18} /> },
+    { value: FrequencyType.WEEKLY, label: "Semanal", icon: <Icons.CalendarDays size={18} /> },
+    { value: FrequencyType.YEARLY, label: "Anual", icon: <Icons.CalendarCheck2 size={18} /> },
   ];
 
   const days = Array.from({ length: 31 }, (_, i) => ({
@@ -298,7 +293,7 @@ export function UnifiedTransactionModal({
                 : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
             }`}
           >
-            <Calendar size={16} />
+            <Icons.Calendar size={16} />
             Transação Única
           </button>
           <button
@@ -310,7 +305,7 @@ export function UnifiedTransactionModal({
                 : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
             }`}
           >
-            <Repeat size={16} />
+            <Icons.Repeat size={16} />
             Conta Fixa
           </button>
         </div>
@@ -318,28 +313,28 @@ export function UnifiedTransactionModal({
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
         {/* Type Toggle */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 p-1 bg-muted/50 rounded-2xl border border-border/50">
-          {typeOptions.map((opt) => {
-            const isDisabled = mode === "single" && opt.value === TransactionType.INVESTMENT;
-            
-            return (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => !isDisabled && setValue("type", opt.value)}
-                disabled={isDisabled}
-                className={`py-2.5 text-sm font-bold rounded-xl transition-all flex items-center justify-center ${
-                  isDisabled
-                    ? "text-muted-foreground/50 cursor-not-allowed"
-                    : watch("type") === opt.value
-                      ? "bg-white dark:bg-zinc-800 shadow-sm text-emerald-600"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                }`}
-              >
-                {opt.label}
-              </button>
-            );
-          })}
+        <div className={`grid gap-2 p-1 bg-muted/50 rounded-2xl border border-border/50 ${
+          mode === "single" ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1 sm:grid-cols-3"
+        }`}>
+          {getTypeOptions().map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => !isEditing && setValue("type", opt.value)}
+              disabled={isEditing}
+              className={`py-3 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${
+                isEditing 
+                  ? watch("type") === opt.value 
+                    ? "bg-white dark:bg-zinc-800 shadow-sm" 
+                    : "text-muted-foreground cursor-not-allowed opacity-50"
+                  : watch("type") === opt.value
+                    ? "bg-white dark:bg-zinc-800 shadow-sm"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
         </div>
 
         {/* Title */}
@@ -371,27 +366,25 @@ export function UnifiedTransactionModal({
         {mode === "single" ? (
           <>
             {/* Amount and Status (specific per type) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Controller
-                name="amount"
-                control={control}
-                render={({ field }) => (
-                  <CurrencyInput
-                    label={
-                      selectedType === TransactionType.INCOME 
-                        ? "Valor Recebido" 
-                        : selectedType === TransactionType.EXPENSE 
-                          ? "Valor da Despesa" 
-                          : "Valor Investido"
-                    }
-                    value={field.value}
-                    onChange={(formatted) => field.onChange(formatted)}
-                    error={errors.amount?.message as string}
-                  />
-                )}
-              />
+            {selectedType !== TransactionType.INVESTMENT ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Controller
+                  name="amount"
+                  control={control}
+                  render={({ field }) => (
+                    <CurrencyInput
+                      label={
+                        selectedType === TransactionType.INCOME 
+                          ? "Valor Recebido" 
+                          : "Valor da Despesa"
+                      }
+                      value={field.value}
+                      onChange={(formatted) => field.onChange(formatted)}
+                      error={errors.amount?.message as string}
+                    />
+                  )}
+                />
 
-              {selectedType !== TransactionType.INVESTMENT && (
                 <Controller
                   name="status"
                   control={control}
@@ -404,68 +397,22 @@ export function UnifiedTransactionModal({
                     />
                   )}
                 />
-              )}
-            </div>
-
-            {/* Month and Year */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Controller
-                name="competencyMonth"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    label="Mês"
-                    value={(field.value ?? new Date().getMonth()).toString()}
-                    onChange={(v) => field.onChange(parseInt(v))}
-                    options={months.map((m, i) => ({ value: i.toString(), label: m }))}
-                  />
-                )}
-              />
-              <Controller
-                name="competencyYear"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    label="Ano"
-                    value={(field.value ?? new Date().getFullYear()).toString()}
-                    onChange={(v) => field.onChange(parseInt(v))}
-                    options={years.map((y) => ({ value: y.toString(), label: y.toString() }))}
-                  />
-                )}
-              />
-            </div>
-
-            {/* Date fields specific per type */}
-            {selectedType === TransactionType.EXPENSE && (
-              <Controller
-                name="dueDate"
-                control={control}
-                render={({ field }) => (
-                  <DatePicker
-                    label="Data de Vencimento (opcional)"
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
-                )}
-              />
-            )}
-
-            {selectedType === TransactionType.INCOME && (
-              <Controller
-                name="dueDate"
-                control={control}
-                render={({ field }) => (
-                  <DatePicker
-                    label="Data de Recebimento (opcional)"
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
-                )}
-              />
-            )}
-
-            {selectedType === TransactionType.INVESTMENT && (
+              </div>
+            ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Controller
+                  name="amount"
+                  control={control}
+                  render={({ field }) => (
+                    <CurrencyInput
+                      label="Valor Investido"
+                      value={field.value}
+                      onChange={(formatted) => field.onChange(formatted)}
+                      error={errors.amount?.message as string}
+                    />
+                  )}
+                />
+
                 <Controller
                   name="dueDate"
                   control={control}
@@ -477,6 +424,59 @@ export function UnifiedTransactionModal({
                     />
                   )}
                 />
+              </div>
+            )}
+
+            {/* Category and Date - only show for single transactions and non-investment */}
+            {selectedType !== TransactionType.INVESTMENT && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <Controller
+                  name="categoryId"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      label="Categoria"
+                      value={field.value}
+                      onChange={field.onChange}
+                      error={errors.categoryId?.message as string}
+                      placeholder={categories.length === 0 ? "Carregando..." : "Selecione"}
+                      options={categories.filter((cat) => cat.name !== "Aplicações/Investimentos").map((cat) => ({
+                        value: cat.id,
+                        label: cat.name,
+                        icon: getIconComponent(cat.icon || "Circle"),
+                      }))}
+                    />
+                  )}
+                />
+
+                {/* Date fields specific per type */}
+                {selectedType === TransactionType.EXPENSE && (
+                  <Controller
+                    name="dueDate"
+                    control={control}
+                    render={({ field }) => (
+                      <DatePicker
+                        label="Data de Vencimento (opcional)"
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
+                    )}
+                  />
+                )}
+
+                {selectedType === TransactionType.INCOME && (
+                  <Controller
+                    name="dueDate"
+                    control={control}
+                    render={({ field }) => (
+                      <DatePicker
+                        label="Data de Recebimento (opcional)"
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
+                    )}
+                  />
+                )}
               </div>
             )}
 
@@ -546,6 +546,7 @@ export function UnifiedTransactionModal({
                       options={categories.filter((cat) => cat.name !== "Aplicações/Investimentos").map((cat) => ({
                         value: cat.id,
                         label: cat.name,
+                        icon: getIconComponent(cat.icon || "Circle"),
                       }))}
                     />
                   )}
@@ -578,32 +579,6 @@ export function UnifiedTransactionModal({
               )}
             </div>
 
-            {/* Start and End Dates */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <Controller
-                name="startDate"
-                control={control}
-                render={({ field }) => (
-                  <DatePicker
-                    label="Data de Início"
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
-                )}
-              />
-              <Controller
-                name="endDate"
-                control={control}
-                render={({ field }) => (
-                  <DatePicker
-                    label="Data de Término (opcional)"
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
-                )}
-              />
-            </div>
-
             {/* Description */}
             <Input
               label="Descrição (opcional)"
@@ -617,27 +592,6 @@ export function UnifiedTransactionModal({
               {...register("description")}
             />
           </>
-        )}
-
-        {/* Category - only show for single transactions and non-investment */}
-        {mode === "single" && selectedType !== TransactionType.INVESTMENT && (
-          <Controller
-            name="categoryId"
-            control={control}
-            render={({ field }) => (
-              <Select
-                label="Categoria"
-                value={field.value}
-                onChange={field.onChange}
-                error={errors.categoryId?.message as string}
-                placeholder={categories.length === 0 ? "Carregando..." : "Selecione"}
-                options={categories.filter((cat) => cat.name !== "Aplicações/Investimentos").map((cat) => ({
-                  value: cat.id,
-                  label: cat.name,
-                }))}
-              />
-            )}
-          />
         )}
 
         {/* Buttons */}
