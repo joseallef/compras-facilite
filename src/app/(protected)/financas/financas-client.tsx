@@ -1,13 +1,13 @@
 "use client";
 
 import {
-    deleteRecurringAction,
-    deleteTransactionAction,
-    ensureMonthlyTransactionsAction,
-    getRecurringsAction,
-    getTransactionsAction,
-    updateRecurringAction,
-    updateTransactionAction
+  deleteRecurringAction,
+  deleteTransactionAction,
+  ensureMonthlyTransactionsAction,
+  getRecurringsAction,
+  getTransactionsAction,
+  updateRecurringAction,
+  updateTransactionAction
 } from "@/features/recurring-transactions/actions/recurring-actions";
 import { MonthlyTransactions } from "@/features/recurring-transactions/components/monthly-transactions";
 import { RecurringList } from "@/features/recurring-transactions/components/recurring-list";
@@ -111,6 +111,10 @@ export function FinancasClient({
   };
 
   const handleGenerateTransactions = async () => {
+    if (recurrings.length === 0) {
+      toast.info("Nenhuma conta fixa cadastrada para gerar transações!");
+      return;
+    }
     try {
       await ensureMonthlyTransactionsAction(selectedMonth, selectedYear);
       await loadData();
