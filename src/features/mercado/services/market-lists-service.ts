@@ -86,7 +86,7 @@ export async function duplicateShoppingList(listId: string, newName: string) {
       });
     }
 
-    revalidatePath("/mercado");
+
     return await prisma.shoppingList.findUnique({
       where: { id: newList.id },
       include: { items: true },
@@ -136,7 +136,7 @@ export async function deleteShoppingList(listId: string) {
     if (result.count === 0) {
       throw new Error("Not found");
     }
-    revalidatePath("/mercado");
+
   } catch (error) {
     console.error("Error deleting shopping list:", error);
     throw new Error("Failed to delete list");
@@ -154,7 +154,7 @@ export async function updateShoppingList(listId: string, data: {
     if (result.count === 0) {
       throw new Error("Not found");
     }
-    revalidatePath("/mercado");
+
     return await prisma.shoppingList.findUnique({ where: { id: listId } });
   } catch (error) {
     console.error("Error updating shopping list:", error);
@@ -201,7 +201,7 @@ export async function createShoppingListFromTemplate(name: string, items: {
       });
     }
 
-    revalidatePath("/mercado");
+
     return await prisma.shoppingList.findUnique({
       where: { id: list.id },
       include: { items: true },

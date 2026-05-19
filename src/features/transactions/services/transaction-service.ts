@@ -3,7 +3,6 @@
 import { requireValidSession } from "@/core/auth/server-utils";
 import { prisma } from "@/core/db/prisma";
 import { TransactionStatus, TransactionType } from "@prisma/client";
-import { revalidatePath } from "next/cache";
 
 export async function getTransactions(filters?: {
   month?: number;
@@ -147,8 +146,7 @@ export async function createTransaction(data: {
         userId,
       },
     });
-    revalidatePath("/dashboard");
-    revalidatePath("/financas");
+
     return transaction;
   } catch (error) {
     console.error("Error creating transaction:", error);
@@ -188,8 +186,7 @@ export async function updateTransaction(
         paidAt: data.status === TransactionStatus.PAID ? new Date() : null,
       },
     });
-    revalidatePath("/dashboard");
-    revalidatePath("/financas");
+
     return transaction;
   } catch (error) {
     console.error("Error updating transaction:", error);
@@ -204,8 +201,7 @@ export async function deleteTransaction(id: string) {
     await prisma.transaction.delete({
       where: { id, userId },
     });
-    revalidatePath("/dashboard");
-    revalidatePath("/financas");
+
   } catch (error) {
     console.error("Error deleting transaction:", error);
     throw new Error("Failed to delete transaction");
