@@ -8,7 +8,7 @@ import { DatePicker } from "@/shared/ui/date-picker";
 import { Input } from "@/shared/ui/input";
 import { Modal } from "@/shared/ui/modal";
 import { Select } from "@/shared/ui/select";
-import { formatCurrency, parseCurrency } from "@/shared/utils/currency";
+import { parseCurrency } from "@/shared/utils/currency";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as Icons from "lucide-react";
 import { useEffect, useState } from "react";
@@ -83,7 +83,7 @@ export function UnifiedTransactionModal({
       ? {
           title: initialData?.title || "",
           notes: initialData?.notes || "",
-          amount: initialData?.amount?.toString() || "",
+          amount: initialData?.amount || "",
           type: initialData?.type || TransactionType.EXPENSE,
           categoryId: initialData?.categoryId || "",
           status: initialData?.status || TransactionStatus.PENDING,
@@ -94,7 +94,7 @@ export function UnifiedTransactionModal({
           description: initialData?.description || "",
           type: initialData?.type || TransactionType.EXPENSE,
           categoryId: initialData?.categoryId || "",
-          defaultAmount: initialData?.defaultAmount ? formatCurrency(initialData.defaultAmount) : "",
+          defaultAmount: initialData?.defaultAmount || "",
           frequency: initialData?.frequency || FrequencyType.MONTHLY,
           dueDay: initialData?.dueDay?.toString() || "",
         },
@@ -111,7 +111,7 @@ export function UnifiedTransactionModal({
           ? {
               title: initialData?.title || "",
               notes: initialData?.notes || "",
-              amount: initialData?.amount?.toString() || "",
+              amount: initialData?.amount || "",
               type: initialData?.type || TransactionType.EXPENSE,
               categoryId: initialData?.categoryId || "",
               status: initialData?.status || TransactionStatus.PENDING,
@@ -122,7 +122,7 @@ export function UnifiedTransactionModal({
               description: initialData?.description || "",
               type: initialData?.type || TransactionType.EXPENSE,
               categoryId: initialData?.categoryId || "",
-              defaultAmount: initialData?.defaultAmount ? formatCurrency(initialData.defaultAmount) : "",
+              defaultAmount: initialData?.defaultAmount || "",
               frequency: initialData?.frequency || FrequencyType.MONTHLY,
               dueDay: initialData?.dueDay?.toString() || "",
             }
@@ -136,7 +136,7 @@ export function UnifiedTransactionModal({
         ? {
             title: initialData?.title || "",
             notes: initialData?.notes || "",
-            amount: initialData?.amount?.toString() || "",
+            amount: initialData?.amount || "",
             type: initialData?.type || TransactionType.EXPENSE,
             categoryId: initialData?.categoryId || "",
             status: initialData?.status || TransactionStatus.PENDING,
@@ -147,7 +147,7 @@ export function UnifiedTransactionModal({
             description: initialData?.description || "",
             type: initialData?.type || TransactionType.EXPENSE,
             categoryId: initialData?.categoryId || "",
-            defaultAmount: initialData?.defaultAmount ? formatCurrency(initialData.defaultAmount) : "",
+            defaultAmount: initialData?.defaultAmount || "",
             frequency: initialData?.frequency || FrequencyType.MONTHLY,
             dueDay: initialData?.dueDay?.toString() || "",
           };
@@ -198,15 +198,18 @@ export function UnifiedTransactionModal({
           toast.success("Transação criada com sucesso!");
         }
       } else {
+        const defaultAmount = parseCurrency(finalValues.defaultAmount);
         if (isEditing && initialData?.id) {
           await updateRecurringAction(initialData.id, {
             ...finalValues,
+            defaultAmount,
             dueDay: finalValues.dueDay,
           });
           toast.success("Conta recorrente atualizada com sucesso!");
         } else {
           await createRecurringAction({
             ...finalValues,
+            defaultAmount,
             dueDay: finalValues.dueDay,
           });
           toast.success("Conta recorrente criada com sucesso!");
