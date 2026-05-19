@@ -15,9 +15,13 @@ export const formatCurrency = (value: string | number): string => {
   });
 };
 
-export const parseCurrency = (value: string): number => {
+export const parseCurrency = (value: string | number): number => {
   if (!value) return 0;
+  if (typeof value === "number") {
+    return value;
+  }
   const numericValue = value.replace(/[^\d]/g, "");
+  if (!numericValue) return 0;
   return parseInt(numericValue, 10) / 100;
 };
 
