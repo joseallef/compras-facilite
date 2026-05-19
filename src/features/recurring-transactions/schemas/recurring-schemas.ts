@@ -18,7 +18,7 @@ const recurringBaseSchema = z.object({
   description: z.string().optional(),
   type: TransactionType,
   categoryId: z.string().optional(),
-  defaultAmount: z.string().min(1, "Valor é obrigatório"),
+  defaultAmount: z.union([z.string().min(1, "Valor é obrigatório"), z.number()]),
   frequency: FrequencyType.default("MONTHLY"),
   dueDay: z.any().transform((val) => {
     if (val === "" || val === undefined || val === null) {

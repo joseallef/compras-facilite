@@ -1,11 +1,13 @@
 export const formatCurrency = (value: string | number): string => {
-  let numericValue = typeof value === "string" ? value : value.toString();
+  let number: number;
   
-  numericValue = numericValue.replace(/[^\d]/g, "");
-  
-  if (!numericValue) return "";
-  
-  const number = parseInt(numericValue, 10) / 100;
+  if (typeof value === "number") {
+    number = value;
+  } else {
+    const numericValue = value.replace(/[^\d]/g, "");
+    if (!numericValue) return "";
+    number = parseInt(numericValue, 10) / 100;
+  }
   
   return number.toLocaleString("pt-BR", {
     minimumFractionDigits: 2,
@@ -13,9 +15,13 @@ export const formatCurrency = (value: string | number): string => {
   });
 };
 
-export const parseCurrency = (value: string): number => {
+export const parseCurrency = (value: string | number): number => {
   if (!value) return 0;
+  if (typeof value === "number") {
+    return value;
+  }
   const numericValue = value.replace(/[^\d]/g, "");
+  if (!numericValue) return 0;
   return parseInt(numericValue, 10) / 100;
 };
 

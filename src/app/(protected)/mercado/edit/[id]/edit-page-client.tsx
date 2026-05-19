@@ -440,6 +440,7 @@ export function EditPageClient() {
         onClose={() => setIsFinishModalOpen(false)}
         onConfirm={handleFinishShopping}
         isLoading={isSubmitting}
+        initialValue={list?.totalValue}
       />
 
       <EditItemModal

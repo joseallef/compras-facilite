@@ -5,7 +5,7 @@ const TransactionStatus = z.enum(["PENDING", "PAID", "OVERDUE"]);
 
 const transactionSchemaFields = {
   title: z.string().min(1, "Título é obrigatório"),
-  amount: z.string().min(1, "Valor é obrigatório"),
+  amount: z.union([z.string().min(1, "Valor é obrigatório"), z.number()]),
   type: TransactionType,
   status: TransactionStatus.default("PENDING"),
   competencyMonth: z.coerce.number().int().min(0).max(11).optional(),
