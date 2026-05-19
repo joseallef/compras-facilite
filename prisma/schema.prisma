@@ -51,7 +51,7 @@ model ShoppingList {
   totalValue  Float?
   items       ShoppingItem[]
   user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  transaction Transaction?
+  transactions Transaction[]
 
   @@index([userId])
 }
@@ -121,7 +121,7 @@ model Transaction {
   notes                  String?
   userId                 String
   categoryId             String
-  shoppingListId         String?               @unique
+  shoppingListId         String?
   createdAt              DateTime              @default(now())
   updatedAt              DateTime              @updatedAt
   category               TransactionCategory   @relation(fields: [categoryId], references: [id])

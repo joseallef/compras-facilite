@@ -23,11 +23,7 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useDebouncedCallback } from "use-debounce";
 
-const TransactionType = {
-  INCOME: "INCOME",
-  EXPENSE: "EXPENSE",
-} as const;
-type TransactionType = typeof TransactionType[keyof typeof TransactionType];
+import { TransactionType } from "@prisma/client";
 
 export function EditPageClient() {
   const router = useRouter();
@@ -176,7 +172,6 @@ export function EditPageClient() {
             competencyYear: now.getFullYear(),
             categoryId: marketCategory.id,
             notes: `Lista de compras concluída`,
-            shoppingListId: listId,
           });
         }
       }

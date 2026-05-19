@@ -155,7 +155,6 @@ export async function updateShoppingList(listId: string, data: {
       throw new Error("Not found");
     }
     revalidatePath("/mercado");
-    revalidatePath(`/mercado/edit/${listId}`);
     return await prisma.shoppingList.findUnique({ where: { id: listId } });
   } catch (error) {
     console.error("Error updating shopping list:", error);
