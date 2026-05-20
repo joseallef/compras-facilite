@@ -17,7 +17,7 @@ import { MarketEditPageSkeleton } from "@/shared/ui/skeleton";
 import { cn } from "@/shared/utils/cn";
 import { normalizeString } from "@/shared/utils/string";
 import { motion } from "framer-motion";
-import { ArrowLeft, CheckCircle2, DollarSign, Lock, Search, ShoppingCart, X } from "lucide-react";
+import { ArrowLeft, CheckCircle2, DollarSign, Edit, Lock, Search, ShoppingCart, X } from "lucide-react";
 import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -64,11 +64,11 @@ export function EditPageClient() {
   }, [isLoaded, listId, router]);
 
   const filteredItems = useMemo(() => {
-    if (!list?.items) return [];
-    if (!searchQuery.trim()) return list.items;
+    const items = list?.items || [];
+    if (!searchQuery.trim()) return items;
     
     const query = normalizeString(searchQuery);
-    return list.items.filter((item: MarketItem) => 
+    return items.filter((item: MarketItem) => 
       normalizeString(item.name).includes(query) || 
       normalizeString(item.category).includes(query)
     );
@@ -265,10 +265,16 @@ export function EditPageClient() {
                 disabled={isClosed}
                 containerClassName="space-y-0"
                 inputClassName={cn(
-                  "text-2xl md:text-3xl font-bold bg-transparent border-none p-0 focus:ring-0 text-foreground outline-none rounded-none",
-                  isClosed && "opacity-80"
+                  "text-2xl md:text-3xl font-bold bg-card border border-border p-3 md:p-4 rounded-2xl focus:ring-2 focus:ring-emerald-500/50 text-foreground outline-none pr-12",
+                  !isClosed && "hover:border-emerald-300 dark:hover:border-emerald-700 transition-all",
+                  isClosed && "opacity-80 cursor-not-allowed"
                 )}
               />
+              {!isClosed && (
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 text-muted/50 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                  <Edit size={18} />
+                </div>
+              )}
               {isClosed && (
                 <div className="absolute -top-5 md:-top-6 left-0 flex items-center gap-1.5 px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-emerald-200 dark:border-emerald-800">
                   <Lock size={10} />
@@ -425,7 +431,7 @@ export function EditPageClient() {
                   onClick={() => setIsFinishModalOpen(true)}
                   className="bg-muted/10 hover:bg-muted/20 text-foreground px-6 py-3 rounded-2xl font-bold flex items-center gap-2 transition-all active:scale-95 border border-border"
                 >
-                  Fechar
+                  Finalizar Compra
                 </Button>
               </div>
             ) : null}
