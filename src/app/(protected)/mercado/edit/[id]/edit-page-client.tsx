@@ -4,7 +4,7 @@ import { AddItemForm } from "@/features/mercado/components/add-item-form";
 import { CategorySection } from "@/features/mercado/components/category-section";
 import { useListDetail } from "@/features/mercado/hooks/use-list-detail";
 import {
-  createTransaction,
+  createOrUpdateShoppingListTransaction,
   getTransactionCategories
 } from "@/features/transactions/services/transaction-service";
 import { Category, MarketItem } from "@/shared/types";
@@ -152,7 +152,7 @@ export function EditPageClient() {
         totalValue 
       });
 
-      // 2. Criar uma transação financeira se houver valor
+      // 2. Criar ou atualizar transação financeira se houver valor
       if (totalValue > 0) {
         const categories = await getTransactionCategories(TransactionType.EXPENSE);
         let marketCategory = categories.find((c: any) => c.name.toLowerCase() === "mercado");
@@ -164,15 +164,18 @@ export function EditPageClient() {
 
         if (marketCategory) {
           const now = new Date();
-          await createTransaction({
-            title: `Lista: ${list.name}`,
-            amount: totalValue,
-            type: TransactionType.EXPENSE,
-            competencyMonth: now.getMonth(),
-            competencyYear: now.getFullYear(),
-            categoryId: marketCategory.id,
-            notes: `Lista de compras concluída`,
-          });
+          await createOrUpdateShoppingListTransaction(
+            listId,
+            {
+              title: list.name,
+              amount: totalValue,
+              type: TransactionType.EXPENSE,
+              competencyMonth: now.getMonth(),
+              competencyYear: now.getFullYear(),
+              categoryId: marketCategory.id,
+              notes: `Lista de compras concluída`,
+            }
+          );
         }
       }
 

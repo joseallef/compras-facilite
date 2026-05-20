@@ -41,6 +41,7 @@ export async function getTransactions(filters?: {
         recurringTransaction: true,
       },
       orderBy: [
+        { updatedAt: "desc" },
         { status: "asc" },
         { dueDate: "asc" },
       ],
@@ -75,6 +76,7 @@ export async function getTransactions(filters?: {
           recurringTransaction: true,
         },
         orderBy: [
+          { updatedAt: "desc" },
           { status: "asc" },
           { dueDate: "asc" },
         ],
@@ -103,8 +105,6 @@ export async function createTransaction(data: {
   const userId = await requireValidSession();
 
   const finalData = { ...data };
-  
-  delete finalData.shoppingListId;
 
   if (finalData.type === TransactionType.INVESTMENT && !finalData.categoryId) {
     let investmentCategory = await prisma.transactionCategory.findFirst({
@@ -146,6 +146,7 @@ export async function createTransaction(data: {
         competencyYear,
         categoryId: finalData.categoryId,
         userId,
+        shoppingListId: finalData.shoppingListId,
       },
     });
 
@@ -328,5 +329,56 @@ export async function createTransactionCategory(data: {
   } catch (error) {
     console.error("Error creating transaction category:", error);
     throw new Error("Failed to create category");
+  }
+}
+
+export async function createOrUpdateShoppingListTransaction(
+  shoppingListId: string,
+  data: {
+    title: string;
+    amount: number;
+    type: TransactionType;
+    status?: TransactionStatus;
+    competencyMonth?: number;
+    competencyYear?: number;
+    categoryId: string;
+    notes?: string;
+  }
+) {
+  const userId = await requireValidSession();
+  
+  // Check if transaction already exists for this shopping list
+  const existingTransaction = await prisma.transaction.findFirst({
+    where: {
+      userId,
+      shoppingListId,
+    },
+  });
+
+  const referenceDate = new Date();
+  const competencyMonth = data.competencyMonth ?? referenceDate.getMonth();
+  const competencyYear = data.competencyYear ?? referenceDate.getFullYear();
+
+  if (existingTransaction) {
+    // Update existing transaction
+    return await prisma.transaction.update({
+      where: { id: existingTransaction.id, userId },
+      data: {
+        ...data,
+        competencyMonth,
+        competencyYear,
+      },
+    });
+  } else {
+    // Create new transaction
+    return await prisma.transaction.create({
+      data: {
+        ...data,
+        competencyMonth,
+        competencyYear,
+        userId,
+        shoppingListId,
+      },
+    });
   }
 }
