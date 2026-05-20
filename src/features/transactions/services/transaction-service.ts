@@ -103,6 +103,8 @@ export async function createTransaction(data: {
   const userId = await requireValidSession();
 
   const finalData = { ...data };
+  
+  delete finalData.shoppingListId;
 
   if (finalData.type === TransactionType.INVESTMENT && !finalData.categoryId) {
     let investmentCategory = await prisma.transactionCategory.findFirst({
