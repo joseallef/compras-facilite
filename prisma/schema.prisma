@@ -42,15 +42,15 @@ model RateLimit {
 }
 
 model ShoppingList {
-  id          String         @id @default(uuid())
-  name        String
-  userId      String
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  status      ListStatus     @default(ABERTA)
-  totalValue  Float?
-  items       ShoppingItem[]
-  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String         @id @default(uuid())
+  name         String
+  userId       String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  status       ListStatus     @default(ABERTA)
+  totalValue   Float?
+  items        ShoppingItem[]
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions Transaction[]
 
   @@index([userId])
