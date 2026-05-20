@@ -4,7 +4,7 @@ import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Modal } from "@/shared/ui/modal";
 import { CheckCircle2, History, Sparkles } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface FinishMarketModalProps {
   isOpen: boolean;
@@ -22,16 +22,24 @@ export function FinishMarketModal({
   initialValue,
 }: FinishMarketModalProps) {
   const [value, setValue] = useState<string>("");
-  
+  const lastIsOpenRef = useRef(isOpen);
+  const lastInitialValueRef = useRef(initialValue);
+
   useEffect(() => {
-    if (isOpen && initialValue != null) {
-      const formatted = new Intl.NumberFormat("pt-BR", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      }).format(initialValue);
-      setValue(formatted);
-    } else if (isOpen) {
-      setValue("");
+    if (lastIsOpenRef.current !== isOpen || lastInitialValueRef.current !== initialValue) {
+      lastIsOpenRef.current = isOpen;
+      lastInitialValueRef.current = initialValue;
+      if (isOpen && initialValue != null) {
+        const formatted = new Intl.NumberFormat("pt-BR", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }).format(initialValue);
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setValue(formatted);
+      } else if (isOpen) {
+         
+        setValue("");
+      }
     }
   }, [isOpen, initialValue]);
 

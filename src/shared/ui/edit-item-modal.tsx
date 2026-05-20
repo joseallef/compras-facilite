@@ -4,7 +4,7 @@ import { CATEGORIES, Category, MarketItem } from "@/shared/types";
 import { CATEGORY_ICONS } from "@/shared/utils/category-icons";
 import { cn } from "@/shared/utils/cn";
 import { Save } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "./button";
 import { Input } from "./input";
 import { Modal } from "./modal";
@@ -24,19 +24,27 @@ export function EditItemModal({
   onConfirm,
   isLoading,
 }: EditItemModalProps) {
-  const [name, setName] = useState("");
-  const [category, setCategory] = useState<Category>("Outros");
-  const [quantity, setQuantity] = useState(1);
-  const [unit, setUnit] = useState("un");
+  const [name, setName] = useState(() => item ? item.name : "");
+  const [category, setCategory] = useState<Category>(() => item ? item.category : "Outros");
+  const [quantity, setQuantity] = useState(() => item ? item.quantity : 1);
+  const [unit, setUnit] = useState(() => item ? item.unit : "un");
+  const lastItemRef = useRef(item);
 
   useEffect(() => {
-    if (item) {
-      setName(item.name);
-      setCategory(item.category);
-      setQuantity(item.quantity);
-      setUnit(item.unit);
+    if (lastItemRef.current !== item) {
+      lastItemRef.current = item;
+      if (item) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setName(item.name);
+         
+        setCategory(item.category);
+         
+        setQuantity(item.quantity);
+         
+        setUnit(item.unit);
+      }
     }
-  }, [item, isOpen]);
+  }, [item]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -2,7 +2,7 @@
 
 import { Input, InputProps } from "@/shared/ui/input";
 import { formatCurrency, parseCurrency } from "@/shared/utils/currency";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface CurrencyInputProps extends Omit<InputProps, "onChange" | "value"> {
   value?: string | number;
@@ -15,11 +15,16 @@ export function CurrencyInput({
   placeholder = "0,00",
   ...props
 }: CurrencyInputProps) {
-  const [displayValue, setDisplayValue] = useState("");
+  const [displayValue, setDisplayValue] = useState(() => 
+    value !== undefined && value !== null ? formatCurrency(value) : ""
+  );
+  const lastValueRef = useRef(value);
 
   useEffect(() => {
-    if (value !== undefined && value !== null) {
-      setDisplayValue(formatCurrency(value));
+    if (lastValueRef.current !== value) {
+      lastValueRef.current = value;
+      const newValue = value !== undefined && value !== null ? formatCurrency(value) : "";
+      setDisplayValue(newValue);
     }
   }, [value]);
 

@@ -2,6 +2,7 @@
 
 import { createRecurringAction, updateRecurringAction } from "@/features/recurring-transactions/actions/recurring-actions";
 import { createRecurringSchema } from "@/features/recurring-transactions/schemas/recurring-schemas";
+import { FrequencyType, TransactionStatus, TransactionType } from "@/shared/constants";
 import { Button } from "@/shared/ui/button";
 import { CurrencyInput } from "@/shared/ui/currency-input";
 import { DatePicker } from "@/shared/ui/date-picker";
@@ -17,28 +18,6 @@ import { toast } from "sonner";
 import { useCategories } from "../hooks/use-categories";
 import { createTransactionSchema } from "../schemas/transaction-schemas";
 import { createTransaction, updateTransaction } from "../services/transaction-service";
-
-const TransactionType = {
-  INCOME: "INCOME",
-  EXPENSE: "EXPENSE",
-  INVESTMENT: "INVESTMENT",
-} as const;
-
-const TransactionStatus = {
-  PENDING: "PENDING",
-  PAID: "PAID",
-  OVERDUE: "OVERDUE",
-} as const;
-
-const FrequencyType = {
-  MONTHLY: "MONTHLY",
-  WEEKLY: "WEEKLY",
-  YEARLY: "YEARLY",
-} as const;
-
-type TransactionType = typeof TransactionType[keyof typeof TransactionType];
-type FrequencyType = typeof FrequencyType[keyof typeof FrequencyType];
-type TransactionStatus = typeof TransactionStatus[keyof typeof TransactionStatus];
 
 type Mode = "single" | "recurring";
 
@@ -160,7 +139,7 @@ export function UnifiedTransactionModal({
       if (!initialData?.categoryId || (initialData && initialData.type !== selectedType)) {
         setValue("categoryId", categories[0].id);
       } else {
-        const exists = categories.some((c: any) => c.id === initialData.categoryId);
+        const exists = categories.some((c) => c.id === initialData.categoryId);
         if (!exists) {
           setValue("categoryId", categories[0].id);
         }

@@ -12,6 +12,7 @@ import {
 import { MonthlyTransactions } from "@/features/recurring-transactions/components/monthly-transactions";
 import { RecurringList } from "@/features/recurring-transactions/components/recurring-list";
 import { UnifiedTransactionModal } from "@/features/transactions/components/unified-transaction-modal";
+import { MONTHS, TransactionStatus, TransactionType, YEARS } from "@/shared/constants";
 import { Button } from "@/shared/ui/button";
 import { ConfirmModal } from "@/shared/ui/confirm-modal";
 import { Input } from "@/shared/ui/input";
@@ -21,22 +22,6 @@ import { cn } from "@/shared/utils/cn";
 import { ArrowDownCircle, ArrowUpCircle, ChevronLeft, ChevronRight, PiggyBank, Plus, RepeatIcon, Search, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-
-const TransactionStatus = {
-  PENDING: "PENDING",
-  PAID: "PAID",
-  OVERDUE: "OVERDUE",
-} as const;
-
-type TransactionStatus = typeof TransactionStatus[keyof typeof TransactionStatus];
-
-const TransactionType = {
-  INCOME: "INCOME",
-  EXPENSE: "EXPENSE",
-  INVESTMENT: "INVESTMENT",
-} as const;
-
-type TransactionType = typeof TransactionType[keyof typeof TransactionType];
 
 interface FinancasClientProps {
   initialRecurrings: any[];
@@ -64,12 +49,32 @@ export function FinancasClient({
   const [activeType, setActiveType] = useState<TransactionType | "ALL">("ALL");
   const [activeStatus, setActiveStatus] = useState<TransactionStatus | "ALL">("ALL");
 
-  const months = [
-    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
-  ];
+  const filteredTransactions = transactions.filter((t) => {
+    let matches = true;
+    if (activeType !== "ALL" && t.type !== activeType) matches = false;
+    if (activeStatus !== "ALL" && t.status !== activeStatus) matches = false;
+    
+    if (search) {
+      const matchesSearch = t.title.toLowerCase().includes(search.toLowerCase()) ||
+                           t.category.name.toLowerCase().includes(search.toLowerCase());
+      matches = matches && matchesSearch;
+    }
+    
+    return matches;
+  });
 
-  const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() + i - 2);
+  const filteredRecurrings = recurrings.filter((r) => {
+    let matches = true;
+    if (activeType !== "ALL" && r.type !== activeType) matches = false;
+    
+    if (search) {
+      const matchesSearch = r.title.toLowerCase().includes(search.toLowerCase()) ||
+                           r.category.name.toLowerCase().includes(search.toLowerCase());
+      matches = matches && matchesSearch;
+    }
+    
+    return matches;
+  });
 
   const loadData = async () => {
     setIsLoading(true);
@@ -87,10 +92,6 @@ export function FinancasClient({
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    loadData();
-  }, [selectedMonth, selectedYear]);
 
   const handlePrevMonth = () => {
     if (selectedMonth === 0) {
@@ -191,32 +192,9 @@ export function FinancasClient({
     setSearch("");
   };
 
-  const filteredTransactions = transactions.filter((t) => {
-    let matches = true;
-    if (activeType !== "ALL" && t.type !== activeType) matches = false;
-    if (activeStatus !== "ALL" && t.status !== activeStatus) matches = false;
-    
-    if (search) {
-      const matchesSearch = t.title.toLowerCase().includes(search.toLowerCase()) ||
-                           t.category.name.toLowerCase().includes(search.toLowerCase());
-      matches = matches && matchesSearch;
-    }
-    
-    return matches;
-  });
-
-  const filteredRecurrings = recurrings.filter((r) => {
-    let matches = true;
-    if (activeType !== "ALL" && r.type !== activeType) matches = false;
-    
-    if (search) {
-      const matchesSearch = r.title.toLowerCase().includes(search.toLowerCase()) ||
-                           r.category.name.toLowerCase().includes(search.toLowerCase());
-      matches = matches && matchesSearch;
-    }
-    
-    return matches;
-  });
+  useEffect(() => {
+    loadData();
+  }, [selectedMonth, selectedYear]);
 
   return (
     <main className="max-w-7xl mx-auto w-full p-4 md:p-8 space-y-8 pb-24">
@@ -227,7 +205,7 @@ export function FinancasClient({
               Minhas Finanças
             </h1>
             <p className="text-muted mt-1 text-lg">
-              Histórico de {months[selectedMonth]} de {selectedYear}
+              Histórico de {MONTHS[selectedMonth]} de {selectedYear}
             </p>
           </div>
 
@@ -246,14 +224,14 @@ export function FinancasClient({
               <Select
                 value={selectedMonth.toString()}
                 onChange={(v) => setSelectedMonth(parseInt(v))}
-                options={months.map((m, i) => ({ value: i.toString(), label: m }))}
+                options={MONTHS.map((m: string, i: number) => ({ value: i.toString(), label: m }))}
                 className="h-10 border-none bg-transparent hover:bg-muted font-bold text-sm min-w-[120px] rounded-xl focus:ring-0"
                 selectClassName="py-1 h-10 border-none shadow-none bg-transparent"
               />
               <Select
                 value={selectedYear.toString()}
                 onChange={(v) => setSelectedYear(parseInt(v))}
-                options={years.map((y) => ({ value: y.toString(), label: y.toString() }))}
+                options={YEARS.map((y: number) => ({ value: y.toString(), label: y.toString() }))}
                 className="h-10 border-none bg-transparent hover:bg-muted font-bold text-sm min-w-[90px] rounded-xl focus:ring-0"
                 selectClassName="py-1 h-10 border-none shadow-none bg-transparent"
               />

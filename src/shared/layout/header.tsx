@@ -34,7 +34,7 @@ export function Header() {
     setIsMenuOpen(false);
     try {
       await logout();
-    } catch (error) {
+    } catch {
       setIsLoggingOut(false);
       toast.error("Ocorreu um erro ao sair da conta.");
     }

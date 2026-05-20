@@ -2,6 +2,7 @@
 
 import { getDashboardTransactionsAction, getYearlyDataAction } from "@/features/dashboard/actions/dashboard-actions";
 import { RecentTransactions } from "@/features/dashboard/components/recent-transactions";
+import { COLORS, MONTHS, TransactionStatus, TransactionType, YEARS } from "@/shared/constants";
 import { Button } from "@/shared/ui/button";
 import { Select } from "@/shared/ui/select";
 import { DashboardSkeleton } from "@/shared/ui/skeleton";
@@ -10,42 +11,20 @@ import { ArrowDownRight, ArrowUpRight, BarChart3, Calendar, ChevronLeft, Chevron
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-    Bar,
-    BarChart,
-    CartesianGrid,
-    Cell,
-    Legend,
-    Line,
-    LineChart,
-    Pie,
-    PieChart,
-    ResponsiveContainer,
-    Tooltip,
-    XAxis,
-    YAxis,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from "recharts";
-
-const TransactionType = {
-  INCOME: "INCOME",
-  EXPENSE: "EXPENSE",
-  INVESTMENT: "INVESTMENT",
-} as const;
-
-const TransactionStatus = {
-  PENDING: "PENDING",
-  PAID: "PAID",
-  OVERDUE: "OVERDUE",
-} as const;
-
-const months = [
-  "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-  "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
-];
-
-const COLORS = [
-  "#10b981", "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6",
-  "#ec4899", "#06b6d4", "#f43f5e", "#14b8a6", "#6366f1"
-];
 
 interface DashboardClientProps {
   initialTransactions: any[];
@@ -70,34 +49,8 @@ export function DashboardClient({
     }
     return "month";
   });
-
-  useEffect(() => {
-    localStorage.setItem("dashboard_view_mode", viewMode);
-  }, [viewMode]);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-
-  const years = Array.from({ length: 7 }, (_, i) => new Date().getFullYear() + i - 3);
-
-  const fetchData = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const [transData, yearData] = await Promise.all([
-        getDashboardTransactionsAction(selectedMonth, selectedYear),
-        getYearlyDataAction(selectedYear),
-      ]);
-      setTransactions(transData);
-      setYearlyData(yearData);
-    } catch (error) {
-      console.error("Failed to fetch dashboard data", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [selectedMonth, selectedYear]);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
+  
   const stats = useMemo(() => {
     const currentMonthTransactions = transactions;
 
@@ -173,8 +126,8 @@ export function DashboardClient({
         .filter((t: any) => t.type === TransactionType.INVESTMENT)
         .reduce((acc: number, t: any) => acc + t.amount, 0);
       return {
-        month: months[month].slice(0, 3),
-        fullMonth: months[month],
+        month: MONTHS[month].slice(0, 3),
+        fullMonth: MONTHS[month],
         income,
         expense,
         investment,
@@ -206,6 +159,24 @@ export function DashboardClient({
     };
   }, [yearlyData]);
 
+  const categories = yearlyData?.categories || [];
+
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const [transData, yearData] = await Promise.all([
+        getDashboardTransactionsAction(selectedMonth, selectedYear),
+        getYearlyDataAction(selectedYear),
+      ]);
+      setTransactions(transData);
+      setYearlyData(yearData);
+    } catch (error) {
+      console.error("Failed to fetch dashboard data", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [selectedMonth, selectedYear]);
+
   const handlePrevMonth = () => {
     if (selectedMonth === 0) {
       setSelectedMonth(11);
@@ -232,7 +203,13 @@ export function DashboardClient({
     setSelectedYear(selectedYear + 1);
   };
 
-  const categories = yearlyData?.categories || [];
+  useEffect(() => {
+    localStorage.setItem("dashboard_view_mode", viewMode);
+  }, [viewMode]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   return (
     <main className="max-w-7xl mx-auto w-full p-4 md:p-8 space-y-6 pb-24">
@@ -246,7 +223,7 @@ export function DashboardClient({
             <p className="text-muted mt-1 text-base md:text-lg flex items-center gap-2">
               <Calendar size={18} className="text-emerald-600" />
               {viewMode === "month" 
-                ? `Resumo de ${months[selectedMonth]} de ${selectedYear}`
+                ? `Resumo de ${MONTHS[selectedMonth]} de ${selectedYear}`
                 : `Visão Anual de ${selectedYear}`
               }
             </p>
@@ -302,7 +279,7 @@ export function DashboardClient({
                 <Select
                   value={selectedMonth.toString()}
                   onChange={(v) => setSelectedMonth(parseInt(v))}
-                  options={months.map((m, i) => ({ value: i.toString(), label: m }))}
+                  options={MONTHS.map((m: string, i: number) => ({ value: i.toString(), label: m }))}
                   className="h-10 border-none bg-transparent hover:bg-muted font-bold text-sm flex-1 md:flex-none min-w-[80px] md:min-w-[120px] rounded-xl focus:ring-0"
                   selectClassName="py-1 h-10 border-none shadow-none bg-transparent"
                 />
@@ -311,7 +288,7 @@ export function DashboardClient({
               <Select
                 value={selectedYear.toString()}
                 onChange={(v) => setSelectedYear(parseInt(v))}
-                options={years.map((y) => ({ value: y.toString(), label: y.toString() }))}
+                options={YEARS.map((y: number) => ({ value: y.toString(), label: y.toString() }))}
                 className="h-10 border-none bg-transparent hover:bg-muted font-bold text-sm flex-1 md:flex-none min-w-[70px] md:min-w-[90px] rounded-xl focus:ring-0"
                 selectClassName="py-1 h-10 border-none shadow-none bg-transparent"
               />
@@ -379,7 +356,7 @@ export function DashboardClient({
                   </h2>
                   <p className="text-emerald-50/90 max-w-xl text-xs md:text-sm font-medium leading-relaxed">
                     {viewMode === "month" 
-                      ? `Acompanhe suas receitas e despesas de ${months[selectedMonth]}.`
+                      ? `Acompanhe suas receitas e despesas de ${MONTHS[selectedMonth]}.`
                       : `Visão completa do desempenho financeiro ao longo de ${selectedYear}.`
                     }
                   </p>
