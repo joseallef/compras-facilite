@@ -41,11 +41,13 @@ export function UnifiedTransactionModal({
   initialMode = "single",
   initialData,
 }: UnifiedTransactionModalProps) {
+  // 1. STATES
   const [mode, setMode] = useState<Mode>(initialMode);
   const [isLoading, setIsLoading] = useState(false);
 
+  // 2. VARIÁVEIS
   const isEditing = !!initialData;
-
+  
   const {
     register,
     handleSubmit,
@@ -82,72 +84,53 @@ export function UnifiedTransactionModal({
   const selectedType = watch("type");
   const { categories } = useCategories(selectedType === TransactionType.INVESTMENT ? undefined : selectedType);
 
-  useEffect(() => {
-    if (isOpen) {
-      setMode(initialMode);
-      reset(
-        initialMode === "single"
-          ? {
-              title: initialData?.title || "",
-              notes: initialData?.notes || "",
-              amount: initialData?.amount || "",
-              type: initialData?.type || TransactionType.EXPENSE,
-              categoryId: initialData?.categoryId || "",
-              status: initialData?.status || TransactionStatus.PENDING,
-              dueDate: initialData?.dueDate || undefined,
-            }
-          : {
-              title: initialData?.title || "",
-              description: initialData?.description || "",
-              type: initialData?.type || TransactionType.EXPENSE,
-              categoryId: initialData?.categoryId || "",
-              defaultAmount: initialData?.defaultAmount || "",
-              frequency: initialData?.frequency || FrequencyType.MONTHLY,
-              dueDay: initialData?.dueDay?.toString() || "",
-            }
-      );
-    }
-  }, [isOpen, initialData, initialMode]);
+  const statusOptions = [
+    { value: TransactionStatus.PENDING, label: "Pendente", icon: <Icons.Clock size={18} /> },
+    { value: TransactionStatus.PAID, label: "Pago", icon: <Icons.CheckCircle2 size={18} /> },
+    { value: TransactionStatus.OVERDUE, label: "Atrasado", icon: <Icons.AlertCircle size={18} /> },
+  ];
 
-  useEffect(() => {
-    if (isOpen && !isEditing) {
-      const defaultValues = mode === "single"
-        ? {
-            title: initialData?.title || "",
-            notes: initialData?.notes || "",
-            amount: initialData?.amount || "",
-            type: initialData?.type || TransactionType.EXPENSE,
-            categoryId: initialData?.categoryId || "",
-            status: initialData?.status || TransactionStatus.PENDING,
-            dueDate: initialData?.dueDate || undefined,
-          }
-        : {
-            title: initialData?.title || "",
-            description: initialData?.description || "",
-            type: initialData?.type || TransactionType.EXPENSE,
-            categoryId: initialData?.categoryId || "",
-            defaultAmount: initialData?.defaultAmount || "",
-            frequency: initialData?.frequency || FrequencyType.MONTHLY,
-            dueDay: initialData?.dueDay?.toString() || "",
-          };
-      reset(defaultValues);
-    }
-  }, [mode, isOpen, isEditing, initialData, reset]);
+  const frequencyOptions = [
+    { value: FrequencyType.MONTHLY, label: "Mensal", icon: <Icons.Calendar size={18} /> },
+    { value: FrequencyType.WEEKLY, label: "Semanal", icon: <Icons.CalendarDays size={18} /> },
+    { value: FrequencyType.YEARLY, label: "Anual", icon: <Icons.CalendarCheck2 size={18} /> },
+  ];
 
-  useEffect(() => {
-    if (categories.length > 0 && selectedType !== TransactionType.INVESTMENT) {
-      if (!initialData?.categoryId || (initialData && initialData.type !== selectedType)) {
-        setValue("categoryId", categories[0].id);
-      } else {
-        const exists = categories.some((c) => c.id === initialData.categoryId);
-        if (!exists) {
-          setValue("categoryId", categories[0].id);
-        }
-      }
-    } else if (selectedType === TransactionType.INVESTMENT) {
-      setValue("categoryId", "");
+  const days = Array.from({ length: 31 }, (_, i) => ({
+    value: (i + 1).toString(),
+    label: `Dia ${i + 1}`,
+  }));
+
+  const months = [
+    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+  ];
+
+  const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() + i - 2);
+
+  // 3. FUNÇÕES
+  const parseDate = (dateValue: any): Date | undefined => {
+    if (!dateValue) return undefined;
+    if (dateValue instanceof Date && !isNaN(dateValue.getTime())) return dateValue;
+    if (typeof dateValue === "string") {
+      const date = new Date(dateValue);
+      if (!isNaN(date.getTime())) return date;
     }
-  }, [categories, selectedType, setValue, initialData]);
+    return undefined;
+  };
+
+  const getTypeOptions = (): Array<{ value: TransactionType; label: string }> => {
+    const options = [
+      { value: TransactionType.EXPENSE, label: "Despesa" },
+      { value: TransactionType.INCOME, label: "Receita" },
+    ] as Array<{ value: TransactionType; label: string }>;
+    
+    if (mode === "recurring") {
+      options.push({ value: TransactionType.INVESTMENT, label: "Investimento" });
+    }
+    
+    return options;
+  };
 
   const onSubmit = async (values: any) => {
     setIsLoading(true);
@@ -212,43 +195,75 @@ export function UnifiedTransactionModal({
     }
   };
 
-  const getTypeOptions = (): Array<{ value: TransactionType; label: string }> => {
-    const options = [
-      { value: TransactionType.EXPENSE, label: "Despesa" },
-      { value: TransactionType.INCOME, label: "Receita" },
-    ] as Array<{ value: TransactionType; label: string }>;
-    
-    if (mode === "recurring") {
-      options.push({ value: TransactionType.INVESTMENT, label: "Investimento" });
+  // 4. EFFECTS
+  useEffect(() => {
+    if (isOpen) {
+      setMode(initialMode);
+      reset(
+        initialMode === "single"
+          ? {
+              title: initialData?.title || "",
+              notes: initialData?.notes || "",
+              amount: initialData?.amount || "",
+              type: initialData?.type || TransactionType.EXPENSE,
+              categoryId: initialData?.categoryId || "",
+              status: initialData?.status || TransactionStatus.PENDING,
+              dueDate: parseDate(initialData?.dueDate) || undefined,
+            }
+          : {
+              title: initialData?.title || "",
+              description: initialData?.description || "",
+              type: initialData?.type || TransactionType.EXPENSE,
+              categoryId: initialData?.categoryId || "",
+              defaultAmount: initialData?.defaultAmount || "",
+              frequency: initialData?.frequency || FrequencyType.MONTHLY,
+              dueDay: initialData?.dueDay?.toString() || "",
+            }
+      );
     }
-    
-    return options;
-  };
+  }, [isOpen, initialData, initialMode]);
 
-  const statusOptions = [
-    { value: TransactionStatus.PENDING, label: "Pendente", icon: <Icons.Clock size={18} /> },
-    { value: TransactionStatus.PAID, label: "Pago", icon: <Icons.CheckCircle2 size={18} /> },
-    { value: TransactionStatus.OVERDUE, label: "Atrasado", icon: <Icons.AlertCircle size={18} /> },
-  ];
+  useEffect(() => {
+    if (isOpen && !isEditing) {
+      const defaultValues = mode === "single"
+        ? {
+            title: initialData?.title || "",
+            notes: initialData?.notes || "",
+            amount: initialData?.amount || "",
+            type: initialData?.type || TransactionType.EXPENSE,
+            categoryId: initialData?.categoryId || "",
+            status: initialData?.status || TransactionStatus.PENDING,
+            dueDate: parseDate(initialData?.dueDate) || undefined,
+          }
+        : {
+            title: initialData?.title || "",
+            description: initialData?.description || "",
+            type: initialData?.type || TransactionType.EXPENSE,
+            categoryId: initialData?.categoryId || "",
+            defaultAmount: initialData?.defaultAmount || "",
+            frequency: initialData?.frequency || FrequencyType.MONTHLY,
+            dueDay: initialData?.dueDay?.toString() || "",
+          };
+      reset(defaultValues);
+    }
+  }, [mode, isOpen, isEditing, initialData, reset]);
 
-  const frequencyOptions = [
-    { value: FrequencyType.MONTHLY, label: "Mensal", icon: <Icons.Calendar size={18} /> },
-    { value: FrequencyType.WEEKLY, label: "Semanal", icon: <Icons.CalendarDays size={18} /> },
-    { value: FrequencyType.YEARLY, label: "Anual", icon: <Icons.CalendarCheck2 size={18} /> },
-  ];
+  useEffect(() => {
+    if (categories.length > 0 && selectedType !== TransactionType.INVESTMENT) {
+      if (!initialData?.categoryId || (initialData && initialData.type !== selectedType)) {
+        setValue("categoryId", categories[0].id);
+      } else {
+        const exists = categories.some((c) => c.id === initialData.categoryId);
+        if (!exists) {
+          setValue("categoryId", categories[0].id);
+        }
+      }
+    } else if (selectedType === TransactionType.INVESTMENT) {
+      setValue("categoryId", "");
+    }
+  }, [categories, selectedType, setValue, initialData]);
 
-  const days = Array.from({ length: 31 }, (_, i) => ({
-    value: (i + 1).toString(),
-    label: `Dia ${i + 1}`,
-  }));
-
-  const months = [
-    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
-  ];
-
-  const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() + i - 2);
-
+  // 5. RETURN (JSX)
   return (
     <Modal
       isOpen={isOpen}

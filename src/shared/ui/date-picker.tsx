@@ -29,6 +29,18 @@ export function DatePicker({
 }: DatePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
 
+  const getValidDate = (val: Date | string | null | undefined): Date | null => {
+    if (!val) return null;
+    if (val instanceof Date && !isNaN(val.getTime())) return val;
+    if (typeof val === "string") {
+      const date = new Date(val);
+      if (!isNaN(date.getTime())) return date;
+    }
+    return null;
+  };
+
+  const validValue = getValidDate(value);
+
   return (
     <div className={cn("space-y-2", className)}>
       {label && (
@@ -45,14 +57,14 @@ export function DatePicker({
         className={cn(
           "w-full flex items-center justify-between bg-card border rounded-2xl py-2.5 outline-none transition-all shadow-sm hover:bg-card disabled:opacity-50 disabled:cursor-not-allowed relative",
           "pl-5 pr-12 text-left",
-          !value && "text-muted/60"
+          !validValue && "text-muted/60"
         )}
       >
         <span className="font-bold truncate">
-          {value ? format(value, "dd/MM/yyyy") : placeholder}
+          {validValue ? format(validValue, "dd/MM/yyyy") : placeholder}
         </span>
         <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
-          {value && (
+          {validValue && (
             <div
               onClick={(e) => {
                 e.stopPropagation();
@@ -70,7 +82,7 @@ export function DatePicker({
       <Modal
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
-        title={value ? format(value, "MMMM 'de' yyyy", { locale: ptBR }) : "Selecione uma data"}
+        title={validValue ? format(validValue, "MMMM 'de' yyyy", { locale: ptBR }) : "Selecione uma data"}
         className="w-fit p-0 overflow-hidden"
       >
         <div className="p-4">
@@ -96,7 +108,7 @@ export function DatePicker({
           <DayPicker
             locale={ptBR}
             mode="single"
-            selected={value || undefined}
+            selected={validValue || undefined}
             onSelect={(date) => {
               onChange?.(date || null);
               setIsOpen(false);
