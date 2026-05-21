@@ -1,10 +1,10 @@
-import { useState, useEffect, useRef } from "react";
 import { getTransactionCategoriesAction } from "@/features/recurring-transactions/actions/recurring-actions";
-import { TransactionType } from "@prisma/client";
+import { TransactionCategory, TransactionType } from "@prisma/client";
+import { useEffect, useRef, useState } from "react";
 
 interface CachedCategories {
   [key: string]: {
-    data: any[];
+    data: TransactionCategory[];
     timestamp: number;
   };
 }
@@ -13,7 +13,7 @@ const CACHE_TTL = 5 * 60 * 1000;
 let globalCache: CachedCategories = {};
 
 export function useCategories(type?: TransactionType) {
-  const [categories, setCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<TransactionCategory[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const cacheKey = type || "all";
   const fetchInProgress = useRef<Set<string>>(new Set());

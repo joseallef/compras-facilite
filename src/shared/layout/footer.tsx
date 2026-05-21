@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/features/auth/hooks/use-auth";
-import { ShoppingCart, Wallet } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import Link from "next/link";
 
 export function Footer() {

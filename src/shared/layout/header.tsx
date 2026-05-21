@@ -34,7 +34,7 @@ export function Header() {
     setIsMenuOpen(false);
     try {
       await logout();
-    } catch (error) {
+    } catch {
       setIsLoggingOut(false);
       toast.error("Ocorreu um erro ao sair da conta.");
     }
@@ -134,7 +134,15 @@ export function Header() {
                           <p className="text-sm font-bold truncate">{user?.name}</p>
                           <p className="text-xs text-muted truncate">{user?.email}</p>
                         </div>
-                        <div className="p-2">
+                        <div className="p-2 space-y-1">
+                          <Link
+                            href="/perfil"
+                            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-muted hover:text-foreground hover:bg-muted/10 rounded-xl transition-all group"
+                            onClick={() => setIsMenuOpen(false)}
+                          >
+                            <User className="h-4 w-4 transition-transform group-hover:scale-110" />
+                            Meu Perfil
+                          </Link>
                           <Button
                             onClick={handleLogout}
                             disabled={isLoggingOut}

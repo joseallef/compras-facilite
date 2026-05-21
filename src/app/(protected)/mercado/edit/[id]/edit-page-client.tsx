@@ -49,7 +49,6 @@ export function EditPageClient() {
   } = useListDetail(listId);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const isAtMarket = searchParams.get("mode") === "market";
   const [isFinishModalOpen, setIsFinishModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -57,12 +56,7 @@ export function EditPageClient() {
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-    if (isLoaded && !listId) {
-      router.replace("/mercado");
-    }
-  }, [isLoaded, listId, router]);
-
+  const isAtMarket = searchParams.get("mode") === "market";
   const filteredItems = useMemo(() => {
     const items = list?.items || [];
     if (!searchQuery.trim()) return items;
@@ -146,18 +140,15 @@ export function EditPageClient() {
     if (!listId || !list) return;
     setIsSubmitting(true);
     try {
-      // 1. Atualizar a lista para CONCLUIDA
       await updateList(listId, { 
         status: "CONCLUIDA", 
         totalValue 
       });
 
-      // 2. Criar ou atualizar transação financeira se houver valor
       if (totalValue > 0) {
         const categories = await getTransactionCategories(TransactionType.EXPENSE);
         let marketCategory = categories.find((c: any) => c.name.toLowerCase() === "mercado");
         
-        // Se não existir categoria mercado, tenta criar uma ou usa a primeira
         if (!marketCategory) {
           marketCategory = categories[0];
         }
@@ -207,6 +198,22 @@ export function EditPageClient() {
     }
   };
 
+  const toggleMarketMode = () => {
+    const p = new URLSearchParams(searchParams?.toString());
+    if (isAtMarket) {
+      p.delete("mode");
+    } else {
+      p.set("mode", "market");
+    }
+    router.replace(`${pathname}?${p.toString()}`);
+  };
+
+  useEffect(() => {
+    if (isLoaded && !listId) {
+      router.replace("/mercado");
+    }
+  }, [isLoaded, listId, router]);
+
   if (!isLoaded) {
     return <MarketEditPageSkeleton />;
   }
@@ -226,16 +233,6 @@ export function EditPageClient() {
       </div>
     );
   }
-
-  const toggleMarketMode = () => {
-    const p = new URLSearchParams(searchParams?.toString());
-    if (isAtMarket) {
-      p.delete("mode");
-    } else {
-      p.set("mode", "market");
-    }
-    router.replace(`${pathname}?${p.toString()}`);
-  };
 
   const isClosed = list.status === "CONCLUIDA";
 

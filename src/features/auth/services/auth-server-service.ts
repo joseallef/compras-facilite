@@ -1,5 +1,6 @@
 "use server";
 
+import { requireValidSession } from "@/core/auth/server-utils";
 import { prisma } from "@/core/db/prisma";
 import { consumeRateLimit, getClientIp } from "@/core/security/rate-limit";
 import { Prisma } from "@prisma/client";
@@ -280,3 +281,73 @@ export async function resetPasswordAction(data: {
     return { ok: false, error: "Erro ao redefinir senha. Tente novamente." };
   }
 }
+
+export async function updateProfileAction(data: {
+  name?: string;
+  email?: string;
+  currentPassword?: string;
+  newPassword?: string;
+}): Promise<ActionResult<{ success: true }>> {
+  const userId = await requireValidSession();
+  
+  const ip = await getClientIp();
+  const limitResult = await consumeRateLimit({
+    key: `update-profile:${ip}:${userId}`,
+    limit: 10,
+    windowMs: 15 * 60 * 1000, // 15 minutes
+  });
+
+  if (!limitResult.allowed) {
+    return { ok: false, error: "Muitas tentativas de atualização. Tente novamente mais tarde." };
+  }
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      return { ok: false, error: "Usuário não encontrado." };
+    }
+
+    const updateData: any = {};
+
+    if (data.name !== undefined && data.name.length > 0) {
+      updateData.name = data.name;
+    }
+
+    if (data.newPassword && data.newPassword.length > 0) {
+      if (!data.currentPassword || data.currentPassword.length === 0) {
+        return { ok: false, error: "Senha atual é obrigatória para alterar a senha." };
+      }
+      
+      const isValid = await bcrypt.compare(
+        `${data.currentPassword}${getPasswordPepper()}`,
+        user.password
+      );
+      
+      if (!isValid) {
+        return { ok: false, error: "Credenciais inválidas." };
+      }
+
+      const hashedNewPassword = await bcrypt.hash(
+        `${data.newPassword}${getPasswordPepper()}`,
+        getBcryptRounds()
+      );
+      updateData.password = hashedNewPassword;
+    }
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+    });
+
+    return { ok: true, data: { success: true } };
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      return { ok: false, error: "E-mail já está em uso." };
+    }
+    return { ok: false, error: "Erro ao atualizar perfil. Tente novamente." };
+  }
+}
+

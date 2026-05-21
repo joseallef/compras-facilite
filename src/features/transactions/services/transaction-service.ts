@@ -246,7 +246,6 @@ export async function getTransactionCategories(type?: TransactionType) {
         { name: "Aplicações/Investimentos", type: TransactionType.INVESTMENT, icon: "PiggyBank", color: "#059669" },
       ];
 
-      let created = false;
       for (const cat of defaultCategories) {
         if (!existingNames.includes(cat.name)) {
           try {
@@ -256,7 +255,6 @@ export async function getTransactionCategories(type?: TransactionType) {
                 userId,
               },
             });
-            created = true;
           } catch {
             // Ignora erros de duplicata
           }
