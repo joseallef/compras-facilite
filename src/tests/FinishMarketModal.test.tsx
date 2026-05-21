@@ -19,7 +19,7 @@ describe("FinishMarketModal Component", () => {
     );
 
     expect(screen.getByText("Compra Concluída!")).toBeInTheDocument();
-    expect(screen.getByLabelText("Valor Total Gasto (R$)")).toBeInTheDocument();
+    expect(screen.getByLabelText("Valor Total Gasto")).toBeInTheDocument();
   });
 
   it("should format currency correctly as user types", () => {
@@ -31,7 +31,7 @@ describe("FinishMarketModal Component", () => {
       />
     );
 
-    const input = screen.getByLabelText("Valor Total Gasto (R$)") as HTMLInputElement;
+    const input = screen.getByLabelText("Valor Total Gasto") as HTMLInputElement;
     
     fireEvent.change(input, { target: { value: "1234" } });
     expect(input.value).toBe("12,34");
@@ -49,7 +49,7 @@ describe("FinishMarketModal Component", () => {
       />
     );
 
-    const input = screen.getByLabelText("Valor Total Gasto (R$)");
+    const input = screen.getByLabelText("Valor Total Gasto");
     fireEvent.change(input, { target: { value: "15050" } }); // 150,50
     
     const confirmButton = screen.getByText("Confirmar");

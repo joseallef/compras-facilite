@@ -31,7 +31,8 @@ export default auth(async (req) => {
               (path !== "/" && req.nextUrl.pathname.startsWith(path + "/"))
   );
   
-  const protectedRoutes = ["/dashboard", "/mercado", "/financas"];
+  // Prefixos de app/(protected)/ — manter sincronizado com novas rotas autenticadas
+  const protectedRoutes = ["/dashboard", "/mercado", "/financas", "/perfil"];
   const isProtectedRoute = protectedRoutes.some(
     (path) => req.nextUrl.pathname.startsWith(path)
   );
