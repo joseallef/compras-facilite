@@ -4,7 +4,7 @@
 **Compras Facilite** é uma aplicação web moderna para gerenciar listas de mercado inteligentes, com controle de gastos, dashboard financeiro e autenticação robusta.
 
 ### Principais Tecnologias
-- **Framework**: Next.js 15 (App Router)
+- **Framework**: Next.js 16 (App Router)
 - **Linguagem**: TypeScript
 - **Estilização**: Tailwind CSS 4 + Lucide React
 - **ORM**: Prisma
@@ -90,12 +90,9 @@ Já renomeamos:
 
 Conforme `SECURITY_AUDIT.md`, existem riscos de segurança que precisam ser resolvidos:
 
-1. **Alto**: Token de reset de senha em texto puro
-   - Persistir apenas hash do token (SHA-256)
-   - Enviar email no servidor (não no cliente)
+1. ~~**Alto**: Token de reset de senha~~ — hash SHA-256 + e-mail server-side em `auth-server-service.ts`
 
-2. **Alto**: Rate limit para login/registro/recuperação de senha
-   - Já existe módulo de rate limit, mas não aplicado nas rotas de autenticação
+2. ~~**Alto**: Rate limit em auth~~ — login (`auth.ts`), registro/forgot/reset (`auth-server-service.ts`)
 
 3. **Médio**: Validação no servidor
    - Adicionar validação de senha, email, nome nas Server Actions (não confiar apenas no cliente)
@@ -119,8 +116,8 @@ Conforme `SECURITY_AUDIT.md`, existem riscos de segurança que precisam ser reso
 ### 3.5 Testes e Qualidade de Código
 **Status**: ✅ Atualizados
 
-- Todos os arquivos de teste renomeados e atualizados
-- Testes passam com a nova nomenclatura
+- 7 suites / 38 testes (`npm test`)
+- Arquivos de teste alinhados à nomenclatura Market (ex.: label `Valor Total Gasto` no `FinishMarketModal`)
 
 ---
 
@@ -134,8 +131,8 @@ Conforme `SECURITY_AUDIT.md`, existem riscos de segurança que precisam ser reso
 |--------|--------|-------------|
 | Finalizar renomeação de types/components/hooks | ✅ Feito | Alta |
 | Corrigir controle de acesso nas Server Actions | ✅ Feito | Crítica |
-| Reestruturar fluxo de reset de senha (hash token + email server) | 🚧 Pendente | Alta |
-| Implementar rate limit nas rotas de autenticação | 🚧 Pendente | Alta |
+| Reestruturar fluxo de reset de senha (hash token + email server) | ✅ Feito | Alta |
+| Implementar rate limit nas rotas de autenticação | ✅ Feito | Alta |
 | Endurecer validações no servidor | 🚧 Pendente | Média |
 | Adicionar headers de segurança | 🚧 Pendente | Baixa |
 | Atualizar arquivos de teste para usar nomes novos | ✅ Feito | Média |

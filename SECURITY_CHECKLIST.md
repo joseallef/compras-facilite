@@ -13,23 +13,21 @@ Use esta lista para acompanhar melhorias de segurança sem depender de “testes
 
 ---
 
-## 🔒 Recuperação de Senha — PENDENTE
+## ✅ Recuperação de Senha — CONCLUÍDO
 
-- ⏳ Armazenar apenas hash do token (comparar por hash).
-- ⏳ Não expor token ao client (não retornar token em action).
-- ⏳ Enviar e-mail pelo servidor (evitar chaves e envio no browser).
+- ✅ Armazenar apenas hash do token (comparar por hash).
+- ✅ Não expor token ao client (não retornar token em action).
+- ✅ Enviar e-mail pelo servidor (API EmailJS no server action).
 - ✅ Invalidar tokens anteriores e aplicar expiração curta.
 
 ---
 
-## ✅ Proteções Anti-Abuso — PARCIALMENTE CONCLUÍDO
+## ✅ Proteções Anti-Abuso — CONCLUÍDO (auth + listas)
 
 - ✅ Rate limit implementado em `core/security/rate-limit.ts`
 - ✅ Rate limit aplicado em criação de listas
-- ⏳ Aplicar rate limit em:
-  - login
-  - registro
-  - recuperação de senha
+- ✅ Rate limit em login (`auth.ts`: IP + e-mail)
+- ✅ Rate limit em registro, recuperação e redefinição de senha (`auth-server-service.ts`)
 - ⏳ Aplicar cooldown incremental em tentativas repetidas.
 - ⏳ Considerar CAPTCHA/Turnstile em endpoints suscetíveis a spam.
 

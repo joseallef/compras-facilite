@@ -1,8 +1,14 @@
 import { prisma } from "@/core/db/prisma";
+import { consumeRateLimit, getClientIp } from "@/core/security/rate-limit";
 import bcrypt from "bcryptjs";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import { CredentialsSignin } from "next-auth";
 import { authConfig } from "./auth-config";
+
+class LoginRateLimited extends CredentialsSignin {
+  code = "rate_limit";
+}
 
 function getPasswordPepper() {
   const pepper = process.env.PASSWORD_PEPPER ?? "";
@@ -59,6 +65,29 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
 
         const email = normalizeEmail(credentials.email as string);
+        const ip = await getClientIp();
+
+        const ipLimit = await consumeRateLimit({
+          key: `login:ip:${ip}`,
+          limit: 20,
+          windowMs: 15 * 60 * 1000,
+        });
+
+        if (!ipLimit.allowed) {
+          await sleep(250);
+          throw new LoginRateLimited();
+        }
+
+        const emailLimit = await consumeRateLimit({
+          key: `login:email:${email}`,
+          limit: 10,
+          windowMs: 15 * 60 * 1000,
+        });
+
+        if (!emailLimit.allowed) {
+          await sleep(250);
+          throw new LoginRateLimited();
+        }
         const user = await prisma.user.findUnique({
           where: { email },
         });

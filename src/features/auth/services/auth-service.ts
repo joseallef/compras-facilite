@@ -16,7 +16,10 @@ export const authService = {
     });
 
     if (result?.error) {
-      throw new Error(result.error);
+      if (result.error === "rate_limit" || result.code === "rate_limit") {
+        throw new Error("Muitas tentativas de login. Tente novamente mais tarde.");
+      }
+      throw new Error("Erro ao fazer login. Verifique suas credenciais.");
     }
 
     return result;

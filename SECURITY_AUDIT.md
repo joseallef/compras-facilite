@@ -51,16 +51,13 @@ Este relatório consolida uma análise defensiva do código-fonte e dependência
 
 ## Principais Riscos Restantes
 
-### 1) Alto — Token de reset de senha em texto puro e fluxo exposto ao cliente
+### ✅ 1) Reset de senha (hash + envio server-side) — CONCLUÍDO
 
-**Risco**
-- O token é armazenado em claro no banco e é retornado ao client, que então monta o link e envia o e-mail via EmailJS no browser.
-- Em caso de vazamento de banco/logs/telemetria, o token pode ser reutilizado até expirar.
-
-**Recomendação**
-- Persistir apenas o hash do token (ex.: SHA-256) e comparar por hash.
-- Não retornar token para o client; enviar o e-mail no servidor (credenciais server-side).
-- Manter expiração curta (ok) e invalidar tokens antigos (já existe `deleteMany`, manter).
+**Status**: ✅ Implementado em `src/features/auth/services/auth-server-service.ts`
+- Token persistido como hash SHA-256; comparação por hash (com fallback legado para tokens antigos em texto)
+- E-mail enviado no servidor via API EmailJS (`fetch` server-side)
+- Token bruto nunca retornado ao client
+- Rate limit por IP e e-mail em `createPasswordResetTokenAction` / `resetPasswordAction`
 
 ---
 
@@ -110,8 +107,8 @@ Recomendação:
 
 ## Próximas ações recomendadas (ordem)
 
-1. Reestruturar reset de senha (hash do token + envio server-side).
-2. Aplicar rate limit em login/registro/recuperação de senha.
+1. ~~Reestruturar reset de senha (hash do token + envio server-side).~~ ✅
+2. ~~Aplicar rate limit em login/registro/recuperação de senha.~~ ✅ (login em `auth.ts`; demais em `auth-server-service.ts`)
 3. Endurecer validações no servidor.
 4. Adicionar headers de segurança.
 5. Planejar atualização de dependências (audit).

@@ -67,8 +67,11 @@ export function LoginForm() {
       
       const callbackUrl = searchParams.get("callbackUrl");
       router.push(callbackUrl || "/dashboard");
-    } catch {
-      const errorMessage = "Erro ao fazer login. Verifique suas credenciais.";
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Erro ao fazer login. Verifique suas credenciais.";
       setFormError(errorMessage);
       toast.error(errorMessage);
     } finally {

@@ -161,18 +161,29 @@ export async function createPasswordResetTokenAction(
   email: string
 ): Promise<ActionResult<{ success: true }>> {
   const ip = await getClientIp();
-  const limitResult = await consumeRateLimit({
-    key: `forgot-password:${ip}`,
-    limit: 3,
-    windowMs: 60 * 60 * 1000, // 1 hour
-  });
-
-  if (!limitResult.allowed) {
-    return { ok: false, error: "Muitas solicitações de recuperação. Tente novamente mais tarde." };
-  }
 
   try {
     const normalizedEmail = normalizeEmail(email);
+
+    const ipLimit = await consumeRateLimit({
+      key: `forgot-password:ip:${ip}`,
+      limit: 3,
+      windowMs: 60 * 60 * 1000,
+    });
+
+    if (!ipLimit.allowed) {
+      return { ok: false, error: "Muitas solicitações de recuperação. Tente novamente mais tarde." };
+    }
+
+    const emailLimit = await consumeRateLimit({
+      key: `forgot-password:email:${normalizedEmail}`,
+      limit: 3,
+      windowMs: 60 * 60 * 1000,
+    });
+
+    if (!emailLimit.allowed) {
+      return { ok: false, error: "Muitas solicitações de recuperação. Tente novamente mais tarde." };
+    }
     if (!normalizedEmail || !isValidEmail(normalizedEmail)) {
       return { ok: true, data: { success: true } };
     }
@@ -253,10 +264,18 @@ export async function resetPasswordAction(data: {
     if (password.length < 6) return { ok: false, error: "A senha deve ter pelo menos 6 caracteres." };
     if (password.length > 200) return { ok: false, error: "A senha é muito longa." };
 
-    const resetToken = await prisma.passwordResetToken.findUnique({
-      where: { token: hashResetToken(token) },
+    const tokenHash = hashResetToken(token);
+    let resetToken = await prisma.passwordResetToken.findUnique({
+      where: { token: tokenHash },
       include: { user: true },
     });
+
+    if (!resetToken) {
+      resetToken = await prisma.passwordResetToken.findUnique({
+        where: { token },
+        include: { user: true },
+      });
+    }
 
     if (!resetToken || resetToken.expiresAt < new Date()) {
       return { ok: false, error: "Token de recuperação inválido ou expirado." };
